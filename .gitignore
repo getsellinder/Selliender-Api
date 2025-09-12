@@ -1,0 +1,22 @@
+# Node modules
+node_modules/
+
+# Temporary files
+tmp/
+*.tmp
+
+# VSCode settings
+.vscode/
+
+# Environment files (contain secrets)
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+
+# Build/output folders
+dist/
+build/
+out/
