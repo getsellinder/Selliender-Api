@@ -1,0 +1,27 @@
+.MuiInputBase-input {
+  /* padding: 0 !important;  6px 0 7px*/
+}
+
+.MuiInputBase-input {
+    font: inherit;
+    color: currentColor;
+    width: 100%;
+    border: 0;
+    height: 2.1876em !important;
+    margin: 0;
+    display: block;
+    padding: 10px 10px 7px;
+      /* padding:  0 !important; */
+    min-width: 0;
+    background: none;
+    box-sizing: content-box;
+    animation-name: mui-auto-fill-cancel;
+    letter-spacing: inherit;
+    animation-duration: 10ms;
+    -webkit-tap-highlight-color: transparent;}
+
+
+
+
+
+    
