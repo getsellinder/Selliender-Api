@@ -154,7 +154,7 @@ const AppSidebar = () => {
           </>
         ) : { AppName } ? (
           <div>
-             <h5 className="sidebar-brand" style={{fontSize:"1.5rem"}}>Selliender</h5>
+             <h5 className="sidebar-brand" style={{fontSize:"1.5rem"}}>Sellinder</h5>
           </div>
          
         ) : (
