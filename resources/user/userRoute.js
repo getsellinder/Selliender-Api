@@ -2,7 +2,6 @@ import express from "express";
 import {
   registerUser,
   loginUser,
-  AddCusstomer,
   logout,
   forgotPassword,
   resetPassword,
@@ -26,6 +25,10 @@ import {
 } from "./userController.js";
 import { isAuthenticatedUser, authorizeRoles } from "../../middlewares/auth.js";
 import { rolesAdmin } from "../../Utils/authorizeRoles.js";
+import {
+  AddCusstomer,
+  getAllCustomer,
+} from "./customers/Customer.Controller.js";
 
 const router = express.Router();
 
@@ -80,11 +83,19 @@ router
     deleteEmployeeById
   );
 router
+  .route("/admin/customer")
+  .get(
+    isAuthenticatedUser,
+    authorizeRoles("admin", "Customer"),
+    getAllCustomer
+  );
+
+router
   .route("/admin/employee")
   .get(
     isAuthenticatedUser,
     authorizeRoles("admin", "Customer"),
-    getAllEmployee
+    getAllCustomer
   );
 router
   .route("/admin/update-employee/:id")

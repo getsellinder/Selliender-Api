@@ -16,12 +16,9 @@ export const register = async (req, res) => {
   try {
     let patient = await Patient.findOne({ mobileNumber: fullMobileNumber });
     if (patient && patient.isVerified) {
-      return res
-        .status(400)
-        .json({
-          message:
-            "Patient already registered and verified for This Mobile No.",
-        });
+      return res.status(400).json({
+        message: "Patient already registered and verified for This Mobile No.",
+      });
     }
     const otp = crypto.randomInt(100000, 1000000).toString();
     const otpExpires = Date.now() + 3 * 60 * 1000; // 3 minutes
@@ -40,11 +37,9 @@ export const register = async (req, res) => {
     await patient.save();
     await sendOtp(fullMobileNumber, `Your tavisa verification OTP is: ${otp}`);
 
-    return res
-      .status(200)
-      .json({
-        message: `OTP sent to your  mobile number ${fullMobileNumber} successfully`,
-      });
+    return res.status(200).json({
+      message: `OTP sent to your  mobile number ${fullMobileNumber} successfully`,
+    });
   } catch (error) {
     res.status(500).json({
       message: error.message ? error.message : "Server error!",
@@ -104,14 +99,12 @@ export const loginPatient = async (req, res) => {
     }
     const token = patient.getJWTToken();
 
-    return res
-      .status(200)
-      .json({
-        success: true,
-        token,
-        name: patient?.name,
-        message: "Login Successfully",
-      });
+    return res.status(200).json({
+      success: true,
+      token,
+      name: patient?.name,
+      message: "Login Successfully",
+    });
   } catch (error) {
     return res.status(500).json({
       message: error.message ? error.message : "Something went wrong!",
@@ -221,11 +214,9 @@ export const create1RegistrationDetails = async (req, res) => {
       emailExists &&
       emailExists._id.toString() !== req.patient._id.toString()
     ) {
-      return res
-        .status(400)
-        .json({
-          message: "This Email ID is already in use By Another patient",
-        });
+      return res.status(400).json({
+        message: "This Email ID is already in use By Another patient",
+      });
     }
     patient.email = email;
     patient.password = password;
@@ -234,12 +225,10 @@ export const create1RegistrationDetails = async (req, res) => {
     const patientResponse = patient.toObject();
     delete patientResponse.password;
 
-    res
-      .status(200)
-      .json({
-        patient: patientResponse,
-        message: "Registration details updated successfully",
-      });
+    res.status(200).json({
+      patient: patientResponse,
+      message: "Registration details updated successfully",
+    });
   } catch (error) {
     res.status(500).json({
       message: error.message ? error.message : "Server error!",
@@ -269,11 +258,9 @@ export const EnterPatientDetails = async (req, res) => {
     default:
       //gender Validate
       if (!["Male", "Female"].includes(gender)) {
-        return res
-          .status(400)
-          .json({
-            message: 'Invalid gender:gender Must be "Male" or "Female"',
-          });
+        return res.status(400).json({
+          message: 'Invalid gender:gender Must be "Male" or "Female"',
+        });
       }
       // Validate weightUnit
       if (!["Kgs", "Lbs"].includes(weightUnit)) {
@@ -325,12 +312,10 @@ export const EnterPatientDetails = async (req, res) => {
         await patient.save();
         const patientResponse = patient.toObject();
         delete patientResponse.password;
-        res
-          .status(200)
-          .json({
-            patient: patientResponse,
-            message: "Patient details updated successfully",
-          });
+        res.status(200).json({
+          patient: patientResponse,
+          message: "Patient details updated successfully",
+        });
       } catch (error) {
         res.status(500).json({
           message: error.message ? error.message : "Server error!",
@@ -364,12 +349,10 @@ export const EnterPersonalDetails = async (req, res) => {
     await patient.save();
     const patientResponse = patient.toObject();
     delete patientResponse.password;
-    res
-      .status(200)
-      .json({
-        patient: patientResponse,
-        message: "Patient Pesonal details updated successfully",
-      });
+    res.status(200).json({
+      patient: patientResponse,
+      message: "Patient Pesonal details updated successfully",
+    });
   } catch (error) {
     res.status(500).json({
       message: error.message ? error.message : "Server error!",
@@ -496,12 +479,10 @@ export const updateMobileNumber = async (req, res) => {
 
   try {
     if (req.patient?.mobileNumber === newFullMobileNumber) {
-      return res
-        .status(400)
-        .json({
-          message:
-            "New mobile number cannot be the same as the old mobile number",
-        });
+      return res.status(400).json({
+        message:
+          "New mobile number cannot be the same as the old mobile number",
+      });
     }
     let patient = await Patient.findOne({
       mobileNumber: req.patient?.mobileNumber,
@@ -523,11 +504,9 @@ export const updateMobileNumber = async (req, res) => {
       `Your tavisa verification OTP is: ${otp}`
     );
 
-    return res
-      .status(200)
-      .json({
-        message: `OTP sent to your new mobile number ${newFullMobileNumber} successfully`,
-      });
+    return res.status(200).json({
+      message: `OTP sent to your new mobile number ${newFullMobileNumber} successfully`,
+    });
   } catch (error) {
     res.status(500).json({
       message: error.message ? error.message : "Server error!",
@@ -690,11 +669,9 @@ export const UpdateProile = async (req, res) => {
         emailExists &&
         emailExists._id.toString() !== req.patient._id.toString()
       ) {
-        return res
-          .status(400)
-          .json({
-            message: "This Email ID is already in use By Another patient",
-          });
+        return res.status(400).json({
+          message: "This Email ID is already in use By Another patient",
+        });
       }
     }
 
@@ -715,12 +692,10 @@ export const UpdateProile = async (req, res) => {
       { new: true } // Return the updated document
     );
 
-    return res
-      .status(200)
-      .json({
-        patient: NewPatientDetail,
-        message: "Profile updated successfully",
-      });
+    return res.status(200).json({
+      patient: NewPatientDetail,
+      message: "Profile updated successfully",
+    });
   } catch (error) {
     res.status(500).json({
       message: error.message ? error.message : "Server error!",

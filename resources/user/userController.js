@@ -151,54 +151,6 @@ export const registerUser = async (req, res) => {
   }
 };
 
-export const AddCusstomer = async (req, res) => {
-  try {
-    const {
-      name,
-      email,
-      password,
-      phone,
-      // accessTo,
-      // role,
-      street,
-      city,
-      state,
-      country,
-      pincode,
-    } = req.body;
-
-    let findUser = await User.findOne({ email });
-
-    if (findUser) {
-      return res
-        .status(400)
-        .json({ success: false, message: "User already exists" });
-    }
-    userobj = {
-      name,
-      email,
-      password,
-      phone,
-      // role,
-      // accessTo,
-      street,
-      city,
-      state,
-      country,
-      pincode,
-      logintype: "email-password",
-    };
-    const add = await User.create(userobj);
-    return res
-      .status(200)
-      .json({ message: "Customer Added Successfully", add });
-  } catch (error) {
-    return res
-      .status(500)
-      .json({ message: error.message || "Internal Servar Error" });
-  }
-};
-
 export const AddEmploye = async (req, res) => {
   try {
     const { name, email, password, phone, accessTo } = req.body;
