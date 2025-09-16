@@ -38,10 +38,7 @@ const AddCustomer = () => {
 
   const [loading, setLoading] = useState(false);
 
-  // console.log(data);
-  // const handleChange = (e) => {
-  //   setData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  // };
+
 
   const handerInputChanges = (e) => {
     setUser({ ...user, [e.target.name]: e.target.value });
@@ -120,8 +117,7 @@ const AddCustomer = () => {
   };
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-    console.log("register users", user);
-    console.log("type of pincode", typeof user.pincode);
+ 
     try {
       const response = await axios.post("/api/v1/create/customer", user, {
         headers: {
