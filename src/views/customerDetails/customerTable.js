@@ -11,41 +11,52 @@ import {
   IconButton,
   InputLabel,
   MenuItem,
+  Pagination,
   Select,
   TextField,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import Fuse from "fuse.js";
-import { Typography } from "@material-ui/core";
+import { InputAdornment, Typography } from "@material-ui/core";
 import OrderDetails from "./orderDetails";
 const CustomerTable = () => {
   const token = isAutheticated();
 
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [query, setQuery] = useState("");
   const [loading1, setLoading1] = useState(true);
   const [success, setSuccess] = useState(true);
   const [users, setUsers] = useState([]);
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemPerPage, setItemPerPage] = useState(10);
-  const [showData, setShowData] = useState(users);
+  const [currentPage, setCurrentPage] = useState();
+  const [itemPerPage, setItemPerPage] = useState();
+  const [totalpages,setTotalPages]=useState()
+  const [showData, setShowData] = useState([]);
 
-  const handleShowEntries = (e) => {
-    setCurrentPage(1);
-    setItemPerPage(e.target.value);
-  };
+  const [name, setName] = useState("");
 
-  const getUsers = async () => {
+  const getUsers = async (
+    searchName = name,
+    page = currentPage,
+    limit = itemPerPage
+  ) => {
     axios
-      .get(`/api/v1/getAllUsers`, {
+      .get(`/api/v1/admin/customer`, {
+        params: {
+          limit: limit,
+          page: page,
+          name: searchName,
+        },
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
       .then((res) => {
-        setUsers(res.data.users);
+        setShowData(res?.data);
+         setTotalPages(res.data.total_pages); 
         setLoading(false);
+        
       })
       .catch((error) => {
         swal({
@@ -58,24 +69,28 @@ const CustomerTable = () => {
         setLoading(false);
       });
   };
+  const handleSearch = () => {
+    setCurrentPage(1);
+    getUsers(name, 1, itemPerPage); // pass query explicitly
+    setName(name);
+  };
+  const handleShowEntries = (e) => {
+    let newlimit = e.target.value;
+    setCurrentPage(1);
+    setItemPerPage(newlimit);
+    getUsers(name, 1, newlimit);
+  };
 
   useEffect(() => {
     getUsers();
   }, [success]);
-  console.log(users);
 
-  useEffect(() => {
-    const loadData = () => {
-      const indexOfLastPost = currentPage * itemPerPage;
-      const indexOfFirstPost = indexOfLastPost - itemPerPage;
-      setShowData(users.slice(indexOfFirstPost, indexOfLastPost));
-    };
-    loadData();
-  }, [currentPage, itemPerPage, users]);
-  console.log(users);
-
-
- const tableheading=["Customer Name","Login Type"]
+  const tableheading = ["Customer Name", "Login Type"];
+  // count={showData.total_data}
+  //                     page={showData.total_pages}
+  console.log("showData", showData);
+  console.log("showData.total_data", showData.total_data);
+  console.log("showData.total_pages", showData.total_pages);
   return (
     <div className="main-content">
       <div className="page-content">
@@ -120,8 +135,14 @@ const CustomerTable = () => {
                 <div className="card-body">
                   <div className="row ml-0 mr-0 mb-10 ">
                     <div className="col-sm-12 col-md-12">
-                      <div className="dataTables_length">
-                        <label className="w-100">
+                      <div
+                        className="dataTables_length"
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <label className="w-50">
                           Show
                           <select
                             style={{ width: "10%" }}
@@ -133,13 +154,47 @@ const CustomerTable = () => {
                                 form-control form-control-sm
                               "
                           >
-                            <option value="150">10</option>
-                            <option value="25">25</option>
-                            <option value="50">50</option>
-                            <option value="100">100</option>
+                            <option value="5">5</option>
+                            <option value="10">10</option>
+                            <option value="15">15</option>
+                            <option value="20">20</option>
                           </select>
                           entries
                         </label>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            width: "40%",
+                            maxWidth: 400,
+                            backgroundColor: "#fff",
+                          }}
+                        >
+                          <TextField 
+                            variant="outlined"
+                            placeholder="Search customers..."
+                            value={name}
+                            name="name"
+                            onChange={(e) => setName(e.target.value)}
+                            fullWidth
+                            InputProps={{
+                              endAdornment: (
+                                <InputAdornment position="end">
+                                  <IconButton
+                                    onClick={handleSearch}
+                                    edge="end"
+                                    color="primary"
+                                  >
+                                    <SearchIcon />
+                                  </IconButton>
+                                </InputAdornment>
+                              ),
+                              sx: { borderRadius: "12px" },
+
+                            }}
+                          
+                          />
+                        </Box>
                       </div>
                     </div>
                   </div>
@@ -153,9 +208,10 @@ const CustomerTable = () => {
                         className="thead-info"
                         style={{ background: "rgb(140, 213, 213)" }}
                       >
-                       
                         <tr>
-                       {tableheading.map((name)=><th>{name}</th>)}
+                          {tableheading.map((name) => (
+                            <th>{name}</th>
+                          ))}
                         </tr>
                       </thead>
                       <tbody>
@@ -173,11 +229,15 @@ const CustomerTable = () => {
                             </td>
                           </tr>
                         ) : (
-                          showData.map((user, i) => {
+                          showData?.customers?.map((user, i) => {
                             return (
                               <tr key={i}>
                                 <td className="text-start">{user.name}</td>
-                                <td>{user.logintype?user.logintype:"not login yet"}</td>
+                                <td>
+                                  {user.logintype
+                                    ? user.logintype
+                                    : "not login yet"}
+                                </td>
 
                                 <td className="text-start">
                                   {new Date(user.createdAt).toLocaleString(
@@ -206,7 +266,6 @@ const CustomerTable = () => {
                                 /> */}
 
                                 <td className="text-start">
-                                
                                   <Link to={`/customers-details/${user?._id}`}>
                                     <button
                                       type="button"
@@ -220,105 +279,20 @@ const CustomerTable = () => {
                             );
                           })
                         )}
+                        <Pagination
+                          count={totalpages}
+                          page={currentPage}
+                          onChange={(e, value) => {
+                            setCurrentPage(value)
+                              getUsers(name, value, itemPerPage);
+                          }}
+                          color="primary"
+                          shape="rounded"
+                        />
                       </tbody>
                     </table>
                   </div>
-
-                  <div className="row mt-20">
-                    <div className="col-sm-12 col-md-6 mb-20">
-                      <div
-                        className="dataTables_info"
-                        id="datatable_info"
-                        role="status"
-                        aria-live="polite"
-                      >
-                        Showing {currentPage * itemPerPage - itemPerPage + 1} to{" "}
-                        {Math.min(currentPage * itemPerPage, users.length)} of{" "}
-                        {users.length} entries
-                      </div>
-                    </div>
-
-                    <div className="col-sm-12 col-md-6">
-                      <div className="d-flex">
-                        <ul className="pagination ms-auto">
-                          <li
-                            className={
-                              currentPage === 1
-                                ? "paginate_button page-item previous disabled"
-                                : "paginate_button page-item previous"
-                            }
-                          >
-                            <span
-                              className="page-link"
-                              style={{ cursor: "pointer" }}
-                              onClick={() => setCurrentPage((prev) => prev - 1)}
-                            >
-                              Previous
-                            </span>
-                          </li>
-
-                          {!(currentPage - 1 < 1) && (
-                            <li className="paginate_button page-item">
-                              <span
-                                className="page-link"
-                                style={{ cursor: "pointer" }}
-                                onClick={(e) =>
-                                  setCurrentPage((prev) => prev - 1)
-                                }
-                              >
-                                {currentPage - 1}
-                              </span>
-                            </li>
-                          )}
-
-                          <li className="paginate_button page-item active">
-                            <span
-                              className="page-link"
-                              style={{ cursor: "pointer" }}
-                            >
-                              {currentPage}
-                            </span>
-                          </li>
-
-                          {!(
-                            (currentPage + 1) * itemPerPage - itemPerPage >
-                            users.length - 1
-                          ) && (
-                            <li className="paginate_button page-item ">
-                              <span
-                                className="page-link"
-                                style={{ cursor: "pointer" }}
-                                onClick={() => {
-                                  setCurrentPage((prev) => prev + 1);
-                                }}
-                              >
-                                {currentPage + 1}
-                              </span>
-                            </li>
-                          )}
-
-                          <li
-                            className={
-                              !(
-                                (currentPage + 1) * itemPerPage - itemPerPage >
-                                users.length - 1
-                              )
-                                ? "paginate_button page-item next"
-                                : "paginate_button page-item next disabled"
-                            }
-                          >
-                            <span
-                              className="page-link"
-                              style={{ cursor: "pointer" }}
-                              onClick={() => setCurrentPage((prev) => prev + 1)}
-                            >
-                              Next
-                            </span>
-                          </li>
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
+             
                 </div>
               </div>
             </div>

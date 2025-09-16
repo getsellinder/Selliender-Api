@@ -149,7 +149,7 @@ const AddCustomer = () => {
       </h3>
       <Card sx={{ padding: "1rem", marginBottom: "1rem", width: "60%" }}>
         <form
-          autoComplete="new-password"
+       autoComplete="off"
           style={{
             display: "flex",
             flexWrap: "wrap",
@@ -158,7 +158,8 @@ const AddCustomer = () => {
           onSubmit={handleFormSubmit}
         >
           <TextField
-            autoComplete="off"
+          
+                     autoComplete="off"
             id="name"
             required
             type="text"
@@ -168,6 +169,7 @@ const AddCustomer = () => {
             label="Name"
             variant="outlined"
             onChange={handerInputChanges}
+            
           />
           <br />
           <TextField

@@ -39,7 +39,7 @@ const Employee = () => {
     const loadData = () => {
       const indexOfLastPost = currentPage * itemPerPage;
       const indexOfFirstPost = indexOfLastPost - itemPerPage;
-      setShowData(employee.slice(indexOfFirstPost, indexOfLastPost));
+      setShowData(employee?.slice(indexOfFirstPost, indexOfLastPost));
     };
     loadData();
   }, [currentPage, itemPerPage, employee]);
@@ -274,7 +274,7 @@ const Employee = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {!loading && showData.length === 0 && (
+                        {!loading && showData?.length === 0 && (
                           <tr className="text-center">
                             <td colSpan="6">
                               <h5>No Data Available</h5>
@@ -288,8 +288,8 @@ const Employee = () => {
                             </td>
                           </tr>
                         ) : (
-                          showData.map((employee, i) => {
-                            console.log("employee.accessTo",typeof (employee.accessTo))
+                          showData?.map((employee, i) => {
+                            console.log("employee.accessTo",typeof (employee?.accessTo))
                             return (
                               <tr key={i}>
                                 <td className="text-start">{employee.name}</td>
@@ -357,8 +357,8 @@ const Employee = () => {
                         aria-live="polite"
                       >
                         Showing {currentPage * itemPerPage - itemPerPage + 1} to{" "}
-                        {Math.min(currentPage * itemPerPage, employee.length)}{" "}
-                        of {employee.length} entries
+                        {Math.min(currentPage * itemPerPage, employee?.length)}{" "}
+                        of {employee?.length} entries
                       </div>
                     </div>
 
@@ -406,7 +406,7 @@ const Employee = () => {
 
                           {!(
                             (currentPage + 1) * itemPerPage - itemPerPage >
-                            employee.length - 1
+                            employee?.length - 1
                           ) && (
                             <li className="paginate_button page-item ">
                               <span
@@ -425,7 +425,7 @@ const Employee = () => {
                             className={
                               !(
                                 (currentPage + 1) * itemPerPage - itemPerPage >
-                                employee.length - 1
+                                employee?.length - 1
                               )
                                 ? "paginate_button page-item next"
                                 : "paginate_button page-item next disabled"
