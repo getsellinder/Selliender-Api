@@ -1,7 +1,3 @@
-import { Chapter } from "../Chapter/ChapterModel.js";
-import { GenreModel } from "../Genres/GenreModel.js";
-import { episode, Series } from "../series/SeriesModel.js";
-import { SubjectModel } from "../Subjects/SubjectModel.js";
 import LibraryModel from "./Myligrarymodel.js";
 // MY LIBRARY SCREEN
 
@@ -42,8 +38,6 @@ export const addlibrary = async (req, res) => {
     // 2. Try to find the episode by ID
     const foundEpisode = await episode.findById(id);
     if (foundEpisode) {
-      // const Genretitle = await GenreModel.findById(foundEpisode.genre);
-      // const subjecttitle = await SubjectModel.findById(foundEpisode.subject);
       const libraryDoc = await LibraryModel.findOne({ userId });
       const isDuplicate = libraryDoc?.library?.some(
         (item) => item.episodeId && item.episodeId.toString() === id
@@ -144,57 +138,6 @@ export const deletelibrary = async (req, res) => {
   }
 };
 
-// MY LISTEN HISTORY SCREEN
-// export const addlistenhistory = async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const userId = req.user._id;
-
-//     const gen = await Chapter.findById({ _id: id });
-//     if (!gen || gen.length === 0) {
-//       return res.status(400).json({ message: "Gen Data Not found" });
-//     }
-//     let image = gen.image;
-
-//     const subject = await SubjectModel.findById(gen.subject).select(
-//       "subjectName"
-//     );
-//     if (!subject || subject.length === 0) {
-//       return res.status(400).json({ message: "subject Data Not found" });
-//     }
-//     const data = {
-//       name: subject.subjectName,
-//       img: image[0]?.url || "",
-//     };
-//     const isAlreadyAdded = await LibraryModel.findOne({
-//       userId,
-//       listenHistory: {
-//         $elemMatch: {
-//           name: data.name,
-//           img: data.img,
-//         },
-//       },
-//     });
-
-//     if (isAlreadyAdded) {
-//       return res
-//         .status(409)
-//         .json({ message: "Already exists in listen history" });
-//     }
-//     await LibraryModel.updateOne(
-//       { userId },
-//       { $push: { listenHistory: data } },
-//       { upsert: true }
-//     );
-
-//     return res
-//       .status(200)
-//       .json({ message: "Added to listen history successfully" });
-//   } catch (error) {
-//     console.log("error in addlistenhistory", error.message);
-//     return res.status(500).json({ message: error.message });
-//   }
-// };
 export const addlistenhistory = async (req, res) => {
   try {
     const { id } = req.params;
@@ -205,10 +148,6 @@ export const addlistenhistory = async (req, res) => {
 
     let data;
     if (foundSeries) {
-      // const episodes = await episode.find({ seriesId: id });
-      // const Genretitle = await GenreModel.findById(foundSeries.genre);
-      // const subjecttitle = await SubjectModel.findById(foundSeries.subject);
-
       data = {
         type: "series",
         seriesId: foundSeries._id,
@@ -225,9 +164,6 @@ export const addlistenhistory = async (req, res) => {
     // 2. Try to find the episode by ID
     const foundEpisode = await episode.findById(id);
     if (foundEpisode) {
-      // const Genretitle = await GenreModel.findById(foundEpisode.genre);
-      // const subjecttitle = await SubjectModel.findById(foundEpisode.subject);
-
       data = {
         refId: foundEpisode._id,
         title: foundEpisode.title,

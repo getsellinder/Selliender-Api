@@ -9,8 +9,7 @@ import cors from "cors";
 
 import cookieParser from "cookie-parser";
 import { googleSigninAndLogin } from "./resources/user/userController.js";
-import SeriesRoute from "./resources/series/SeriesRoute.js";
-import TradingRoute from "./resources/treading/Trading.route.js";
+
 import MessageRouter from "./resources/message/Message.Route.js";
 import PackageRoute from "./resources/packages/Package.Route.js";
 
@@ -152,19 +151,11 @@ import StateRouter from "./resources/setting/state/state_routes.js";
 import LanguageRoute from "./resources/setting/Language/language_routes.js";
 //purpose
 import PurposeRoute from "./resources/setting/Purpose/Purpose_routes.js";
-// import GoogleRounte from "./Utils/googleauth.js";
-//Patient Routes
-// import PatientRoute from './resources/Patients/PatientRoute.js'
-// import TestRoute from './resources/Patients/Tests/TestRoute.js'
+
 // category Route
 import categoryRoute from "./resources/Category/categoryRoutes.js";
-// Genre Route
 
-import genreRoute from "./resources/Genres/GenreRoutes.js";
 import libraryRoute from "./resources/MyLibrary/MylibraryRoute.js";
-
-// Subject Route
-import subjectRoute from "./resources/Subjects/SubjectRoutes.js";
 
 import CollectionRoute from "./resources/Collections/CollectionRoute.js";
 import ColorRoute from "./resources/color/colorRoutes.js";
@@ -224,12 +215,6 @@ app.use("/api/category", categoryRoute);
 // package
 
 app.use("/api/package", PackageRoute);
-
-// Genre
-app.use("/api/genre", genreRoute);
-//Subjecy
-app.use("/api/subject", subjectRoute);
-app.use("/api", SeriesRoute);
 
 app.use("/api/collection", CollectionRoute);
 app.use("/api/color", ColorRoute);
@@ -308,5 +293,4 @@ app.use("/api", SupportRouter);
 app.use("/api", MessageRouter);
 app.use("/api/reports", ReportsRoute);
 
-app.use("/api", TradingRoute);
 export default app;

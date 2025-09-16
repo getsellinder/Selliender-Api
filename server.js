@@ -17,16 +17,7 @@ cloudinary.config({
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
-//<---------deployement------------->``
-// const data_dir = path.resolve();
 
-// if (process.env.NODE_ENV === "production") {
-//     app.use(express.static(path.join(data_dir, "/frontend/build")));
-
-//     app.get("*", (req, res) =>
-//         res.sendFile(path.join(data_dir, "frontend", "build", "index.html"))
-//     );
-// } else {
 app.get("/", (req, res) => {
   res.send("API is running..");
 });
@@ -34,6 +25,6 @@ app.get("/", (req, res) => {
 initSocket(serverSocket);
 // }
 //<---------deployement------------->
-const server = app.listen(process.env.PORT, () => {
+app.listen(process.env.PORT, () => {
   console.log(`Server  is working on http://localhost:${process.env.PORT}`);
 });

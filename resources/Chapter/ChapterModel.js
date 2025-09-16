@@ -10,14 +10,7 @@ const chapterSchema = new Schema(
       trim: true,
       // unique: true,
     },
-    subject: {
-      type: mongoose.Schema.ObjectId,
-      ref: "SubjectModel",
-    },
-    genre: {
-      type: Schema.Types.ObjectId,
-      ref: "GenreModel",
-    },
+
     master_price: {
       type: Number,
       required: true,

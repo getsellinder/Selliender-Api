@@ -7,10 +7,7 @@ import {
   deleteChapter,
   deleteImageFromCloudinary,
   deleteReview,
-  getAllChapterAdmin,
-  getAllChaptersDevicesFirst,
   getAllChapterUser,
-  getAllDeletedChapters,
   getChapterByName,
   getChaptersByGenre,
   getOneChapter,
@@ -38,21 +35,6 @@ router.route("/chapter/getOne/:id").get(getOneChapter);
 router.route("/chapter/getByName/:name").get(getChapterByName);
 
 // Get all chapters by Admin
-router
-  .route("/chapter/getAll/admin/")
-  .get(
-    isAuthenticatedUser,
-    authorizeRoles("admin", "Customer"),
-    getAllChapterAdmin
-  );
-
-router
-  .route("/chapter/delete/getAll/")
-  .get(
-    isAuthenticatedUser,
-    authorizeRoles("admin", "Customer"),
-    getAllDeletedChapters
-  );
 
 router
   .route("/chapter/restore/chapter/:id")
@@ -94,9 +76,6 @@ router.route("/chapter/admin/status/:id").patch(ChangeChapterStatus);
 router.route("/chapter/getAll/user/").get(getAllChapterUser);
 
 // Get All Chapter By Devices
-router
-  .route("/chapter/getAllChaptersDevicesFrist")
-  .get(getAllChaptersDevicesFirst);
 
 // DELETE
 

@@ -50,14 +50,7 @@ const contentEntrySchema = new mongoose.Schema(
     seriesabout: { type: String, ref: "Series" },
     seriespart: { type: String, ref: "Series" },
     seriesno: { type: String },
-    subject: {
-      type: String,
-      ref: "SubjectModel",
-    },
-    genre: {
-      type: String,
-      ref: "GenreModel",
-    },
+
     isStandalone: { type: Boolean, default: false },
     listenedAt: { type: Date, default: Date.now }, // helps filtering
   },
