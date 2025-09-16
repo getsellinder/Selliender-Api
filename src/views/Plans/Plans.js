@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import Button from "@material-ui/core/Button";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { isAutheticated } from "src/auth";
+
 import swal from "sweetalert";
 import {
   Box,
@@ -18,8 +18,10 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import Fuse from "fuse.js";
 import { InputAdornment, Typography } from "@material-ui/core";
-import OrderDetails from "./orderDetails";
-const CustomerTable = () => {
+
+import { isAutheticated } from "src/auth";
+
+const Plans = () => {
   const token = isAutheticated();
 
   const navigate = useNavigate();
@@ -31,7 +33,7 @@ const CustomerTable = () => {
 
   const [currentPage, setCurrentPage] = useState();
   const [itemPerPage, setItemPerPage] = useState();
-  const [totalpages,setTotalPages]=useState()
+  const [totalpages, setTotalPages] = useState();
   const [showData, setShowData] = useState([]);
 
   const [name, setName] = useState("");
@@ -54,9 +56,8 @@ const CustomerTable = () => {
       })
       .then((res) => {
         setShowData(res?.data);
-         setTotalPages(res.data.total_pages); 
+        setTotalPages(res.data.total_pages);
         setLoading(false);
-        
       })
       .catch((error) => {
         swal({
@@ -85,7 +86,61 @@ const CustomerTable = () => {
     getUsers();
   }, [success]);
 
-  const tableheading = ["Customer Name", "Login Type"];
+  const tableheading = [
+    "Package",
+    "Gst",
+    "Price",
+    "Total Price",
+    "Status",
+    "Created",
+    "",
+    "",
+    "",
+  ];
+  const dummy = [
+    {
+      _id: "68c933cb5730fb3286dd255a",
+      Package: "Premium",
+      Gst: {
+        _id: "68c933abddfee0c0849167ec",
+        name: "first",
+        Gst: 5,
+        active: true,
+      },
+      Price: 499,
+      Total_Price: 100,
+      createdAt: "2025-09-16T09:54:19.381Z",
+      Status: "Active",
+    },
+    {
+      _id: "68c933cb5730fb3286dd255a",
+      Package: "Premium",
+      Gst: {
+        _id: "68c933abddfee0c0849167ec",
+        name: "first",
+        Gst: 5,
+        active: true,
+      },
+      Price: 499,
+      Total_Price: 100,
+      createdAt: "2025-09-16T09:54:19.381Z",
+      Status: "Active",
+    },
+    {
+      _id: "68c933cb5730fb3286dd255a",
+      Package: "Premium",
+      Gst: {
+        _id: "68c933abddfee0c0849167ec",
+        name: "first",
+        Gst: 5,
+        active: true,
+      },
+      Price: 499,
+      Total_Price: 100,
+      createdAt: "2025-09-16T09:54:19.381Z",
+      Status: "Active",
+    },
+  ];
 
   return (
     <div className="main-content">
@@ -95,14 +150,14 @@ const CustomerTable = () => {
             <div className="col-12">
               <div
                 className="
-                    page-title-box
-                    d-flex
-                    align-items-center
-                    justify-content-between
-                  "
+                       page-title-box
+                       d-flex
+                       align-items-center
+                       justify-content-between
+                     "
               >
                 <div style={{ fontSize: "22px" }} className="fw-bold">
-                  All Customers
+                  All Plans
                 </div>
 
                 <div className="page-title-right">
@@ -115,10 +170,10 @@ const CustomerTable = () => {
                       textTransform: "capitalize",
                     }}
                     onClick={() => {
-                      navigate("/add-customer");
+                      navigate("/Pricing-Plans/add");
                     }}
                   >
-                    Add Customer
+                    Add Plan
                   </Button>
                 </div>
               </div>
@@ -145,10 +200,10 @@ const CustomerTable = () => {
                             name=""
                             onChange={(e) => handleShowEntries(e)}
                             className="
-                                select-w
-                                custom-select custom-select-sm
-                                form-control form-control-sm
-                              "
+                                   select-w
+                                   custom-select custom-select-sm
+                                   form-control form-control-sm
+                                 "
                           >
                             <option value="5">5</option>
                             <option value="10">10</option>
@@ -166,9 +221,9 @@ const CustomerTable = () => {
                             backgroundColor: "#fff",
                           }}
                         >
-                          <TextField 
+                          <TextField
                             variant="outlined"
-                            placeholder="Search customers..."
+                            placeholder="Search Plan..."
                             value={name}
                             name="name"
                             onChange={(e) => setName(e.target.value)}
@@ -186,9 +241,7 @@ const CustomerTable = () => {
                                 </InputAdornment>
                               ),
                               sx: { borderRadius: "12px" },
-
                             }}
-                          
                           />
                         </Box>
                       </div>
@@ -206,7 +259,7 @@ const CustomerTable = () => {
                       >
                         <tr>
                           {tableheading.map((name) => (
-                            <th>{name}</th>
+                            <th className={name==="Package"?"text-start":"text-center"}>{name}</th>
                           ))}
                         </tr>
                       </thead>
@@ -225,17 +278,18 @@ const CustomerTable = () => {
                             </td>
                           </tr>
                         ) : (
-                          showData?.customers?.map((user, i) => {
+                          dummy.map((user, i) => {
                             return (
                               <tr key={i}>
-                                <td className="text-start">{user.name}</td>
-                                <td>
-                                  {user.logintype
-                                    ? user.logintype
-                                    : "not login yet"}
+                                <td className="text-start" >{user.Package}</td>
+                                <td className="text-center" >{user.Gst.Gst}</td>
+                                <td className="text-center" >{user.Price}</td>
+                                <td className="text-center" >
+                                  {user.Total_Price}
                                 </td>
+                                <td className="text-center">{user.Status}</td>
 
-                                <td className="text-start">
+                                <td className="text-center">
                                   {new Date(user.createdAt).toLocaleString(
                                     "en-IN",
                                     {
@@ -250,26 +304,46 @@ const CustomerTable = () => {
                                   )}
                                 </td>
                                 {/* {loading1 && (
-                                  <>
-                                    <td className="text-start">loading...</td>
-                                    <td className="text-start">loading...</td>
-                                  </>
-                                )} */}
+                                     <>
+                                       <td className="text-start">loading...</td>
+                                       <td className="text-start">loading...</td>
+                                     </>
+                                   )} */}
 
                                 {/* <OrderDetails
-                                  _id={user?._id}
-                                  setLoading1={setLoading1}
-                                /> */}
+                                     _id={user?._id}
+                                     setLoading1={setLoading1}
+                                   /> */}
 
                                 <td className="text-start">
-                                  <Link to={`/customers-details/${user?._id}`}>
-                                    <button
+                                  <Link
+                                    to={`/Pricing-Plans/update/${user?._id}`}
+                                  >
+                                    <button style={{background:"orange",fontWeight:"600",color:"#000"}}
+                                      type="button"
+                                      className="mt-1 btn btn-info btn-sm  waves-effect waves-light btn-table ml-2"
+                                    >
+                                      Update
+                                    </button>
+                                  </Link>
+                                </td>
+                                <td className="text-start">
+                                  <Link to={`/Pricing-Plans/view/${user?._id}`}>
+                                    <button style={{fontWeight:"600",color:"#000"}}
                                       type="button"
                                       className="mt-1 btn btn-info btn-sm  waves-effect waves-light btn-table ml-2"
                                     >
                                       View
                                     </button>
                                   </Link>
+                                </td>
+                                <td className="text-start">
+                                  <button style={{background:"red",fontWeight:"600",color:"#000"}}
+                                    type="button"
+                                    className="mt-1 btn btn-info btn-sm  waves-effect waves-light btn-table ml-2"
+                                  >
+                                    Delete
+                                  </button>
                                 </td>
                               </tr>
                             );
@@ -279,8 +353,8 @@ const CustomerTable = () => {
                           count={totalpages}
                           page={currentPage}
                           onChange={(e, value) => {
-                            setCurrentPage(value)
-                              getUsers(name, value, itemPerPage);
+                            setCurrentPage(value);
+                            getUsers(name, value, itemPerPage);
                           }}
                           color="primary"
                           shape="rounded"
@@ -288,7 +362,6 @@ const CustomerTable = () => {
                       </tbody>
                     </table>
                   </div>
-             
                 </div>
               </div>
             </div>
@@ -299,4 +372,4 @@ const CustomerTable = () => {
   );
 };
 
-export default CustomerTable;
+export default Plans;

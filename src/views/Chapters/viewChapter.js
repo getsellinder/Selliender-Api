@@ -20,7 +20,7 @@ const ViewChapter = () => {
     { volume: "", weight: "", variant_Name: "", price: "" },
   ]);
 
-  const getChapterData = async () => {
+   const getChapterData = async () => {
     try {
       const res = await axios.get(`/api/chapter/getOne/${id}`, {
         headers: {

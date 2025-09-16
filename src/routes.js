@@ -145,6 +145,10 @@ import ViewRefundPolicy from "./views/Content/ViewContent/viewRefundPolicy";
 import ViewShippingPolicy from "./views/Content/ViewContent/viewShippingPolicy";
 import ViewPrivacyPolicy from "./views/Content/ViewContent/viewPrivacyPolicy";
 import ViewTermsConditions from "./views/Content/ViewContent/viewTermsConditions";
+import Plans from "./views/Plans/Plans";
+import PlanAdd from "./views/Plans/PlanAdd";
+import PlanEdit from "./views/Plans/PlansEdit";
+import PlanView from "./views/Plans/PlansView";
 
 
 
@@ -185,6 +189,33 @@ const routes = [
     path: "/new-user-day-wise",
     name: "new user day wise",
     element: UserCharts,
+    navName: "Charts",
+  },
+
+  // Pricing-Plans
+    {
+    path: "/Pricing-Plans",
+    name: "Pricing-Plans",
+    element: Plans,
+    navName: "Charts",
+  },
+    {
+    path: "/Pricing-Plans/add",
+    name: "Pricing-Plans",
+    element: PlanAdd,
+    navName: "Charts",
+  },
+    {
+      path: "/Pricing-Plans/update/:id",
+    name: "Pricing-Plans",
+    element: PlanEdit,
+    navName: "Charts",
+  },
+
+     {
+      path: "/Pricing-Plans/view/:id",
+    name: "Pricing-Plans",
+    element: PlanView,
     navName: "Charts",
   },
   {

@@ -10,7 +10,7 @@ function Tax() {
   const [success, setSuccess] = useState(true);
   const [loading, setLoading] = useState(true);
   const token = isAutheticated();
-  // console.log(token);
+
   useEffect(() => {
     function getTaxes() {
       setLoading(true);
@@ -183,7 +183,7 @@ function Tax() {
                                     ml-2
                                   "
                                   disabled={!tax?.active}
-                                  onClick={() => handleDelete(tax._id)}
+                                  onClick={() => handleDelete(tax?._id)}
                                   id="sa-params"
                                 >
                                   Delete

@@ -89,6 +89,15 @@ const _nav = [
     group: "Customers",
   },
 
+  {
+    component: CNavItem,
+    name: "Pricing Plans",
+    icon: <CIcon icon={cilMoney} customClassName="nav-icon" />,
+    to: "/Pricing-Plans",
+    group: "Plans",
+  },
+
+  
  
       
      

@@ -16,6 +16,7 @@ import { createRoot } from "react-dom/client";
 import { Toaster } from "react-hot-toast";
 
 import { CustomerProvider } from "./views/CustomerSupport/CustomerContext";
+import { PlanProvider } from "./views/Plans/PlanContext";
 
 const setupAxios = () => {
   // axios.defaults.baseURL = "http://localhost:5000";
@@ -38,10 +39,13 @@ const root = createRoot(domNode);
 
 root.render(
   <Provider store={store}>
+    <PlanProvider>
     <CustomerProvider>
       <App />
       <Toaster />
+     
     </CustomerProvider>
+     </PlanProvider>
   </Provider>
 );
 

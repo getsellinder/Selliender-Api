@@ -29,7 +29,7 @@ function Addtax() {
   };
 
   async function handleSubmit() {
-    if (data.name.trim() === "" || data.tax.trim() === "") {
+    if (data?.name?.trim() === "" || data?.tax?.trim() === "") {
       return swal("Error", "All fields are required!", "error");
     }
     setLoading(true);
