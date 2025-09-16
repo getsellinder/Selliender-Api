@@ -5,19 +5,12 @@ const Change_Password = React.lazy(() =>
   import("./views/pages/register/Change_password")
 );
 
-import Profile from "./views/Profile/Profile";
+
 import EditProfile from "./views/Profile/EditProfile";
 const Dashboard = React.lazy(() => import("./views/dashboard/Dashboard"));
 const Reports = React.lazy(() => import("./views/reports/reports"));
 ///
-//Cities
-import Cities from "./views/configuration/Purpose/Purpose.js";
-import AddCity from "./views/configuration/Purpose/AddPurpose.js";
-import EditCity from "./views/configuration/Purpose/EditPurpose.js";
-//states
-import EditState from "./views/configuration/states/EditStates.js";
-import AddState from "./views/configuration/states/AddState.js";
-import States from "./views/configuration/states/States.js";
+
 //social media,address,logo
 import Socialmedia from "./views/configuration/Socialmedia.js";
 import Address from "./views/configuration/Address.js";
@@ -26,7 +19,7 @@ import Login from "./views/pages/login/Login";
 import Web_Images from "./views/configuration/Web_Images";
 
 // Appointments
-import Appointments from "./views/Appointments/Appointments";
+
 
 //Businesses
 
@@ -34,63 +27,39 @@ import Appointments from "./views/Appointments/Appointments";
 // import Topics from "./views/Chapters/topics.js";
 
 //product
-import AddPrdAndImg from "./views/Products/AddPrdAndImg";
+
 import EditPrdAndImg from "./views/Products/EditPrdAndImg";
 import ViewProduct from "./views/Products/ViewProduct";
 
 //Order Management
 import NewOrders from "./views/orders/NewOrders.js";
-// import ProcessingOrders from "./views/orders/ProcessingOrders.js";
-// import DispatchedOrders from "./views/orders/DispatchedOrders.js";
-// import DeliveredOrders from "./views/orders/DeliveredOrders.js";
-// import CancelledOrders from "./views/orders/CancelledOrders.js";
+
 import ReturnedOrders from "./views/orders/ReturnedOrders.js";
-import ViewOdr from "./views/orders/ViewOdr";
+
 import AddOrder from "./views/orders/AddOrder";
 
-import AbandonedCarts from "./views/AbandonedCarts/AbandonedCarts";
+
 //Taxes
 import Tax from "./views/configuration/tax/Tax";
 import Addtax from "./views/configuration/tax/Addtax";
 import Edittax from "./views/configuration/tax/Edittax";
 import EditOrder from "./views/orders/EditOrder";
 import ViewOrders from "./views/orders/ViewOrders";
-import Departures from "./views/Departures/Departures";
-import AddDeparture from "./views/Departures/AddDeparture";
-import Informations from "./views/Informations/Informations";
-import AddInformations from "./views/Informations/AddInformations";
+
 
 import ApplicationName from "./views/configuration/ApplicationName";
 import CopyrightMessage from "./views/configuration/CopyrightMessage";
 import ContactRequests from "./views/ContactRequests/ContactRequests";
 import AddContactRequest from "./views/ContactRequests/AddContactRequest";
 
-import AddSeoRequest from "./views/seo/AddSeoRequest";
+
 
 import Testimonials from "./views/Testimonials/Testimonials";
 import AddTestimonial from "./views/Testimonials/AddTestimonial";
 import ViewTestimonial from "./views/Testimonials/ViewTestimonial";
-import Policies from "./views/configuration/Policies/Policies";
-////purpose
-import Purpose from "./views/configuration/Purpose/Purpose";
-import AddPurpose from "./views/configuration/Purpose/AddPurpose";
-//language
-import Languages from "./views/configuration/Language/Languages";
-import AddLanguage from "./views/configuration/Language/AddLanguage";
-import EditLanguage from "./views/configuration/Language/EditLanguage";
-//BusinessType
-import BusinessType from "./views/configuration/Business_Type/Business";
-import AddBusinessType from "./views/configuration/Business_Type/AddBusiness";
-import EditBusinessType from "./views/configuration/Business_Type/EditLanguage";
-import EditPurpose from "./views/configuration/Purpose/EditPurpose.js";
-import ViewAppointment from "./views/Appointments/ViewAppointment";
-import EditAppointment from "./views/Appointments/EditAppointment";
-import AddNewAppointment from "./views/Appointments/AddNewAppointment";
 
-import Campaign from "./views/Campaigns/Campaign.js";
-import AddCampaign from "./views/Campaigns/AddCampaign.js";
-import Genres from "./views/Genres/genres";
-import Subjects from "./views/Subjects/subjects";
+
+
 // import Collections from "./views/Collections/collections";
 // import Colors from "./views/Color/color";
 import Content from "./views/Content/content";
@@ -124,12 +93,7 @@ import SupportReply from "./views/CustomerSupport/SupportReply";
 import SupportRequestClosed from "./views/CustomerSupport/SupportRequestClosed";
 import CloseRequestView from "./views/CustomerSupport/CloseRequestView";
 import EditTestimonial from "./views/Testimonials/EditTestimonial";
-//Blogs
-// import Blogs from "./views/Blog/Blogs";
-// import CreateBlog from "./views/Blog/CreateBlog";
-// import users from "./views/Users/users";
-// import UpdateBlog from "./views/Blog/EditBlog";
-// import ViewBlog from "./views/Blog/ViewBlog";
+
 import Home from "./views/Home/home";
 import EditPanel1 from "./views/Home/editPanel1";
 import EditPanel2 from "./views/Home/editPanel2";
@@ -163,26 +127,18 @@ import AddChapterAndImg from "./views/Chapters/addChapterAndImg.js";
 import ViewChapter from "./views/Chapters/viewChapter";
 import { Edit } from "@mui/icons-material";
 import EditChapterAndImg from "./views/Chapters/editChapter";
-import Series from "./views/series/Series";
-import AddSeries from "./views/series/AddSeries";
-import Addepisode from "./views/series/Addepisode";
-import episode from "./views/series/episode";
-import EpisodeAllDetails from "./views/series/EpisodeAllDetails";
-import EpisodeUpdate from "./views/series/EpisodeUpdate";
-import SeriesUpdate from "./views/series/SeriesUpdate";
-import SeriesAllDetails from "./views/series/SeriesAllDetails";
-import SeasonCreate from "./views/series/SeasonCreate";
-import AdminSeriesDashboard from "./views/series/AdminSeriesDashboard";
-import AdminSubjectView from "./views/series/AdminSubjectView";
+
+
+
+
+
 import deleteChapterData from "./views/Chapters/deleteChapterData";
-import GenresSubject from "./views/Genres/genresSubject";
+
 import {  GoogleOAuthProvider } from '@react-oauth/google'
 import GoogleAuth from "./views/Users/googleAuth";
-import SubjectCreate from "./views/Subjects/subjectCreate";
-import Trending from "./views/Trending/Trending";
-import TrendingCreate from "./views/Trending/TrendingCreate";
-import TrendingUpdate from "./views/Trending/TrendingUpdate";
-import TrendingView from "./views/Trending/TrendingView";
+
+
+
 import Chat from "./views/chat/Chat";
 import ViewAboutUs from "./views/Content/ViewContent/viewAboutUs";
 import ViewRefundPolicy from "./views/Content/ViewContent/viewRefundPolicy";
@@ -300,163 +256,23 @@ const routes = [
     element: ViewProduct,
     navName: "Product Management",
   },
-  {
-    path: "/genres",
-    name: "Genres",
-    element: Genres,
-    navName: "Product Management",
-  },
-  {
-    path: "/genre/allsubject/:name/:id",
-    name: "Genres",
-    element: GenresSubject,
-    navName: "Product Management",
-  },
-  {
-    path: "/subgenre",
-    name: "Sugenre",
-    element: Subjects,
-    navName: "Product Management",
-  },
-  {
-    path: "/create/subgenre/:name/:id",
-    name: "Sugenre",
-    element: SubjectCreate,
-    navName: "Product Management",
-  },
-  {
-    path: "/title",
-    name: "Title",
-    element: Series,
-    navName: "Product Management",
-  },
+
  
-   {
-    path: "/add/series",
-    name: "Series",
-    element: AddSeries,
-    navName: "Product Management",
-  },
-  {
-    path: "/episode/",
-    name: "Episode",
-    element: episode,
-    navName: "Product Management",
-  },
+  
+ 
+ 
+ 
+ 
+  
  
 
-     {
-    path: "/add/episode/:id",
-    name: "Episode",
-    element: Addepisode,
-    navName: "Product Management",
-  },
+  
  
-    {
-    path: "/all/episode/details/:id",
-    name: "Episode",
-    element: EpisodeAllDetails,
-    navName: "Product Management",
-  },
-   
-    {
-    path: "/update/episode/:id",
-    name: "EpisodeUpdate",
-    element: EpisodeUpdate,
-    navName: "Product Management",
-  },
-   {
-    path: "/update/series/:id",
-    name: "SeriesUpdate",
-    element: SeriesUpdate,
-    navName: "Product Management",
-  },
+  
+
       
-   {
-    path: "/title/details/:id",
-    name: "SeriesAllDetails",
-    element: SeriesAllDetails,
-    navName: "Product Management",
-  },
-     
-    {
-    path: "/Trending",
-    name: "Trending",
-    element: Trending,
-    navName: "Product Management",
-  },
-      {
-    path: "/Trending/create/:id",
-    name: "Trending",
-    element: TrendingCreate,
-    navName: "Product Management",
-  },
-    {
-    path: "/Trending/update/:id",
-    name: "Trending",
-    element: TrendingUpdate,
-    navName: "Product Management",
-  },
-   {
-    path: "/Trending/view/:id",
-    name: "Trending",
-    element:TrendingView,
-    navName: "Product Management",
-  },
-    {
-    path: "/season",
-    name: "Season",
-    element: SeasonCreate,
-    navName: "Product Management",
-  },
-
-
-   {
-    path: "/AdminSeriesDashboard",
-    name: "AdminSeriesDashboard",
-    element: AdminSeriesDashboard,
-    navName: "Product Management",
-  },
-
-  {
-    path: "/AdminSubjectView/:name/:id",
-    name: "AdminSubjectView",
-    element: AdminSubjectView,
-    navName: "Product Management",
-  },
-  // {AdminSeriesDashboard
-  //   path: "/collections",
-  //   name: "Collection",
-  //   element: Collections,
-  //   navName: "Product Management",
-  // },
-  // {
-  //   path: "/color",
-  //   name: "Color",
-  //   element: Colors,
-  //   navName: "Product Management",
-  // },
-
-  // {
-  //   path: "/patient/view/:id",
-  //   name: "View Patient",
-  //   element: ViewPatient,
-  //   navName: "Patients",
-  // },
-  // {
-  //   path: "/patients",
-  //   name: "Patients",
-  //   element: Patient,
-  //   navName: "Patients",
-  // },
-  // {
-  //   path: "/test/patient/:id",
-  //   name: "Patients",
-  //   element: ViewPatientTest,
-  //   navName: "Patients",
-  // },
-
-  //collections
+   
+   
 
   //Gst tax
   {

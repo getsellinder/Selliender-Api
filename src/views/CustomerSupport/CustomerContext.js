@@ -2,7 +2,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { isAutheticated } from "src/auth";
 import { getUser } from "src/loginUserdetails";
-import socket from "src/socket.client";
+
 
 const { createContext, useContext, useState, useEffect } = require("react");
 

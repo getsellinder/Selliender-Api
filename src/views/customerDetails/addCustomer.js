@@ -29,13 +29,9 @@ const AddCustomer = () => {
     name: "",
     email: "",
     password: "",
+    ConfirmPassword:""
 
-    // phone: "",
-    street: "",
-    city: "",
-    state: "",
-    pincode: "",
-    country: "",
+  
   });
   const [id, setUserId] = useState("");
   const token = isAutheticated();
@@ -204,84 +200,23 @@ const AddCustomer = () => {
             variant="outlined"
             onChange={handerInputChanges}
           />
-
-          {/* <TextField autoComplete="new-password"
-            id="phone"
-            type="text"
-            sx={{  width: "100%" }}
-            required
-            name="phone"
-            value={user.phone}
-            label="Phone number"
-            variant="outlined"
-            onChange={handerInputChanges}
-          /> */}
-          <br />
+<br/>
           <TextField
-            autoComplete="new-password"
-            id="city"
+            autoComplete="Confirm-Password"
+            id="ConfirmPassword"
             type="text"
             sx={{ width: "100%" }}
             required
-            name="city"
-            value={user.city}
-            label="City"
+            name="ConfirmPassword"
+            value={user.ConfirmPassword}
+            label="Confirm-Password"
             variant="outlined"
             onChange={handerInputChanges}
           />
           <br />
-          <TextField
-            autoComplete="new-password"
-            id="state"
-            type="text"
-            sx={{ width: "100%" }}
-            required
-            name="state"
-            value={user.state}
-            label="State"
-            variant="outlined"
-            onChange={handerInputChanges}
-          />
-          <br />
-          <TextField
-            autoComplete="new-password"
-            id="country"
-            type="text"
-            sx={{ width: "100%" }}
-            required
-            name="country"
-            value={user.country}
-            label="Country"
-            variant="outlined"
-            onChange={handerInputChanges}
-          />
-          <br />
-          <TextField
-            autoComplete="new-password"
-            id="pincode"
-            type="text"
-            sx={{ width: "100%" }}
-            required
-            name="pincode"
-            value={user.pincode}
-            label="Pincode"
-            variant="outlined"
-            onChange={handerInputChanges}
-          />
-          <br />
-          <TextField
-            autoComplete="new-password"
-            id="street"
-            type="text"
-            sx={{ width: "100%" }}
-            required
-            name="street"
-            value={user.street}
-            label="Street"
-            variant="outlined"
-            onChange={handerInputChanges}
-          />
-          <br />
+        
+         
+      
 
           <Button
             variant="contained"
@@ -289,7 +224,7 @@ const AddCustomer = () => {
             type="submit"
             style={{ width: "100%" }}
           >
-            Add user
+            Add Customer
           </Button>
           <br />
         </form>

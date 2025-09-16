@@ -65,7 +65,7 @@ import {
 } from "@coreui/icons";
 import {
   CListGroup,
-  // cisMicSettings,
+
   CNavGroup,
   CNavItem,
   CNavTitle,
@@ -80,13 +80,7 @@ const _nav = [
     icon: <CIcon icon={cilSpeedometer} customClassName="nav-icon" />,
     group: "",
   },
-  // {
-  //   component: CNavItem,
-  //   name: "Reports",
-  //   to: "/reports",
-  //   icon: <CIcon icon={cilGraph} customClassName="nav-icon" />,
-  //   group: "",
-  // },
+ 
   {
     component: CNavItem,
     name: "Customers",
@@ -95,157 +89,13 @@ const _nav = [
     group: "Customers",
   },
 
-  {
-        component: CNavItem,
-        name: "Genres",
-        icon: <CIcon icon={cilPlaylistAdd} customClassName="nav-icon" />,
-        to: "/genres",
-        group: "Product Management",
-      },
-       {
-        component: CNavItem,
-        name: "Sub Genre",
-
-        icon: <CIcon icon={cibLibreoffice} customClassName="nav-icon" />,
-        to: "/subgenre",
-        group: "Product Management",
-      },
-      //   {
-      //   component: CNavItem,
-      //   name: "googleLogin",
-
-      //   icon: <CIcon icon={cibLibreoffice} customClassName="nav-icon" />,
-      //   to: "/google/login",
-      //   group: "Product Management",
-      // },
-        {
-        component: CNavItem,
-        name: "Title",
-        icon: <CIcon icon={cilTv} customClassName="nav-icon" />,
-        to: "/title",
-        group: "Product Management",
-      },
-        {
-        component: CNavItem,
-        name: "Episode",
-        icon: <CIcon  icon={cilHeadphones} customClassName="nav-icon" />,
-        to: "/episode/",
-        group: "Product Management",
-      },
-       {
-        component: CNavItem,
-        name: "Trending",
-        icon: <CIcon  icon={cilLoopCircular} customClassName="nav-icon" />,
-        to: "/Trending",
-        group: "Product Management",
-      },
-      //   {
-      //   component: CNavItem,
-      //   name: "Packages",
-      //   icon: <CIcon icon={cilColorBorder} customClassName="nav-icon" />,
-      //   to: "/chapters",
-      //   group: "Product Management",
-      // },
-
-       
-
-
-
-  // {
-  //   Trending
-  // component: CNavGroup,
-  //   name: "Product Management",
-  //   icon: <CIcon icon={cilNotes} customClassName="nav-icon" />,
-  //   group: "",
-
-  //   items: [
-  //     {
-  //       component: CNavItem,
-  //       name: "Genres",
-  //       icon: <CIcon icon={cilPlaylistAdd} customClassName="nav-icon" />,
-  //       to: "/genres",
-  //       group: "Product Management",
-  //     },
-  //     {
-  //       component: CNavItem,
-  //       name: "Subgenre",
-
-  //       icon: <CIcon icon={cibLibreoffice} customClassName="nav-icon" />,
-  //       to: "/subjects",
-  //       group: "Product Management",
-  //     },
-  //     {
-  //       component: CNavItem,
-  //       name: "Chapters",
-  //       icon: <CIcon icon={cilColorBorder} customClassName="nav-icon" />,
-  //       to: "/chapters",
-  //       group: "Product Management",
-  //     },
-  //     {
-  //       component: CNavItem,
-  //       name: "Deleted Chapters",
-  //       icon: <CIcon icon={cilActionUndo} customClassName="nav-icon" />,
-  //       to: "/deleteChapterData",
-  //       group: "Product Management",
-  //     },
-  //      {
-  //       component: CNavItem,
-  //       name: "Title",
-  //       icon: <CIcon icon={cilTv} customClassName="nav-icon" />,
-  //       to: "/series",
-  //       group: "Product Management",
-  //     },
-
-  //     {
-  //       component: CNavItem,
-  //       name: "AdminSeriesDashboard",
-  //       icon: <CIcon icon={cilFeaturedPlaylist} customClassName="nav-icon" />,
-  //       to: "/AdminSeriesDashboard",
-  //       group: "Product Management",
-  //     },
-
-  //     //  {
-  //     //   component: CNavItem,
-  //     //   name: "Season",
-  //     //   icon: <CIcon icon={cilTv} customClassName="nav-icon" />,
-  //     //   to: "/season",
-  //     //   group: "Product Management",
-  //     // },
-  //     {
-  //       component: CNavItem,
-  //       name: "Episode",
-  //       icon: <CIcon  icon={cilHeadphones} customClassName="nav-icon" />,
-  //       to: "/episode",
-  //       group: "Product Management",
-  //     },
+ 
       
-
-  //     // Series{
-  //     //   component: CNavItem,
-  //     //   name: "Collections",
-  //     //   icon: <CIcon icon={cilPaperclip} customClassName="nav-icon" />,
-  //     //   to: "/collections",
-  //     //   group: "Product Management",
-  //     // },
-
-  //     // {
-  //     //   component: CNavItem,
-  //     //   name: "Color",
-  //     //   icon: <CIcon icon={cilColorPalette} customClassName="nav-icon" />,
-  //     //   to: "/color",
-  //     //   group: "Product Management",
-  //     // },
-
-  //     {
-  //       component: CNavItem,
-  //       name: "GST",
-  //       icon: <CIcon icon={cilTablet} customClassName="nav-icon" />,
-  //       to: "/gst",
-  //       group: "Product Management",
-  //     },
-  //   ],
-  // },
-  
+     
+      
+      
+     
+     
   {
     component: CNavGroup,
     name: "Customer Service",
@@ -260,36 +110,10 @@ const _nav = [
         to: "/support/request",
         group: "Customer Service",
       },
-      // {
-      //   component: CNavItem,
-      //   name: "Contact Requests",
-      //   icon: <CIcon icon={cilUserPlus} customClassName="nav-icon" />,
-      //   to: "/contact/request",
-      //   group: "Customer Service",
-      // },
-
-
-
-
-
-
-      // {
-      //   component: CNavItem,
-      //   name: "Email CMS",
-      //   icon: <CIcon icon={cilLocationPin} customClassName="nav-icon" />,
-      //   to: "/email-cms",
-      // },
+     
     ],
   },
-  // //Blog start
-  // {
-  //   component: CNavItem,
-  //   name: "Blog",
-  //   icon: <CIcon icon={cilImagePlus} customClassName="nav-icon" />,
-  //   to: "/blogs",
-  //   group: "Blog",
-  // },
-  // Employee
+
   {
     component: CNavItem,
     name: "Employees & Access",
@@ -297,27 +121,7 @@ const _nav = [
     to: "/employee",
     group: "Employees & Access",
   },
-  // //Point of Sale start
-  // {
-  //   component: CNavItem,
-  //   name: "Point of Sale",
-  //   icon: <CIcon icon={cilNotes} customClassName="nav-icon" />,
-  //   to: "/pos",
-  //   group: "Point of Sale",
-  // },
-  // {
-  //   component: CNavGroup,
-  //   name: "Blog",
-  //   icon: <CIcon icon={cilNotes} customClassName="nav-icon" />,
-  //   items: [
-  //     {
-  //       component: CNavItem,
-  //       name: "Blog",
-  //       icon: <CIcon icon={cilNotes} customClassName="nav-icon" />,
-  //       to: "/blogs",
-  //     },
-  //   ],
-  // },
+ 
   {
     component: CNavGroup,
     name: "Settings",
@@ -354,13 +158,7 @@ const _nav = [
         to: "/socialmedia",
         group: "Settings",
       },
-      // {
-      //   component: CNavItem,
-      //   name: "Currency",
-      //   icon: <CIcon icon={cilMoney} customClassName="nav-icon" />,
-      //   to: "/currency",
-      //   group: "Settings",
-      // },
+    
       {
         component: CNavItem,
         name: "Application Name",
@@ -390,20 +188,7 @@ const _nav = [
         to: "/copyright/message",
         group: "Settings",
       },
-      // {
-      //   component: CNavItem,
-      //   name: "Home",
-      //   icon: <CIcon icon={cilFeaturedPlaylist} customClassName="nav-icon" />,
-      //   to: "/home",
-      //   group: "Settings",
-      // },
-      // {
-      //   component: CNavItem,
-      //   name: "Comments",
-      //   icon: <CIcon icon={cilLoopCircular} customClassName="nav-icon" />,
-      //   to: "/reviewsStatus",
-      //   group: "Settings",
-      // },
+    
     ],
   },
 ];

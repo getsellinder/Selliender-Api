@@ -20,7 +20,7 @@ import { Typography } from "@material-ui/core";
 import OrderDetails from "./orderDetails";
 const CustomerTable = () => {
   const token = isAutheticated();
-  const [query, setQuery] = useState("");
+
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [loading1, setLoading1] = useState(true);
@@ -74,45 +74,8 @@ const CustomerTable = () => {
   }, [currentPage, itemPerPage, users]);
   console.log(users);
 
-  // const handleDelete = (id) => {
-  //   swal({
-  //     title: "Are you sure?",
-  //     icon: "error",
-  //     buttons: {
-  //       Yes: { text: "Yes", value: true },
-  //       Cancel: { text: "Cancel", value: "cancel" },
-  //     },
-  //   }).then((value) => {
-  //     if (value === true) {
-  //       axios
-  //         .delete(`/api/user-address/deleteAddress/${id}`, {
-  //           headers: {
-  //             "Access-Control-Allow-Origin": "*",
-  //             Authorization: `Bearer ${token}`,
-  //           },
-  //         })
-  //         .then((res) => {
-  //           swal({
-  //             title: "Deleted",
-  //             text: "Address Deleted successfully!",
-  //             icon: "success",
-  //             button: "ok",
-  //           });
-  //           setSuccess((prev) => !prev);
-  //         })
-  //         .catch((err) => {
-  //           swal({
-  //             title: "Warning",
-  //             text: "Something went wrong!",
-  //             icon: "error",
-  //             button: "Retry",
-  //             dangerMode: true,
-  //           });
-  //         });
-  //     }
-  //   });
-  // };
 
+ const tableheading=["Customer Name","Login Type"]
   return (
     <div className="main-content">
       <div className="page-content">
@@ -190,15 +153,9 @@ const CustomerTable = () => {
                         className="thead-info"
                         style={{ background: "rgb(140, 213, 213)" }}
                       >
+                       
                         <tr>
-                          <th>Customer Name</th>
-                          <th>Login Type </th>
-                          {/* <th>Profile Image</th> */}
-
-                          <th>Date Registered</th>
-                          <th>Last Purchase</th>
-                          <th>Orders</th>
-                          <th>Action</th>
+                       {tableheading.map((name)=><th>{name}</th>)}
                         </tr>
                       </thead>
                       <tbody>
@@ -236,83 +193,20 @@ const CustomerTable = () => {
                                     }
                                   )}
                                 </td>
-                                {loading1 && (
+                                {/* {loading1 && (
                                   <>
                                     <td className="text-start">loading...</td>
                                     <td className="text-start">loading...</td>
                                   </>
-                                )}
+                                )} */}
 
-                                <OrderDetails
+                                {/* <OrderDetails
                                   _id={user?._id}
                                   setLoading1={setLoading1}
-                                />
+                                /> */}
 
                                 <td className="text-start">
-                                  {/* <Link
-                                    to={`/users-address/view/${userAddress._id}`}
-                                  >
-                                    <button
-                                      style={{
-                                        color: "white",
-                                        marginRight: "1rem",
-                                      }}
-                                      type="button"
-                                      className="
-                                      btn btn-primary btn-sm
-                                    waves-effect waves-light
-                                    btn-table
-                                    mx-1
-                                    mt-1
-                                  "
-                                    >
-                                      View
-                                    </button>
-                                  </Link>
-                                  <Link
-                                    to={`/users-address/edit/${userAddress._id}`}
-                                  >
-                                    <button
-                                      style={{
-                                        color: "white",
-                                        marginRight: "1rem",
-                                      }}
-                                      type="button"
-                                      className="
-                                      btn btn-info btn-sm
-                                    waves-effect waves-light
-                                    btn-table
-                                    mt-1
-                                    mx-1
-                                  "
-                                    >
-                                      Edit
-                                    </button>
-                                  </Link>
-                                  <Link
-                                    to={"#"}
-                                    style={{
-                                      marginRight: "1rem",
-                                    }}
-                                  >
-                                    <button
-                                      style={{ color: "white" }}
-                                      type="button"
-                                      className="
-                                    btn btn-danger btn-sm
-                                    waves-effect waves-light
-                                    btn-table
-                                    mt-1
-                                    mx-1
-                                    
-                                  "
-                                      onClick={() => {
-                                        handleDelete(userAddress._id);
-                                      }}
-                                    >
-                                      Delete
-                                    </button>
-                                  </Link> */}
+                                
                                   <Link to={`/customers-details/${user?._id}`}>
                                     <button
                                       type="button"

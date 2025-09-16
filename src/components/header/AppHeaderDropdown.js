@@ -31,7 +31,7 @@ import { useNavigate } from "react-router-dom";
 import { useEffect } from 'react';
 import axios from 'axios';
 import { useState } from 'react';
-import socket from 'src/socket.client';
+
 import { getUser as AuthUserId } from "src/loginUserdetails";
 const AppHeaderDropdown = () => {
 
@@ -61,7 +61,7 @@ const AppHeaderDropdown = () => {
     console.log("userId log out",userId)
   let history = useNavigate();
   const signout = async () => {
-    socket.emit("logout",userId)
+   
     localStorage.removeItem('authToken')
     swal("success!", "Logged Out", "success");
     history("/");

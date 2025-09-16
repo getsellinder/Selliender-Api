@@ -37,6 +37,7 @@ function users() {
 
   // Change page
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  const tableHeading = ["Customer Name", "Unique Id ", "Date Registered"];
 
   //change time formate
   function formatAMPM(date) {
@@ -74,14 +75,9 @@ function users() {
                       <table className="table table-centered table-nowrap mb-0">
                         <thead className="thead-light">
                           <tr>
-                            <th>Customer Name</th>
-                            <th>Unique Id </th>
-                            {/* <th>Profile Image</th> */}
-
-                            <th>Date Registered</th>
-                            <th>Last Purchase</th>
-                            <th>Orders</th>
-                            <th>Action</th>
+                            {tableHeading.map((name) => (
+                              <th>{name}</th>
+                            ))}
                           </tr>
                         </thead>
                         <tbody>
@@ -89,10 +85,7 @@ function users() {
                             currentUser.map((item, index) => (
                               <tr>
                                 <td>{item?.name}</td>
-                                <td>{item?._id}</td>
-                                {/* <td>
-                                                                <img src={`${item.avatar?.url}`} width="50" alt="" />
-                                                            </td> */}
+                            
 
                                 <td>
                                   {new Date(
@@ -103,8 +96,7 @@ function users() {
                                     , {`${formatAMPM(item?.createdAt)}`}
                                   </span>
                                 </td>
-                                <td>last Purchase</td>
-                                <td>order count </td>
+                       
 
                                 <td>
                                   <Link to={`/users/view/${item._id}`}>

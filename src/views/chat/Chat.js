@@ -15,7 +15,7 @@ import axios from "axios";
 import { isAutheticated } from "src/auth";
 import toast from "react-hot-toast";
 import { Card, CardContent, Divider } from "@material-ui/core";
-import socket from "src/socket.client";
+
 import users from "../Users/users";
 
 const Chat = () => {
@@ -42,37 +42,11 @@ const Chat = () => {
   }, [chatData]);
 
   const [messageLoading, setMessageLoading] = useState(false);
-  const [onlineUsers, setOnlineUsers] = useState([]);
+
 
   const loggedInUserId = userId;
-  const allParticipantIds = [
-    ticketDetails.userId,
-    ...(ticketDetails.messages?.map((m) => m.senderId) || []),
-  ];
 
 
-  const uniqueParticipants = [...new Set(allParticipantIds)];
-   
-  const receiverId = uniqueParticipants.find((id) => id !== loggedInUserId);
-  console.log("receiverId",receiverId)
-
-  // reciverd message socket
-
-  // online user   socket
-  useEffect(() => {
-    if (!userId) return;
-    socket.emit("addUser", userId);
-
-    const handleGetUsers = (users) => {
-      console.log("online users:", users);
-      setOnlineUsers(users);
-    };
-    socket.on("getUsers", handleGetUsers);
-
-    return () => {
-      socket.off("getUsers", handleGetUsers);
-    };
-  }, [userId]);
 
   // typing indicater
 
@@ -85,42 +59,13 @@ const Chat = () => {
   const hendelMessage = (e) => {
     const { name, value } = e.target;
     clearTimeout(typingTimeout)
-     socket.emit("typing", {
-      ticketId: ticketDetails._id,
-      receiverId,
-      userId: loggedInUserId,
-      isTyping:value.length > 0,
-    });
-    if(value.length>0){
-      typingTimeout =setTimeout(()=>{
-        socket.emit("typing",{
-          ticketId: ticketDetails._id,
-          receiverId,
-        userId: loggedInUserId,
-        isTyping: false,
-
-        })
-      },2000)
-    }
+  
 
     setMessages((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
-  
- 
- 
-  useEffect(() => {
-    socket.on("userTyping", ({ ticketId, userId, isTyping }) => {
-      if (ticketId === ticketDetails._id && userId !== loggedInUserId) {
-        setIsReceiverTyping(isTyping);
-      }
-    });
-    return () => {
-      socket.off("userTyping");
-    };
-  }, [ticketDetails._id, loggedInUserId]);
 
   useEffect(() => {
     const handleReceive = (data) => {
@@ -145,11 +90,9 @@ const Chat = () => {
       }
     };
 
-    socket.on("receiveMessage", handleReceive);
 
-    return () => {
-      socket.off("receiveMessage", handleReceive);
-    };
+
+   
   }, []);
   const handelSendMessage = async () => {
     try {
@@ -170,8 +113,7 @@ const Chat = () => {
       // Push outgoing msg immediately
       setChatData((prev) => [...prev, newMsg]);
 
-      // Emit to socket
-      socket.emit("sendMessage", newMsg);
+  
 
       // Save to DB
       await axios.post(`/api/user/message/create/${ticketId}`, message, {
@@ -190,41 +132,7 @@ const Chat = () => {
       setMessageLoading(false);
     }
   };
-  // const handelSendMessage = async () => {
-  //   try {
-  //     setMessageLoading(true);
-  //     let newMsg = {
-  //       ticketId,
-  //       message: message.message,
-  //       senderId: userId,
-  //     };
-
-  //     setChatData((prev) => [...prev, newMsg]);
-
-  //     socket.emit("sendMessage", newMsg);
-  //     const data = await axios.post(
-  //       `/api/user/message/create/${ticketId}`,
-  //       message,
-  //       {
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       }
-  //     );
-
-  //     // getMessagesChat(ticketId);
-  //     setMessages(() => ({
-  //       message: "",
-  //     }));
-  //     toast.success("message sent");
-  //   } catch (error) {
-  //     const msg = error.response?.data?.message || "Failed to send message";
-  //     toast.error(msg);
-  //   } finally {
-  //     setMessageLoading(false);
-  //   }
-  // };
+  
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
