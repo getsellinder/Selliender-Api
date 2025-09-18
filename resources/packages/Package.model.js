@@ -2,13 +2,20 @@ import mongoose from "mongoose";
 
 const PackageScheme = new mongoose.Schema(
   {
+    name: {
+      type: String,
+    },
     Package: {
       type: String,
-      enum: ["Basic", "Standard", "Premium"],
+      enum: ["Free", "Pro", "Growth", "Enterprise"],
       required: true,
     },
-    Gst: {
-      type: mongoose.Schema.ObjectId,
+    PlanLimit: {
+      type: Number,
+      required: true,
+    },
+    GST: {
+      type: mongoose.Schema.Types.ObjectId,
       ref: "Tax",
       required: true,
     },
@@ -20,22 +27,15 @@ const PackageScheme = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    Support: {
-      type: String,
+    features: {
+      type: [],
       required: true,
     },
-    Access: {
-      type: String,
-      required: true,
-    },
-    Limit: {
-      type: String,
-      required: true,
-    },
+
     Status: {
       type: String,
       enum: ["Active", "Inactive"],
-      default: "ACTIVE",
+      default: "Active",
     },
   },
   { timestamps: true }

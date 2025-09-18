@@ -1,32 +1,21 @@
-import { Tax } from "../Tax/tax_model.js";
 import packageModel from "./Package.model.js";
 
 export const PackageCreate = async (req, res) => {
   try {
-    const { Package, Gst, Price, Total_Price, Support, Access, Limit, Status } =
+    const { Package, GST, Price, Total_Price, features, PlanLimit, name } =
       req.body;
-    if (
-      !Package ||
-      !Gst ||
-      !Price ||
-      !Total_Price ||
-      !Support ||
-      !Access ||
-      !Limit ||
-      !Status
-    ) {
+    if (!Package || !GST || !Price || !Total_Price || !PlanLimit || !features) {
       return res.status(404).json({ message: "Please Fill the Form" });
     }
 
     let data = {
       Package,
-      Gst,
+      GST,
       Price,
       Total_Price,
-      Support,
-      Access,
-      Limit,
-      Status,
+      features,
+      PlanLimit,
+      name,
     };
     const add = await packageModel.create(data);
     return res
@@ -43,7 +32,7 @@ export const getByIdPackage = async (req, res) => {
     const { id } = req.params;
     let Findpackage = await packageModel
       .findById(id)
-      .populate("Gst", "name Gst active");
+      .populate("GST", "name Gst active");
 
     if (!Findpackage) {
       return res
@@ -65,7 +54,7 @@ export const getAllPackages = async (req, res) => {
     const { packagename, packageprice } = req.query;
     const filter = {};
     let skip = (page - 1) * limit;
-    console.log("skip", skip);
+
     if (packagename) {
       filter.Package = packagename;
     }
@@ -75,9 +64,10 @@ export const getAllPackages = async (req, res) => {
     const total = await packageModel.countDocuments(filter);
     let getpackages = await packageModel
       .find(filter)
-      .populate("Gst", "name Gst active")
+      .populate("GST", "name Gst active")
       .sort({ createdAt: -1 })
       .skip(skip)
+
       .limit(limit);
     return res.status(200).json({
       getpackages,
@@ -113,23 +103,35 @@ export const PackageDelete = async (req, res) => {
 export const PackageUpdate = async (req, res) => {
   try {
     const { id } = req.params;
-    const { Package, Gst, Price, Total_Price, Support, Access, Limit, Status } =
-      req.body;
+    const {
+      Package,
+      GST,
+      Price,
+      Total_Price,
+      features,
+      PlanLimit,
+      name,
+      Status,
+    } = req.body;
+    const getuser = await packageModel.findById(id);
+    if (!getuser) {
+      return res.status(404).json({ message: "Package not found" });
+    }
 
     let data = {
       Package,
-      Gst,
+      GST,
       Price,
       Total_Price,
-      Support,
-      Access,
-      Limit,
+      features,
+      PlanLimit,
+      name,
       Status,
     };
-    let updte = await packageModel.findByIdAndUpdate(id, data, { new: true });
+    let update = await packageModel.findByIdAndUpdate(id, data, { new: true });
     return res
       .status(200)
-      .json({ message: "Package Updated Successfully", updte });
+      .json({ message: "Package Updated Successfully", update });
   } catch (error) {
     console.log("Erron in the PackageUpdate", error);
     return res.status(500).json({ message: error.message });
