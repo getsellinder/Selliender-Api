@@ -23,11 +23,20 @@ const PackageScheme = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    Total_Price: {
+    Monthly_Price: {
       type: Number,
       required: true,
     },
-    features: {
+    Yearly_Price: {
+      type: Number,
+      required: true,
+    },
+    Monthly_features: {
+      type: [],
+      required: true,
+    },
+
+    Yearly_features: {
       type: [],
       required: true,
     },

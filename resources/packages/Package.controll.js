@@ -2,8 +2,18 @@ import packageModel from "./Package.model.js";
 
 export const PackageCreate = async (req, res) => {
   try {
-    const { Package, GST, Price, Total_Price, features, PlanLimit, name } =
-      req.body;
+    const {
+      Package,
+      GST,
+      Price,
+      Yearly_Price,
+      Monthly_Price,
+
+      PlanLimit,
+      name,
+      Monthly_features,
+      Yearly_features,
+    } = req.body;
     if (!Package || !GST || !Price || !Total_Price || !PlanLimit || !features) {
       return res.status(404).json({ message: "Please Fill the Form" });
     }
@@ -12,10 +22,13 @@ export const PackageCreate = async (req, res) => {
       Package,
       GST,
       Price,
-      Total_Price,
-      features,
+      Yearly_Price,
+      Monthly_Price,
+
       PlanLimit,
       name,
+      Monthly_features,
+      Yearly_features,
     };
     const add = await packageModel.create(data);
     return res
@@ -107,10 +120,13 @@ export const PackageUpdate = async (req, res) => {
       Package,
       GST,
       Price,
-      Total_Price,
-      features,
+      Yearly_Price,
+      Monthly_Price,
+
       PlanLimit,
       name,
+      Monthly_features,
+      Yearly_features,
       Status,
     } = req.body;
     const getuser = await packageModel.findById(id);
@@ -122,10 +138,13 @@ export const PackageUpdate = async (req, res) => {
       Package,
       GST,
       Price,
-      Total_Price,
-      features,
+      Yearly_Price,
+      Monthly_Price,
+
       PlanLimit,
       name,
+      Monthly_features,
+      Yearly_features,
       Status,
     };
     let update = await packageModel.findByIdAndUpdate(id, data, { new: true });
