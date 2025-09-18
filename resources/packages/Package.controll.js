@@ -15,7 +15,7 @@ export const PackageCreate = async (req, res) => {
       Monthly_features,
       Yearly_features,
     } = req.body;
-    if (!Package || !GST || !Price || !Total_Price || !PlanLimit || !features) {
+    if (!Package || !GST || !PlanLimit) {
       return res.status(404).json({ message: "Please Fill the Form" });
     }
 
