@@ -19,15 +19,20 @@ const PackageScheme = new mongoose.Schema(
       ref: "Tax",
       required: true,
     },
-    Price: {
-      type: Number,
-      required: true,
-    },
+
     Monthly_Price: {
       type: Number,
       required: true,
     },
     Yearly_Price: {
+      type: Number,
+      required: true,
+    },
+    Total_Yearly_Price: {
+      type: Number,
+      required: true,
+    },
+    Total_Monthly_Price: {
       type: Number,
       required: true,
     },

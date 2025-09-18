@@ -5,10 +5,11 @@ export const PackageCreate = async (req, res) => {
     const {
       Package,
       GST,
-      Price,
+
       Yearly_Price,
       Monthly_Price,
-
+      Total_Monthly_Price,
+      Total_Yearly_Price,
       PlanLimit,
       name,
       Monthly_features,
@@ -21,10 +22,11 @@ export const PackageCreate = async (req, res) => {
     let data = {
       Package,
       GST,
-      Price,
+
       Yearly_Price,
       Monthly_Price,
-
+      Total_Monthly_Price,
+      Total_Yearly_Price,
       PlanLimit,
       name,
       Monthly_features,
@@ -119,10 +121,11 @@ export const PackageUpdate = async (req, res) => {
     const {
       Package,
       GST,
-      Price,
+
       Yearly_Price,
       Monthly_Price,
-
+      Total_Monthly_Price,
+      Total_Yearly_Price,
       PlanLimit,
       name,
       Monthly_features,
@@ -137,10 +140,11 @@ export const PackageUpdate = async (req, res) => {
     let data = {
       Package,
       GST,
-      Price,
+
       Yearly_Price,
       Monthly_Price,
-
+      Total_Monthly_Price,
+      Total_Yearly_Price,
       PlanLimit,
       name,
       Monthly_features,
