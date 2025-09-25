@@ -38,7 +38,7 @@ export const PlanProvider = ({ children }) => {
   }
 
   const getAllpackages = async (
-    page = page,
+    page = 1,
     limit = PageLimit,
     packagename = packageName,
     packageprice = packagePrice

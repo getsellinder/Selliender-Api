@@ -33,68 +33,36 @@ const Plans = () => {
     handleSinglePackage,
     singlePlanData,
     packageviewLoading,
+    getAllpackages,
   } = usePlan();
   const packages = allPackages?.getpackages;
 
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-
-  const [success, setSuccess] = useState(true);
-
   const [currentPage, setCurrentPage] = useState();
   const [itemPerPage, setItemPerPage] = useState();
-  const [totalpages, setTotalPages] = useState();
-  const [showData, setShowData] = useState([]);
+  const [limit, setLimit] = useState(5);
 
   const [name, setName] = useState("");
 
-  const getUsers = async (
-    searchName = name,
-    page = currentPage,
-    limit = itemPerPage
-  ) => {
-    axios
-      .get(`/api/v1/admin/customer`, {
-        params: {
-          limit: limit,
-          page: page,
-          name: searchName,
-        },
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => {
-        setShowData(res?.data);
-        setTotalPages(res.data.total_pages);
-        setLoading(false);
-      })
-      .catch((error) => {
-        swal({
-          title: error,
-          text: "please login to access the resource or refresh the page  ",
-          icon: "error",
-          button: "Retry",
-          dangerMode: true,
-        });
-        setLoading(false);
-      });
-  };
-  const handleSearch = () => {
-    setCurrentPage(1);
-    getUsers(name, 1, itemPerPage); // pass query explicitly
-    setName(name);
-  };
-  const handleShowEntries = (e) => {
-    let newlimit = e.target.value;
-    setCurrentPage(1);
-    setItemPerPage(newlimit);
-    getUsers(name, 1, newlimit);
+
+  // const handleSearch = (e) => {
+  //   let plan=e.target.value
+  //   // setCurrentPage(1);
+
+  //   getAllpackages(1, limit, plan, undefined);
+  //   // setName(name);
+  // };
+
+  const handleSearch = (plan) => {
+    getAllpackages(1, limit, plan, undefined);
   };
 
-  useEffect(() => {
-    getUsers();
-  }, [success]);
+  const handleShowEntries = (e) => {
+    let newlimit = e.target.value;
+    setLimit(newlimit)
+    getAllpackages(1, newlimit, undefined, undefined);
+  };
+
 
   const tableheading = [
 
@@ -167,6 +135,7 @@ const Plans = () => {
                           <select
                             style={{ width: "10%" }}
                             name=""
+
                             onChange={(e) => handleShowEntries(e)}
                             className="
                                    select-w
@@ -195,13 +164,17 @@ const Plans = () => {
                             placeholder="Search Plan..."
                             value={name}
                             name="name"
-                            onChange={(e) => setName(e.target.value)}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setName(val);
+                              getAllpackages(1, limit, val, undefined);  // normalize to lowercase
+                            }}
                             fullWidth
                             InputProps={{
                               endAdornment: (
                                 <InputAdornment position="end">
                                   <IconButton
-                                    onClick={handleSearch}
+                                    onClick={() => handleSearch(name)}
                                     edge="end"
                                     color="primary"
                                   >
@@ -229,7 +202,7 @@ const Plans = () => {
                         <tr>
                           {tableheading.map((name) => (
                             <th
-                             
+
                             >
                               {name}
                             </th>
@@ -350,12 +323,12 @@ const Plans = () => {
                             );
                           })
                         )}
-                        <Pagination
-                          count={totalpages}
-                          page={currentPage}
+                        <Pagination sx={{ textAlign: "end" }}
+                          count={allPackages.totalPages}
+                          page={allPackages.currentPage}
                           onChange={(e, value) => {
                             setCurrentPage(value);
-                            getUsers(name, value, itemPerPage);
+                            getAllpackages(value, undefined, undefined, undefined);
                           }}
                           color="primary"
                           shape="rounded"
