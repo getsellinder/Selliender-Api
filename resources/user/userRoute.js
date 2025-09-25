@@ -114,7 +114,7 @@ router
 
 router
   .route("/admin/user/:id")
-  .get(isAuthenticatedUser, authorizeRoles("admin", "Customer"), getSingleUser);
+  .get(getSingleUser);
 
 router.route("/user/password/update").put(isAuthenticatedUser, updatePassword);
 

@@ -387,7 +387,7 @@ export const getSingleUser = catchAsyncErrors(async (req, res, next) => {
   if (!req.params.id) {
     return next(new ErrorHander(`please send User ID`, 404));
   }
-  const user = await User.findById(req.params.id);
+  const user = await User.findById(req.params.id).populate("PlanId", "Package PlanLimit name");
 
   if (!user) {
     return next(
@@ -857,3 +857,12 @@ export const googlelogin = async (req, res) => {
     return res.status(500).json({ message: error.message || "Server error" });
   }
 };
+
+
+// export const getLoginUserDetails = () => {
+//   try {
+// const {id}=req.para
+//   } catch (error) {
+//     return res.status(500).json({ message: "Internal Server Error ", Error: error.message })
+//   }
+// } 
