@@ -5,7 +5,6 @@ export const PackageCreate = async (req, res) => {
     const {
       Package,
       GST,
-
       Yearly_Price,
       Monthly_Price,
       Total_Monthly_Price,
@@ -66,16 +65,17 @@ export const getAllPackages = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 4;
 
-    const { packagename, packageprice } = req.query;
-    const filter = {};
+    const { packagename } = req.query;
+
+    const filter = {
+      Status: "Active",
+    };
     let skip = (page - 1) * limit;
 
     if (packagename) {
       filter.Package = packagename;
     }
-    if (packageprice) {
-      filter.Total_Price = Number(packageprice);
-    }
+
     const total = await packageModel.countDocuments(filter);
     let getpackages = await packageModel
       .find(filter)
@@ -121,7 +121,6 @@ export const PackageUpdate = async (req, res) => {
     const {
       Package,
       GST,
-
       Yearly_Price,
       Monthly_Price,
       Total_Monthly_Price,

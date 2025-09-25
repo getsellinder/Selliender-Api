@@ -31,6 +31,8 @@ export const registerUser = async (req, res) => {
       name,
       email,
       password,
+      confirmPassword,
+      PlanId,
       phone,
       accessTo,
       role,
@@ -43,24 +45,20 @@ export const registerUser = async (req, res) => {
 
     let findUser = await User.findOne({ email });
 
+
     if (findUser) {
       return res
         .status(400)
         .json({ success: false, message: "User already exists" });
     }
-    if (req.files) {
-      const files = req.files.avatar;
-      const myCloud = await cloudinary.uploader.upload(
-        files.tempFilePath,
-        {
-          folder: "Frameji/user-image",
-        },
-        function (error, result) {
-          result, error;
-        }
-      );
+
+    if (password.trim() !== confirmPassword.trim()) {
+      return res.status(400).json({
+        message: "Password and Confirm Password do not match. Please try again."
+      });
     }
-    userobj = {
+
+    let data = {
       name,
       email,
       password,
@@ -72,79 +70,11 @@ export const registerUser = async (req, res) => {
       state,
       country,
       pincode,
+      PlanId,
       logintype: "email-password",
     };
-
-    //   name,
-    //   email,
-    //   password,
-    //   phone,
-    //   role,
-    //   accessTo,
-    //   street,
-    //   city,
-    //   state,
-    //   country,
-    //   pincode,
-    //   logintype: "email-password",
-    //   // avatar: { enum: ["email-password", "google"],
-    //   //     public_id: myCloud.public_id,
-    //   //     url: myCloud.secure_url,
-    //   // },
-    // });
-
-    // const emailData = await RegisterEmail.find();
-    // let emailSubject = emailData[0]?.subject;
-    // let emailDescription = emailData[0]?.description;
-    const config = await Config.find();
-
-    let appName = config[0]?.appName;
-    const otp = generateOTP();
-    otpObject[email] = otp;
-    const cook = res.cookie("otp_verification", JSON.stringify(otpObject), {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "None", // allow cross-site
-      maxAge: 5 * 60 * 1000,
-    });
-    console.log("cook", cook);
-    // res.cookie(
-    //   "otp_verification",
-    //   { otpObject },
-    //   {
-    //     httpOnly: true,
-    //     secure: true,
-    //     sameSite: "None",
-    //     maxAge: 5 * 60 * 1000,
-    //   }
-    // );
-
-    await sendEmail({
-      to: `${email}`, // Change to your recipient
-
-      from: `${process.env.SEND_EMAIL_FROM}`, // Change to your verified sender
-
-      subject: `Welcome to ${appName} - Let the Shopping Begin!`,
-      html: ` 
-  <div style="font-family: Arial, sans-serif; max-width: 600px; padding: 16px;">
-     <p style="color: #333; font-size: 16px; line-height: 0.4">Dear <strong>${name}</strong>,</p>
-     <p style="color: #333; font-size: 16px; line-height: 0.4">Following are the access details </p>
-     <br/>
-    <p style="color: #333; font-size: 16px; line-height: 0.4">URL: ${
-      role === "Customer" || role === "admin"
-        ? `https://frameji-admin.vercel.app/`
-        : `https://www.frameji.com/login`
-    } </p>
-     <p style="color: #333; font-size: 16px; line-height: 0.4">Email: ${email}</p>
-      <p>Your OTP for verification is: <strong>${otp}</strong></p>
-     <p style="color: #333; font-size: 16px; line-height: 0.4">Password: ${password}</p>
-      <br/>
-     <p style="color: #333; font-size: 16px; line-height: 0.4">Best Regards,</p>
-    <p style="color: #333; font-size: 16px; line-height: 0.4">Team ${appName}</p>
-  </div>
-        `,
-    });
-    return res.status(201).json({ message: "Otp send successfully" });
+    const add = await User.create(data)
+    return res.status(201).json({ message: "User registered successfully.", add });
     // sendToken(user, 201, res);
   } catch (e) {
     return res.status(400).json({ success: false, message: e.message });

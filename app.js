@@ -11,7 +11,7 @@ import cookieParser from "cookie-parser";
 import { googleSigninAndLogin } from "./resources/user/userController.js";
 
 import MessageRouter from "./resources/message/Message.Route.js";
-import PackageRoute from "./resources/packages/Package.Route.js";
+import PackageRoute from "./resources/Plans/Package.Route.js";
 
 // Design Route
 import designRoute from "./resources/Design/designRouter.js";

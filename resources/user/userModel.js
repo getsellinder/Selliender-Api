@@ -47,6 +47,10 @@ const userSchema = new mongoose.Schema(
       enum: ["email-password", "google"],
       default: "email-password",
     },
+    PlanId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "package"
+    },
     city: { type: String },
     state: { type: String },
     country: { type: String, default: "India" },

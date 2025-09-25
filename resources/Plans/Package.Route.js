@@ -18,8 +18,8 @@ Router.post(
 );
 Router.get(
   "/get/all",
-  isAuthenticatedUser,
-  authorizeRoles(...roles),
+  // isAuthenticatedUser,
+  // authorizeRoles(...roles),
   getAllPackages
 );
 
