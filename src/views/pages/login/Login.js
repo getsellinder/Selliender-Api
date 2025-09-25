@@ -141,9 +141,9 @@ const Login = () => {
               <CCard className="p-4">
                 <CCardBody>
                   <CForm>
-                    <h1>Audio Stream</h1>
+                    <h1>Sellinder</h1>
                     <p className="text-medium-emphasis">
-                      Sign In to Your Audio Stream Admin Dashboard Account.
+                      Sign In to Your Sellinder Admin Dashboard Account.
                     </p>
                     <CInputGroup className="mb-3">
                       <CInputGroupText>

@@ -157,7 +157,7 @@ export default function RegistrationEmail() {
             onChange={(e) => setWelcomeMsg(e.target.value)}
           />
           <h6 style={{ fontWeight: "bold", marginTop: "1rem" }}>
-            App Name : Audio Stream
+            App Name :Sellinder
           </h6>
 
           <label htmlFor="title" className="form-label">

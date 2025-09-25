@@ -51,7 +51,7 @@ export const CustomerProvider = ({ children }) => {
         },
       });
 
-      const result = resp.data;
+      const result = resp?.data;
 
       if (result) {
         setSupportRequestsDataError("");
@@ -59,8 +59,8 @@ export const CustomerProvider = ({ children }) => {
         setSupportRequestsData(result);
       }
     } catch (error) {
-      const message = error.response.data.message;
-      setSupportRequestsDataError(message);
+      const message = error?.response?.data?.message;
+      setSupportRequestsDataError(message || "Internal Server Error");
     }
   };
 

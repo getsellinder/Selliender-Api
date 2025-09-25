@@ -18,18 +18,28 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import Fuse from "fuse.js";
 import { InputAdornment, Typography } from "@material-ui/core";
+import { CircularProgress } from "@mui/material";
 
 import { isAutheticated } from "src/auth";
+import { usePlan } from "./PlanContext";
 
 const Plans = () => {
   const token = isAutheticated();
+  const {
+    allPackages,
+    handlePackageDelete,
+    packagedelLoading,
+    packageLoading,
+    handleSinglePackage,
+    singlePlanData,
+    packageviewLoading,
+  } = usePlan();
+  const packages = allPackages?.getpackages;
 
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [query, setQuery] = useState("");
-  const [loading1, setLoading1] = useState(true);
+
   const [success, setSuccess] = useState(true);
-  const [users, setUsers] = useState([]);
 
   const [currentPage, setCurrentPage] = useState();
   const [itemPerPage, setItemPerPage] = useState();
@@ -87,59 +97,18 @@ const Plans = () => {
   }, [success]);
 
   const tableheading = [
-    "Package",
-    "Gst",
-    "Price",
-    "Total Price",
+
+    "Plan",
+    "M.Price", // Monthly Price
+    "Y.Price", // Yearly Price
+    "GST",
+    "T.M.Price", // Total-Monthly-Price
+    "T.Y.Price", // Total-Yearly-Price
     "Status",
     "Created",
     "",
     "",
     "",
-  ];
-  const dummy = [
-    {
-      _id: "68c933cb5730fb3286dd255a",
-      Package: "Premium",
-      Gst: {
-        _id: "68c933abddfee0c0849167ec",
-        name: "first",
-        Gst: 5,
-        active: true,
-      },
-      Price: 499,
-      Total_Price: 100,
-      createdAt: "2025-09-16T09:54:19.381Z",
-      Status: "Active",
-    },
-    {
-      _id: "68c933cb5730fb3286dd255a",
-      Package: "Premium",
-      Gst: {
-        _id: "68c933abddfee0c0849167ec",
-        name: "first",
-        Gst: 5,
-        active: true,
-      },
-      Price: 499,
-      Total_Price: 100,
-      createdAt: "2025-09-16T09:54:19.381Z",
-      Status: "Active",
-    },
-    {
-      _id: "68c933cb5730fb3286dd255a",
-      Package: "Premium",
-      Gst: {
-        _id: "68c933abddfee0c0849167ec",
-        name: "first",
-        Gst: 5,
-        active: true,
-      },
-      Price: 499,
-      Total_Price: 100,
-      createdAt: "2025-09-16T09:54:19.381Z",
-      Status: "Active",
-    },
   ];
 
   return (
@@ -259,35 +228,51 @@ const Plans = () => {
                       >
                         <tr>
                           {tableheading.map((name) => (
-                            <th className={name==="Package"?"text-start":"text-center"}>{name}</th>
+                            <th
+                             
+                            >
+                              {name}
+                            </th>
                           ))}
                         </tr>
                       </thead>
                       <tbody>
-                        {!loading && showData.length === 0 && (
+                        {!packageLoading && packages.length === 0 && (
                           <tr className="text-center">
-                            <td colSpan="6">
+                            <td colSpan="12">
                               <h5>No Data Available</h5>
                             </td>
                           </tr>
                         )}
-                        {loading ? (
+                        {packageLoading ? (
                           <tr>
-                            <td className="text-center" colSpan="6">
+                            <td className="text-center" colSpan="12">
                               Loading...
                             </td>
                           </tr>
                         ) : (
-                          dummy.map((user, i) => {
+                          packages.map((user, i) => {
+                            console.log("user", user)
+
                             return (
                               <tr key={i}>
-                                <td className="text-start" >{user.Package}</td>
-                                <td className="text-center" >{user.Gst.Gst}</td>
-                                <td className="text-center" >{user.Price}</td>
-                                <td className="text-center" >
-                                  {user.Total_Price}
+                                <td className="text-start">{user.Package}</td>
+
+                                <td className="text-center">
+                                  ₹{user.Monthly_Price}
                                 </td>
-                                <td className="text-center">{user.Status}</td>
+                                <td className="">₹{user.Yearly_Price}</td>
+                                <td className="">{user.GST?.Gst}%</td>
+                                <td className="text-center">
+                                  {" "}
+                                  ₹{user.Total_Monthly_Price}
+                                </td>
+                                <td className="text-center">
+                                  {" "}
+                                  ₹{user.Total_Yearly_Price}
+                                </td>
+
+                                <td className="text-center"> {user.Status}</td>
 
                                 <td className="text-center">
                                   {new Date(user.createdAt).toLocaleString(
@@ -303,23 +288,18 @@ const Plans = () => {
                                     }
                                   )}
                                 </td>
-                                {/* {loading1 && (
-                                     <>
-                                       <td className="text-start">loading...</td>
-                                       <td className="text-start">loading...</td>
-                                     </>
-                                   )} */}
-
-                                {/* <OrderDetails
-                                     _id={user?._id}
-                                     setLoading1={setLoading1}
-                                   /> */}
 
                                 <td className="text-start">
                                   <Link
                                     to={`/Pricing-Plans/update/${user?._id}`}
+
                                   >
-                                    <button style={{background:"orange",fontWeight:"600",color:"#000"}}
+                                    <button
+                                      style={{
+                                        background: "orange",
+                                        fontWeight: "600",
+                                        color: "#000",
+                                      }}
                                       type="button"
                                       className="mt-1 btn btn-info btn-sm  waves-effect waves-light btn-table ml-2"
                                     >
@@ -329,20 +309,41 @@ const Plans = () => {
                                 </td>
                                 <td className="text-start">
                                   <Link to={`/Pricing-Plans/view/${user?._id}`}>
-                                    <button style={{fontWeight:"600",color:"#000"}}
+                                    <button
+
+                                      style={{
+                                        fontWeight: "600",
+                                        color: "#000",
+                                      }}
                                       type="button"
                                       className="mt-1 btn btn-info btn-sm  waves-effect waves-light btn-table ml-2"
                                     >
-                                      View
+                                      {packageviewLoading === user._id ? (
+                                        <CircularProgress size={25} />
+                                      ) : (
+                                        "View"
+                                      )}
                                     </button>
                                   </Link>
                                 </td>
                                 <td className="text-start">
-                                  <button style={{background:"red",fontWeight:"600",color:"#000"}}
+                                  <button
+                                    onClick={() =>
+                                      handlePackageDelete(user?._id)
+                                    }
+                                    style={{
+                                      background: "red",
+                                      fontWeight: "600",
+                                      color: "#000",
+                                    }}
                                     type="button"
                                     className="mt-1 btn btn-info btn-sm  waves-effect waves-light btn-table ml-2"
                                   >
-                                    Delete
+                                    {packagedelLoading === user?._id ? (
+                                      <CircularProgress size={25} />
+                                    ) : (
+                                      "Delete"
+                                    )}
                                   </button>
                                 </td>
                               </tr>
