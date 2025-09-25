@@ -2,6 +2,7 @@ import express from "express";
 import { authorizeRoles, isAuthenticatedUser } from "../../middlewares/auth.js";
 import { roles, rolesAdmin } from "../../Utils/authorizeRoles.js";
 import {
+  countSearchlimit,
   getAllPackages,
   getByIdPackage,
   PackageCreate,
@@ -36,10 +37,19 @@ Router.delete(
   PackageDelete
 );
 Router.put(
+  "/limit/update/:id",
+  countSearchlimit
+);
+Router.put(
   "/update/:id",
   isAuthenticatedUser,
-  authorizeRoles(...rolesAdmin),
+  authorizeRoles(...roles),
   PackageUpdate
 );
+
+
+
+
+
 
 export default Router;

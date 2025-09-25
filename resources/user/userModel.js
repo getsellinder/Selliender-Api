@@ -51,6 +51,10 @@ const userSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "package"
     },
+    SearchLimit: {
+      type: Number
+
+    },
     city: { type: String },
     state: { type: String },
     country: { type: String, default: "India" },

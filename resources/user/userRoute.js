@@ -30,6 +30,7 @@ import {
   getAllCustomer,
 } from "./customers/Customer.Controller.js";
 
+
 const router = express.Router();
 
 router.route("/user/register").post(registerUser);
@@ -141,5 +142,7 @@ router.post(
   authorizeRoles(...rolesAdmin),
   AddEmploye
 );
+
+
 
 export default router;

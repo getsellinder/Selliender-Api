@@ -1,3 +1,4 @@
+import UserModel from "../user/userModel.js";
 import packageModel from "./Package.model.js";
 
 export const PackageCreate = async (req, res) => {
@@ -115,6 +116,35 @@ export const PackageDelete = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
+export const countSearchlimit = async (req, res) => {
+  const { id } = req.params
+
+  try {
+    const getUser = await UserModel.findById(id)
+    if (!getUser) {
+      return res.status(404).json({ message: "User not found" })
+    }
+    let PlanId = getUser.PlanId
+
+    let getplanLimit = await packageModel.findById(PlanId)
+    if (!getplanLimit) {
+      return res.status(404).json({ message: "Plan not found" })
+    }
+    let limit = getplanLimit.PlanLimit
+    let currentLimit = getUser.SearchLimit || 0
+    if (currentLimit >= limit) {
+      return res.status(405).json({ message: "Your search limit is over" });
+    }
+
+    const updatedUser = await UserModel.findByIdAndUpdate(id, { $inc: { SearchLimit: 1 } }, { new: true })
+
+
+    return res.status(200).json({ message: "Search count updated", searchCount: updatedUser.SearchLimit, remaining: limit - updatedUser.SearchLimit })
+  } catch (error) {
+    console.log("countSearchlimit.error", error)
+    return res.status(500).json({ message: "Internal Server Error", Error: error.message })
+  }
+}
 export const PackageUpdate = async (req, res) => {
   try {
     const { id } = req.params;
@@ -159,3 +189,5 @@ export const PackageUpdate = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
+
+
