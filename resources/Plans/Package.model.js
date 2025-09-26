@@ -12,29 +12,30 @@ const PackageScheme = new mongoose.Schema(
     },
     PlanLimit: {
       type: Number,
-      required: true,
+      // required: true,
     },
     GST: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Tax",
-      required: true,
+      // required: true,
     },
 
     Monthly_Price: {
       type: Number,
-      required: true,
+
     },
     Yearly_Price: {
       type: Number,
-      required: true,
+
+
     },
     Total_Yearly_Price: {
       type: Number,
-      required: true,
+
     },
     Total_Monthly_Price: {
       type: Number,
-      required: true,
+
     },
     Monthly_features: {
       type: [],
