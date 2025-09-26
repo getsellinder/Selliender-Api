@@ -80,7 +80,7 @@ export const getLinkedinUploadFile = async (req, res) => {
 
         res.status(200).json({
             user: getUser,
-            message: "⚠️ LinkedIn data will be deleted automatically after 4 minutes"
+            message: "⚠️ LinkedIn data will be deleted automatically after 2 minutes"
         });
 
         // // schedule deletion after 4 minutes
