@@ -4,7 +4,7 @@ const app = express();
 import path, { dirname, join } from "path";
 import { fileURLToPath } from "url";
 import bodyParser from "body-parser";
-import fileUpload from "express-fileupload"; // important pkg for file upload
+// import fileUpload from "express-fileupload"; // important pkg for file upload
 import cors from "cors";
 
 import cookieParser from "cookie-parser";
@@ -12,6 +12,7 @@ import { googleSigninAndLogin } from "./resources/user/userController.js";
 
 import MessageRouter from "./resources/message/Message.Route.js";
 import PackageRoute from "./resources/Plans/Package.Route.js";
+import LinkedinRoute from "./resources/linkedin/Linkedin.Route.js"
 
 // Design Route
 import designRoute from "./resources/Design/designRouter.js";
@@ -46,11 +47,11 @@ const publicPath = join(__dirname, "public");
 
 // Serve static files from the 'public' directory
 app.use(express.static(publicPath));
-app.use(
-  fileUpload({
-    useTempFiles: true,
-  })
-);
+// app.use(
+//   fileUpload({
+//     useTempFiles: true,
+//   })
+// );
 
 // const { STRIPE_SECRET_KEY, WEBHOOK_SECRET_KEY } = process.env;
 // import { Stripe } from "stripe";
@@ -215,6 +216,7 @@ app.use("/api/category", categoryRoute);
 // package
 
 app.use("/api/package", PackageRoute);
+app.use("/api/linked", LinkedinRoute)
 
 app.use("/api/collection", CollectionRoute);
 app.use("/api/color", ColorRoute);

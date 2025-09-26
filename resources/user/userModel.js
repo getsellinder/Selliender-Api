@@ -55,6 +55,16 @@ const userSchema = new mongoose.Schema(
       type: Number
 
     },
+    LinkedinPostId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "LinkedinPost"
+
+    },
+    LinkedinContentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "LinkedinContent"
+
+    },
     city: { type: String },
     state: { type: String },
     country: { type: String, default: "India" },
