@@ -5,42 +5,40 @@ import LinkedinPost from "./LinkedinPost.model.js";
 
 export const LinkedinUploadFile = async (req, res) => {
     const { id } = req.params
-    const { LinkedinURL, LinkedinDec } = req.body;
-    const { files } = req
+    const { LinkedinURL, LinkedinDec, content, posts } = req.body;
+    // const { files } = req
     try {
-        if (!files || (!files.content && !files.posts)) {
-            return res.status(400).json({ message: "No file uploaded" });
-        }
+        // if (!files || (!files.content && !files.posts)) {
+        //     return res.status(400).json({ message: "No file uploaded" });
+        // }
 
         // Convert uploaded buffer to JSON
         let savePfofile = null;
         let savePosts = [];
         // save content
-        if (files.content && files.content[0]) {
-            const contentBuffe = files.content[0].buffer
-            const contentJson = JSON.parse(contentBuffe.toString("utf8"))
-            // insert profile (add LinkedinURL, LinkedinDec)
+        if (content) {
+            // const contentBuffe = files.content[0].buffer
+            // const contentJson = JSON.parse(contentBuffe.toString("utf8"))
+            // // insert profile (add LinkedinURL, LinkedinDec)
             savePfofile = await LinkedinContent.create({
                 LinkedinURL,
                 LinkedinDec,
-                ...contentJson
+                ...content
             })
         }
 
 
         // ---------- Save Posts ----------
-        if (files.posts && files.posts[0]) {
-            const postBuffer = files.posts[0].buffer
-            const postsJson = JSON.parse(postBuffer.toString("utf8"))
-            if (Array.isArray(postsJson)) {
-                savePosts = await LinkedinPost.insertMany(postsJson.map(p => ({
+        if (posts) {
+            if (Array.isArray(posts)) {
+                savePosts = await LinkedinPost.insertMany(posts.map(p => ({
                     ...p,
                     profileId: savePfofile ? savePfofile._id : null
                 })))
             }
             else {
                 const post = await LinkedinPost.create({
-                    ...postsJson,
+                    ...posts,
                     profileId: savePfofile ? savePfofile._id : null
 
                 })
@@ -67,6 +65,8 @@ export const LinkedinUploadFile = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+
 
 export const getLinkedinUploadFile = async (req, res) => {
     const { id } = req.params
