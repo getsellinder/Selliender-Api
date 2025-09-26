@@ -72,7 +72,7 @@ export const getAllPackages = async (req, res) => {
     let skip = (page - 1) * limit;
 
     if (packagename) {
-      filter.Package = packagename;
+      filter.Package = { $regex: new RegExp(packagename, "i") };
     }
 
     const total = await packageModel.countDocuments(filter);
