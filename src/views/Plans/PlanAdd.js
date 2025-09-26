@@ -28,7 +28,7 @@ const PlanAdd = () => {
 
   const [plan, setPlan] = useState({
     Package: "",
-    GST: "",
+    GST:  "" || null,
     Yearly_Price: "",
     Total_Monthly_Price: "",
     Total_Yearly_Price: "",
@@ -44,30 +44,57 @@ const PlanAdd = () => {
 
 
   // handle input change
+  // const handleChange = (e) => {
+  //   const { name, value } = e.target
+  //   setPlan((prevPlan) => {
+  //     if (name === "GST") {
+  //      const gstPercent = getgst?.find((item) => item._id === value)?.Gst || 0;
+  //       // console.log("gstPercent", gstPercent)
+  //       const monthlyPrice = parseFloat(prevPlan.Monthly_Price) || 0;
+  //       let yearlyPrice = parseFloat(prevPlan.Yearly_Price) || 0
+
+  //       let totalMonthly = monthlyPrice + (monthlyPrice * gstPercent) / 100
+  //       const totalYearly = yearlyPrice + (yearlyPrice * gstPercent) / 100
+  //       return {
+  //         ...prevPlan,
+  //         GST: value || "",
+  //         Total_Monthly_Price: totalMonthly,
+  //         Total_Yearly_Price: totalYearly,
+  //       }
+
+  //     }
+  //     return { ...prevPlan, [name]: value };
+  //   })
+  //   // setPlan({ ...plan, [e.target.name]: e.target.value });
+  // };
+
   const handleChange = (e) => {
-    const { name, value } = e.target
-    setPlan((prevPlan) => {
-      if (name === "GST") {
-        const getItem = getgst.find((item) => item._id === value)
-        const gstPercent = getItem ? getItem.Gst : 0;
-        // console.log("gstPercent", gstPercent)
-        const monthlyPrice = parseFloat(prevPlan.Monthly_Price) || 0;
-        let yearlyPrice = parseFloat(prevPlan.Yearly_Price) || 0
+  const { name, value } = e.target;
 
-        let totalMonthly = monthlyPrice + (monthlyPrice * gstPercent) / 100
-        const totalYearly = yearlyPrice + (yearlyPrice * gstPercent) / 100
-        return {
-          ...prevPlan,
-          GST: value,
-          Total_Monthly_Price: totalMonthly,
-          Total_Yearly_Price: totalYearly,
-        }
+  setPlan((prevPlan) => {
+    // Handle GST change
+    if (name === "GST") {
+      const gstPercent = getgst?.find((item) => item._id === value)?.Gst || 0;
 
-      }
-      return { ...prevPlan, [name]: value };
-    })
-    // setPlan({ ...plan, [e.target.name]: e.target.value });
-  };
+      const monthlyPrice = parseFloat(prevPlan.Monthly_Price) || 0;
+      const yearlyPrice = parseFloat(prevPlan.Yearly_Price) || 0;
+
+      const totalMonthly = monthlyPrice + (monthlyPrice * gstPercent) / 100 || 0;
+      const totalYearly = yearlyPrice + (yearlyPrice * gstPercent) / 100 || 0;
+
+      return {
+        ...prevPlan,
+         GST: value ? value : null,
+        Total_Monthly_Price: totalMonthly,
+        Total_Yearly_Price: totalYearly,
+      };
+    }
+
+    // Handle other fields
+    return { ...prevPlan, [name]: value };
+  });
+};
+
 
   const addfeature = (type) => {
     setPlan({ ...plan, [type]: [...plan[type], ""] });

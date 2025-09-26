@@ -32,30 +32,30 @@ const PlanView = () => {
           <Box sx={{ display: "flex", gap: "5rem", fontWeight: "600" }}>
             <Typography style={{ ...fontstyle, width: "10%" }}>Gst</Typography>
             <Typography style={{ ...fontstyle }}>:</Typography>
-            <Typography style={{ ...fontstyle }}>{singlePlanData?.GST?.Gst}%</Typography>
+            <Typography style={{ ...fontstyle }}>{singlePlanData?.GST?.Gst==undefined?0:`${singlePlanData?.GST?.Gst}%`}</Typography>
           </Box>
 
           <Box sx={{ display: "flex", gap: "5rem", fontWeight: "600" }}>
             <Typography style={{ ...fontstyle, width: "10%" }}>MonthlyPrice</Typography>
             <Typography style={{ ...fontstyle }}>:</Typography>
-            <Typography style={{ ...fontstyle }}>₹{singlePlanData?.Monthly_Price}</Typography>
+            <Typography style={{ ...fontstyle }}>{singlePlanData?.Monthly_Price==null?0:`₹${singlePlanData?.Monthly_Price}`}</Typography>
           </Box>
           <Box sx={{ display: "flex", gap: "5rem", fontWeight: "600" }}>
             <Typography style={{ ...fontstyle, width: "10%" }}>YearlyPrice</Typography>
             <Typography style={{ ...fontstyle }}>:</Typography>
-            <Typography style={{ ...fontstyle }}>₹{singlePlanData?.Yearly_Price}</Typography>
+            <Typography style={{ ...fontstyle }}>{singlePlanData?.Yearly_Price==null?0:`₹${singlePlanData?.Yearly_Price}`}</Typography>
           </Box>
 
 
           <Box sx={{ display: "flex", gap: "5rem", fontWeight: "600" }}>
             <Typography style={{ ...fontstyle, width: "10%" }}>Monthly Total Price with GST</Typography>
             <Typography style={{ ...fontstyle }}>:</Typography>
-            <Typography style={{ ...fontstyle }}>₹{singlePlanData?.Total_Monthly_Price}</Typography>
+            <Typography style={{ ...fontstyle }}>  {singlePlanData.Total_Monthly_Price===null?0:` ₹${singlePlanData.Total_Monthly_Price}`}</Typography>
           </Box>
           <Box sx={{ display: "flex", gap: "5rem", fontWeight: "600" }}>
             <Typography style={{ ...fontstyle, width: "10%" }}>Yearly Total Price with GST</Typography>
             <Typography style={{ ...fontstyle }}>:</Typography>
-            <Typography style={{ ...fontstyle }}>₹{singlePlanData?.Total_Yearly_Price}</Typography>
+            <Typography style={{ ...fontstyle }}>{singlePlanData?.Total_Yearly_Price==null?0:`₹${singlePlanData?.Total_Yearly_Price}`}</Typography>
           </Box>
 
           <Box sx={{ display: "flex", gap: "5rem", fontWeight: "600" }}>

@@ -167,7 +167,7 @@ const Plans = () => {
                             onChange={(e) => {
                               const val = e.target.value;
                               setName(val);
-                              getAllpackages(1, limit, val, undefined);  // normalize to lowercase
+                              getAllpackages(1, limit, val, undefined);
                             }}
                             fullWidth
                             InputProps={{
@@ -232,17 +232,17 @@ const Plans = () => {
                                 <td className="text-start">{user.Package}</td>
 
                                 <td className="text-center">
-                                  ₹{user.Monthly_Price}
+                                  {user.Monthly_Price===null?0:`₹${user.Monthly_Price}`}
                                 </td>
-                                <td className="">₹{user.Yearly_Price}</td>
-                                <td className="">{user.GST?.Gst}%</td>
+                                <td className="">{user.Yearly_Price===null?0:`₹${user.Yearly_Price}`}</td>
+                                <td className="">{user.GST?.Gst===undefined?0:`${user.GST?.Gst}%`}</td>
                                 <td className="text-center">
                                   {" "}
-                                  ₹{user.Total_Monthly_Price}
+                                 {user.Total_Monthly_Price===null?0:` ₹${user.Total_Monthly_Price}`}
                                 </td>
                                 <td className="text-center">
                                   {" "}
-                                  ₹{user.Total_Yearly_Price}
+                                  {user.Total_Yearly_Price===null?0:`₹${user.Total_Yearly_Price}`}
                                 </td>
 
                                 <td className="text-center"> {user.Status}</td>
