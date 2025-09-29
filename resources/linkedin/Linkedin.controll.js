@@ -65,6 +65,8 @@ export const LinkedinUploadFile = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+
 export const getLinkedinUploadFile = async (req, res) => {
     const { id } = req.params
     try {
