@@ -65,6 +65,48 @@ export const LinkedinUploadFile = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+export const getLinkedinUploadFile = async (req, res) => {
+    const { id } = req.params
+    try {
+        const getUser = await UserModel.findById(id)
+            .populate("LinkedinContentId")
+            .populate("LinkedinPostId");
+        if (!getUser) {
+            return res.status(404).json({ message: "User not found" })
+        }
+
+        res.status(200).json({
+            user: getUser,
+            message: "⚠️ LinkedIn data will be deleted automatically after 2 minutes"
+        });
+
+        // // schedule deletion after 4 minutes
+        setTimeout(async () => {
+            try {
+                if (getUser.LinkedinContentId) {
+                    await LinkedinContent.findByIdAndDelete(getUser.LinkedinContentId._id)
+                    getUser.LinkedinContentId = null
+                }
+                if (getUser.LinkedinPostId) {
+                    await LinkedinPost.findByIdAndDelete(getUser.LinkedinPostId._id);
+                    getUser.LinkedinPostId = null
+                }
+                // also unlink from user so populate won’t find them again
+                await UserModel.findByIdAndUpdate(id, {
+                    $unset: { LinkedinContentId: "", LinkedinPostId: "" }
+                })
+                console.log(`LinkedIn data removed for user ${id}`);
+            } catch (error) {
+                console.error("Error deleting LinkedIn data:", err.message);
+            }
+        }, 2 * 60 * 1000)
+
+        await getUser.save()
+
+    } catch (error) {
+        return res.status(500).json({ message: error.message })
+    }
+}
 
 
 export const getLinkedinAnalysisResult = async (req, res) => {
@@ -107,46 +149,7 @@ export const getLinkedinAnalysisResult = async (req, res) => {
     }
 }
 
-export const getLinkedinUploadFile = async (req, res) => {
-    const { id } = req.params
-    try {
-        const getUser = await UserModel.findById(id)
-            .populate("LinkedinContentId")
-            .populate("LinkedinPostId");
-        if (!getUser) {
-            return res.status(404).json({ message: "User not found" })
-        }
 
-        res.status(200).json({
-            user: getUser,
-            message: "⚠️ LinkedIn data will be deleted automatically after 2 minutes"
-        });
-
-        // // schedule deletion after 4 minutes
-        setTimeout(async () => {
-            try {
-                if (getUser.LinkedinContentId) {
-                    await LinkedinContent.findByIdAndDelete(getUser.LinkedinContentId._id)
-                }
-                if (getUser.LinkedinPostId) {
-                    await LinkedinPost.findByIdAndDelete(getUser.LinkedinPostId._id);
-                }
-                // also unlink from user so populate won’t find them again
-                await UserModel.findByIdAndUpdate(id, {
-                    $unset: { LinkedinContentId: "", LinkedinPostId: "" }
-                })
-                console.log(`LinkedIn data removed for user ${id}`);
-            } catch (error) {
-                console.error("Error deleting LinkedIn data:", err.message);
-            }
-        }, 2 * 60 * 1000)
-
-
-
-    } catch (error) {
-        return res.status(500).json({ message: error.message })
-    }
-}
 
 
 export const getLinkedinUserProfile = async (req, res) => {
@@ -183,7 +186,7 @@ export const LinkedinuserDelete = async (req, res) => {
             Finduser.LinkedinPostId = null
         }
         if (Finduser.LinkedinContentId) {
-            await LinkedinContent.findByIdAndUpdate(Finduser.LinkedinContentId)
+            await LinkedinContent.findByIdAndDelete(Finduser.LinkedinContentId)
             Finduser.LinkedinPostId = null
         }
         await Finduser.save()
