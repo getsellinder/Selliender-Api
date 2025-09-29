@@ -187,7 +187,7 @@ export const LinkedinuserDelete = async (req, res) => {
         }
         if (Finduser.LinkedinContentId) {
             await LinkedinContent.findByIdAndDelete(Finduser.LinkedinContentId)
-            Finduser.LinkedinPostId = null
+            Finduser.LinkedinContentId = null
         }
         await Finduser.save()
         return res.status(200).json({ message: "User LinkedIn data removed", user: Finduser });
