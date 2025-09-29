@@ -41,18 +41,6 @@ router.route("/user/googleLoginSingin").post(googleSigninAndLogin);
 // router.route("/google/callback").get(googlelogin);
 router.route("/google/callback").post(googlelogin);
 
-// router.get("/google", (req, res) => {
-//   const scope = [
-//     "https://www.googleapis.com/auth/userinfo.email",
-//     "https://www.googleapis.com/auth/userinfo.profile",
-//   ].join(" ");
-
-//   const redirectUri = "http://localhost:5000/google/callback";
-
-//   const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.GOOGLE_CLIENT_ID}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}`;
-
-//   res.redirect(authUrl);
-// });
 
 router.route("/user/login").post(loginUser);
 

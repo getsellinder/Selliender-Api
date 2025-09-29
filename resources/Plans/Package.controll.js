@@ -62,7 +62,7 @@ export const getByIdPackage = async (req, res) => {
 export const getAllPackages = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 4;
+    const limit = parseInt(req.query.limit) || 5;
 
     const { packagename } = req.query;
 

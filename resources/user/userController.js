@@ -352,37 +352,7 @@ export const getUserDetails = catchAsyncErrors(async (req, res, next) => {
   });
 });
 
-// export const getUserDetailsForAdmin = catchAsyncErrors(
-//   async (req, res, next) => {
-//     const user = await User.findById(req.params._id);
 
-//     res.status(200).json({
-//       success: true,
-//       user,
-//     });
-//   }
-// );
-
-// export const getAllUsers = catchAsyncErrors(async (req, res, next) => {
-//   const users = await User.find().populate("orders"); // Assuming orders are stored in a separate collection and populated in the User model
-
-//   // Process user data to calculate last purchase date and order count
-//   const usersWithInfo = users.map((user) => {
-//     const lastPurchase =
-//       user.orders.length > 0
-//         ? user.orders[user.orders.length - 1].createdAt
-//         : null;
-//     const orderCount = user.orders.length;
-//     return { ...user.toJSON(), lastPurchase, orderCount };
-//   });
-
-//   res.status(200).json({
-//     success: true,
-//     users: usersWithInfo,
-//   });
-// });
-
-// 7.Get single user (admin)
 export const getSingleUser = catchAsyncErrors(async (req, res, next) => {
   if (!req.params.id) {
     return next(new ErrorHander(`please send User ID`, 404));
@@ -859,10 +829,3 @@ export const googlelogin = async (req, res) => {
 };
 
 
-// export const getLoginUserDetails = () => {
-//   try {
-// const {id}=req.para
-//   } catch (error) {
-//     return res.status(500).json({ message: "Internal Server Error ", Error: error.message })
-//   }
-// } 
