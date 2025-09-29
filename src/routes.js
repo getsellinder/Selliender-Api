@@ -134,7 +134,7 @@ import EditChapterAndImg from "./views/Chapters/editChapter";
 
 import deleteChapterData from "./views/Chapters/deleteChapterData";
 
-import {  GoogleOAuthProvider } from '@react-oauth/google'
+import { GoogleOAuthProvider } from '@react-oauth/google'
 import GoogleAuth from "./views/Users/googleAuth";
 
 
@@ -149,11 +149,13 @@ import Plans from "./views/Plans/Plans";
 import PlanAdd from "./views/Plans/PlanAdd";
 import PlanEdit from "./views/Plans/PlansEdit";
 import PlanView from "./views/Plans/PlansView";
+import Linkedin from "./views/Linkiedin/Linkedin";
+import LinkedinView from "./views/Linkiedin/LinkedinView";
 
 
 
-const GoogleAuthWrapper=()=>{
-  return(
+const GoogleAuthWrapper = () => {
+  return (
     <GoogleOAuthProvider clientId="706958433155-ohqku868vmbpchhk54gcm4vi9b3433mf.apps.googleusercontent.com">
       <GoogleAuth></GoogleAuth>
     </GoogleOAuthProvider>
@@ -169,7 +171,7 @@ const routes = [
 
 
   { path: "/dashboard", name: "Dashboard", element: Dashboard, navName: "" },
-    { path: "/google/login", name: "googlelogin", element: GoogleAuthWrapper, navName: "" },
+  { path: "/google/login", name: "googlelogin", element: GoogleAuthWrapper, navName: "" },
   { path: "/reports", name: "Reports", element: Reports, navName: "" },
   {
     path: "/change_password",
@@ -193,27 +195,27 @@ const routes = [
   },
 
   // Pricing-Plans
-    {
+  {
     path: "/Pricing-Plans",
     name: "Pricing-Plans",
     element: Plans,
     navName: "Charts",
   },
-    {
+  {
     path: "/Pricing-Plans/add",
     name: "Pricing-Plans",
     element: PlanAdd,
     navName: "Charts",
   },
-    {
-      path: "/Pricing-Plans/update/:id",
+  {
+    path: "/Pricing-Plans/update/:id",
     name: "Pricing-Plans",
     element: PlanEdit,
     navName: "Charts",
   },
 
-     {
-      path: "/Pricing-Plans/view/:id",
+  {
+    path: "/Pricing-Plans/view/:id",
     name: "Pricing-Plans",
     element: PlanView,
     navName: "Charts",
@@ -288,22 +290,22 @@ const routes = [
     navName: "Product Management",
   },
 
- 
-  
- 
- 
- 
- 
-  
- 
 
-  
- 
-  
 
-      
-   
-   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   //Gst tax
   {
@@ -362,7 +364,7 @@ const routes = [
     element: SingleUserAllDetails,
     navName: "Customers",
   },
-    {
+  {
     path: "/chat/:name/:ticketId",
     name: "Customers",
     element: Chat,
@@ -585,7 +587,7 @@ const routes = [
     navName: "Settings",
   },
   // add
-    {
+  {
     path: "/content/view/terms-and-conditions",
     name: "Website Related",
     element: ViewTermsConditions,
@@ -671,6 +673,19 @@ const routes = [
     element: EditPanel3,
     navName: "Website Related",
   },
+  {
+    path: "/Linkedin",
+    name: "Linkedin",
+    element: Linkedin,
+    navName: "Website Related",
+  },
+  {
+    path: "/Linkedin-user/view/:id",
+    name: "Linkedin",
+    element: LinkedinView,
+    navName: "Website Related",
+  },
+
   // {
   //   path: "/home/panel-4",
   //   name: "EditPanel4",

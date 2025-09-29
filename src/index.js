@@ -17,6 +17,7 @@ import { Toaster } from "react-hot-toast";
 
 import { CustomerProvider } from "./views/CustomerSupport/CustomerContext";
 import { PlanProvider } from "./views/Plans/PlanContext";
+import { LinkedinProvider } from "./views/Linkiedin/LinkedenContext";
 
 const setupAxios = () => {
   // axios.defaults.baseURL = "http://localhost:5000";
@@ -39,6 +40,7 @@ const root = createRoot(domNode);
 
 root.render(
   <Provider store={store}>
+    <LinkedinProvider>
     <PlanProvider>
     <CustomerProvider>
       <App />
@@ -46,6 +48,7 @@ root.render(
      
     </CustomerProvider>
      </PlanProvider>
+     </LinkedinProvider>
   </Provider>
 );
 

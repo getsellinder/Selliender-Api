@@ -1,6 +1,9 @@
 import React from "react";
 import CIcon from "@coreui/icons-react";
 import { TbDeviceIpadMinus } from "react-icons/tb";
+import { FiLinkedin } from "react-icons/fi";
+import { cibLinkedin } from "@coreui/icons";
+
 
 import {
   cibMaterialDesign,
@@ -106,6 +109,7 @@ const _nav = [
      
      
   {
+
     component: CNavGroup,
     name: "Customer Service",
     icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
@@ -119,10 +123,19 @@ const _nav = [
         to: "/support/request",
         group: "Customer Service",
       },
+       
      
     ],
   },
 
+    {
+        component: CNavItem,
+        name: "Linkedin Profile",
+        icon: <CIcon icon={cibLinkedin} customClassName="nav-icon"  />,
+        to: "/Linkedin",
+        group: "Customer Service",
+      },
+    
   {
     component: CNavItem,
     name: "Employees & Access",

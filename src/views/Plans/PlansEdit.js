@@ -25,7 +25,7 @@ const PlanEdit = () => {
   const { getgst, singlePlanData, handleSinglePackage, getAllpackages } = usePlan();
   const { id } = useParams();
 
-  console.log('update plan id', singlePlanData, id)
+  console.log('update plan id', singlePlanData)
 
 
   const plans = ["Free", "Pro", "Growth", "Enterprise"];
@@ -33,7 +33,7 @@ const PlanEdit = () => {
 
   const [plan, setPlan] = useState({
     Package: singlePlanData?.Package,
-    GST: singlePlanData?.GST?.Gst._id || "",
+    GST: singlePlanData?.GST?.Gst._id || null,
     Yearly_Price: singlePlanData?.Yearly_Price || "",
     Total_Monthly_Price: singlePlanData?.Total_Monthly_Price || "",
     Total_Yearly_Price: singlePlanData?.Total_Yearly_Price || "",
@@ -131,7 +131,7 @@ const PlanEdit = () => {
 
       setPlan({
         Package: singlePlanData.Package || "",
-        GST: singlePlanData.GST?._id || "",
+        GST: singlePlanData.GST?._id || null,
         Yearly_Price: singlePlanData.Yearly_Price || "",
         Total_Monthly_Price: singlePlanData.Total_Monthly_Price || "",
         Total_Yearly_Price: singlePlanData.Total_Yearly_Price || "",

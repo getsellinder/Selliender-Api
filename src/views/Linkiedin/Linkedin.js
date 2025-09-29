@@ -21,59 +21,94 @@ import { InputAdornment, Typography } from "@material-ui/core";
 import { CircularProgress } from "@mui/material";
 
 import { isAutheticated } from "src/auth";
-import { usePlan } from "./PlanContext";
+import { useLinkedin, usePlan } from "./LinkedenContext";
 
-const Plans = () => {
+const Linkedin = () => {
   const token = isAutheticated();
   const {
-    allPackages,
-    handlePackageDelete,
-    packagedelLoading,
-    packageLoading,
+    anaysicResult,
+    handleLinkedinDelete,
+    linkedindelLoading,
+    linkedinLoading,
     handleSinglePackage,
     singlePlanData,
     packageviewLoading,
-    getAllpackages,
-  } = usePlan();
-  const packages = allPackages?.getpackages;
+    getanaysicResult,
+  } = useLinkedin();
+
+
+
+  const dummyContent = {
+    name: "John Doe",
+    title: "Full Stack Developer",
+    company: "XYZ Pvt Ltd",
+    location: "Bangalore, India",
+    about: "Passionate developer working with MERN stack",
+    skills: ["Node.js", "React", "MongoDB"],
+    education: [
+        { school: "IIT Delhi", degree: "B.Tech", year: "2019" }
+    ],
+    certifications: [
+        { name: "AWS Certified Developer", issuer: "Amazon", issueDate: "2023-08-01", credentialId: "AWS123", url: "https://aws.amazon.com/certification" }
+    ],
+    languages: ["English", "Hindi"],
+    awards: ["Best Employee 2024"]
+};
+
+const dummyPosts = [
+    {
+        content: "Excited to share my journey in MERN stack development!",
+        date: new Date().toISOString(),
+        engagement: "100 views",
+        type: "text",
+        text: "My journey",
+        timeAgo: "1d",
+        likes: "50"
+    },
+    {
+        content: "Learning Node.js microservices architecture.",
+        date: new Date().toISOString(),
+        engagement: "80 views",
+        type: "text",
+        text: "Microservices",
+        timeAgo: "2d",
+        likes: "40"
+    }
+];
+
+  const analysic = anaysicResult?.result;
 
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState();
-  const [itemPerPage, setItemPerPage] = useState();
+
   const [limit, setLimit] = useState(5);
 
   const [name, setName] = useState("");
 
 
-  // const handleSearch = (e) => {
-  //   let plan=e.target.value
-  //   // setCurrentPage(1);
-
-  //   getAllpackages(1, limit, plan, undefined);
-  //   // setName(name);
-  // };
 
   const handleSearch = (plan) => {
-    getAllpackages(1, limit, plan, undefined);
+    getanaysicResult(1, limit, plan);
   };
 
   const handleShowEntries = (e) => {
     let newlimit = e.target.value;
     setLimit(newlimit)
-    getAllpackages(1, newlimit, undefined, undefined);
+    getanaysicResult(1, newlimit, undefined, undefined);
   };
 
 
   const tableheading = [
 
-    "Plan",
-    "M.Price", // Monthly Price
-    "Y.Price", // Yearly Price
-    "GST",
-    "T.M.Price", // Total-Monthly-Price
-    "T.Y.Price", // Total-Yearly-Price
-    "Status",
-    "Created",
+    "Name",
+    "Title",
+    "Education",
+    "Skills",
+    "Comapany",
+    "Languages",
+    "Posts",
+    "Awards",
+
     "",
     "",
     "",
@@ -94,25 +129,10 @@ const Plans = () => {
                      "
               >
                 <div style={{ fontSize: "22px" }} className="fw-bold">
-                  All Plans
+                  User Linkedin Profiles
                 </div>
 
-                {/* <div className="page-title-right">
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    style={{
-                      fontWeight: "bold",
-                      marginBottom: "1rem",
-                      textTransform: "capitalize",
-                    }}
-                    onClick={() => {
-                      navigate("/Pricing-Plans/add");
-                    }}
-                  >
-                    Add Plan
-                  </Button>
-                </div> */}
+
               </div>
             </div>
           </div>
@@ -161,13 +181,13 @@ const Plans = () => {
                         >
                           <TextField
                             variant="outlined"
-                            placeholder="Search Plan..."
+                            placeholder="Search Name..."
                             value={name}
                             name="name"
                             onChange={(e) => {
                               const val = e.target.value;
                               setName(val);
-                              getAllpackages(1, limit, val, undefined);
+                              getanaysicResult(1, limit, val, undefined);
                             }}
                             fullWidth
                             InputProps={{
@@ -210,80 +230,54 @@ const Plans = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {!packageLoading && packages.length === 0 && (
+                        {!linkedinLoading && analysic.length === 0 && (
                           <tr className="text-center">
                             <td colSpan="12">
                               <h5>No Data Available</h5>
                             </td>
                           </tr>
                         )}
-                        {packageLoading ? (
+                        {linkedinLoading ? (
                           <tr>
                             <td className="text-center" colSpan="12">
                               Loading...
                             </td>
                           </tr>
                         ) : (
-                          packages.map((user, i) => {
-                            console.log("user", user)
+                          analysic.map((user, i) => {
+                            let content=user?.LinkedinContentId
+                            console.log("content", content)
 
                             return (
                               <tr key={i}>
-                                <td className="text-start">{user.Package}</td>
+                                <td className="text-start">{user?.LinkedinContentId?.name || "test"}</td>
 
                                 <td className="text-center">
-                                  {user.Monthly_Price===null?0:`₹${user.Monthly_Price}`}
+                                  {content.title}
                                 </td>
-                                <td className="">{user.Yearly_Price===null?0:`₹${user.Yearly_Price}`}</td>
-                                <td className="">{user.GST?.Gst===undefined?0:`${user.GST?.Gst}%`}</td>
+                                <td className="">{(content.education.map(e => e.degree + " at " + e.school))}</td>
+                                  <td className="text-center">
+                                  {" "}
+                                  {content.skills.map((e)=>e).join(", ")}
+                                </td>
+                               
+                                <td className="">{content.company || "IT"}</td>
+                             
                                 <td className="text-center">
                                   {" "}
-                                 {user.Total_Monthly_Price===null?0:` ₹${user.Total_Monthly_Price}`}
-                                </td>
-                                <td className="text-center">
-                                  {" "}
-                                  {user.Total_Yearly_Price===null?0:`₹${user.Total_Yearly_Price}`}
+                                  {content.languages.map((e)=>e).join(", ")}
                                 </td>
 
-                                <td className="text-center"> {user.Status}</td>
+                                <td className="text-center">{content.posts.length || "POST1"}</td>
 
                                 <td className="text-center">
-                                  {new Date(user.createdAt).toLocaleString(
-                                    "en-IN",
-                                    {
-                                      weekday: "short",
-                                      month: "short",
-                                      day: "numeric",
-                                      year: "numeric",
-                                      hour: "numeric",
-                                      minute: "numeric",
-                                      hour12: true,
-                                    }
-                                  )}
+                                  {content.awards?.map((e)=>e)}
                                 </td>
 
-                                <td className="text-start">
-                                  <Link
-                                    to={`/Pricing-Plans/update/${user?._id}`}
 
-                                  >
-                                    <button
-                                      style={{
-                                        background: "orange",
-                                        fontWeight: "600",
-                                        color: "#000",
-                                      }}
-                                      type="button"
-                                      className="mt-1 btn btn-info btn-sm  waves-effect waves-light btn-table ml-2"
-                                    >
-                                      Update
-                                    </button>
-                                  </Link>
-                                </td>
                                 <td className="text-start">
-                                  <Link to={`/Pricing-Plans/view/${user?._id}`}>
+                                  <Link to={`/Linkedin-user/view/${user?._id}`}>
                                     <button
-
                                       style={{
                                         fontWeight: "600",
                                         color: "#000",
@@ -302,7 +296,7 @@ const Plans = () => {
                                 <td className="text-start">
                                   <button
                                     onClick={() =>
-                                      handlePackageDelete(user?._id)
+                                      handleLinkedinDelete(user?._id)
                                     }
                                     style={{
                                       background: "red",
@@ -312,7 +306,7 @@ const Plans = () => {
                                     type="button"
                                     className="mt-1 btn btn-info btn-sm  waves-effect waves-light btn-table ml-2"
                                   >
-                                    {packagedelLoading === user?._id ? (
+                                    {linkedindelLoading === user?._id ? (
                                       <CircularProgress size={25} />
                                     ) : (
                                       "Delete"
@@ -324,11 +318,11 @@ const Plans = () => {
                           })
                         )}
                         <Pagination sx={{ textAlign: "end" }}
-                          count={allPackages.totalPages}
-                          page={allPackages.currentPage}
+                          count={anaysicResult.totalPages}
+                          page={anaysicResult.currentPage}
                           onChange={(e, value) => {
                             setCurrentPage(value);
-                            getAllpackages(value, undefined, undefined, undefined);
+                            getanaysicResult(value, undefined, undefined, undefined);
                           }}
                           color="primary"
                           shape="rounded"
@@ -346,4 +340,4 @@ const Plans = () => {
   );
 };
 
-export default Plans;
+export default Linkedin;
