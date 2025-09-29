@@ -67,6 +67,45 @@ export const LinkedinUploadFile = async (req, res) => {
 };
 
 
+export const getLinkedinAnalysisResult = async (req, res) => {
+    const page = parseInt(req.query.page) || 1
+    const limit = parseInt(req.query.limit) || 5
+    try {
+        const { name } = req.query
+        let filter = {}
+        let skip = (page - 1) * limit
+        if (name) {
+            filter.name = { $regex: new RegExp(name, "i") }
+        }
+
+        let linkedinCondition = {
+            $or: [{ LinkedinPostId: { $exists: true, $ne: null } }, { LinkedinContentId: { $exists: true, $ne: null } }]
+        }
+        const total = await UserModel.countDocuments({
+            ...linkedinCondition,
+            ...filter
+        });
+        const result = await UserModel.find({
+            ...linkedinCondition,
+            ...filter
+        })
+            .populate("LinkedinPostId")
+            .populate("LinkedinContentId")
+            .sort({ createdAt: -1 })
+            .skip((page - 1) * limit)
+            .limit(limit);
+
+        return res.status(200).json({
+            result,
+            currentPage: page,
+            totalPages: Math.ceil(total / limit),
+            totalItems: total,
+        });
+
+    } catch (error) {
+        return res.status(500).json({ message: error.message })
+    }
+}
 
 export const getLinkedinUploadFile = async (req, res) => {
     const { id } = req.params
@@ -110,42 +149,47 @@ export const getLinkedinUploadFile = async (req, res) => {
 }
 
 
-export const getLinkedinAnalysisResult = async (req, res) => {
-    const page = parseInt(req.query.page) || 1
-    const limit = parseInt(req.query.limit) || 5
+export const getLinkedinUserProfile = async (req, res) => {
+    const { id } = req.params
     try {
-        const { name } = req.query
-        let filter = {}
-        let skip = (page - 1) * limit
-        if (name) {
-            filter.name = { $regex: new RegExp(name, "i") }
-        }
-
-        let linkedinCondition = {
-            $or: [{ LinkedinPostId: { $exists: true, $ne: null } }, { LinkedinContentId: { $exists: true, $ne: null } }]
-        }
-        const total = await UserModel.countDocuments({
-            ...linkedinCondition,
-            ...filter
-        });
-        const result = await UserModel.find({
-            ...linkedinCondition,
-            ...filter
-        })
-            .populate("LinkedinPostId")
+        const getUser = await UserModel.findById(id)
             .populate("LinkedinContentId")
-            .sort({ createdAt: -1 })
-            .skip((page - 1) * limit)
-            .limit(limit);
+            .populate("LinkedinPostId");
+        if (!getUser) {
+            return res.status(404).json({ message: "User not found" })
+        }
 
-        return res.status(200).json({
-            result,
-            currentPage: page,
-            totalPages: Math.ceil(total / limit),
-            totalItems: total,
-        });
+        res.status(200).json(getUser);
+
+
+
 
     } catch (error) {
         return res.status(500).json({ message: error.message })
     }
 }
+export const LinkedinuserDelete = async (req, res) => {
+    try {
+        const { id } = req.params;
+        let Finduser = await UserModel.findById(id);
+
+        if (!Finduser) {
+            return res
+                .status(404)
+                .json({ message: "Linkedin Profile not found with this Id" });
+        }
+        if (Finduser.LinkedinPostId) {
+            await LinkedinPost.findByIdAndDelete(Finduser.LinkedinPostId)
+            Finduser.LinkedinPostId = null
+        }
+        if (Finduser.LinkedinContentId) {
+            await LinkedinContent.findByIdAndUpdate(Finduser.LinkedinContentId)
+            Finduser.LinkedinPostId = null
+        }
+        await Finduser.save()
+        return res.status(200).json({ message: "User LinkedIn data removed", user: Finduser });
+    } catch (error) {
+        console.log("Erron in the PackageDelete", error);
+        return res.status(500).json({ message: error.message });
+    }
+};
