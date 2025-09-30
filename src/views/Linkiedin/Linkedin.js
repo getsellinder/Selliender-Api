@@ -96,7 +96,7 @@ const Linkedin = () => {
                      "
               >
                 <div style={{ fontSize: "22px" }} className="fw-bold">
-                  User Linkedin Profiles
+                  Linkedin Profiles
                 </div>
 
 
