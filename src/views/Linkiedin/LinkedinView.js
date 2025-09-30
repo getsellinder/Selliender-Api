@@ -55,7 +55,7 @@ const LinkedinView = () => {
               return (
                 <div style={{ display: "flex", gap: "10px", flexDirection: "column" }}>
                   <div className='box-style' style={{ width: "100%" }}>
-                    <span className='likedin-head' style={{ width: "40%" }} >School</span>
+                    <span className='likedin-head' style={{ width: "40%"}}>School</span>
                     <span>:</span>
                     <span>{c.school}</span>
                   </div>

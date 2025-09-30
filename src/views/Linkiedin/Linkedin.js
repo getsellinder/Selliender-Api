@@ -1,10 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import Button from "@material-ui/core/Button";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
 
-import swal from "sweetalert";
+import { useNavigate } from "react-router-dom";
+
 import {
   Box,
 
@@ -15,16 +13,15 @@ import {
   TextField,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import Fuse from "fuse.js";
-import { InputAdornment, Typography } from "@material-ui/core";
+
+import { InputAdornment } from "@material-ui/core";
 import { CircularProgress } from "@mui/material";
 
 import { isAutheticated } from "src/auth";
-import { useLinkedin, usePlan } from "./LinkedenContext";
+import { useLinkedin } from "./LinkedenContext";
 
 const Linkedin = () => {
-  const token = isAutheticated();
-  const {
+    const {
     anaysicResult,
     handleLinkedinDelete,
     linkedindelLoading,
@@ -32,68 +29,39 @@ const Linkedin = () => {
     handleSinglePackage,
     singlePlanData,
     packageviewLoading,
-    getanaysicResult,
+    getAllAnalysis,
+    setPage
   } = useLinkedin();
-
-
-
-  const dummyContent = {
-    name: "John Doe",
-    title: "Full Stack Developer",
-    company: "XYZ Pvt Ltd",
-    location: "Bangalore, India",
-    about: "Passionate developer working with MERN stack",
-    skills: ["Node.js", "React", "MongoDB"],
-    education: [
-        { school: "IIT Delhi", degree: "B.Tech", year: "2019" }
-    ],
-    certifications: [
-        { name: "AWS Certified Developer", issuer: "Amazon", issueDate: "2023-08-01", credentialId: "AWS123", url: "https://aws.amazon.com/certification" }
-    ],
-    languages: ["English", "Hindi"],
-    awards: ["Best Employee 2024"]
-};
-
-const dummyPosts = [
-    {
-        content: "Excited to share my journey in MERN stack development!",
-        date: new Date().toISOString(),
-        engagement: "100 views",
-        type: "text",
-        text: "My journey",
-        timeAgo: "1d",
-        likes: "50"
-    },
-    {
-        content: "Learning Node.js microservices architecture.",
-        date: new Date().toISOString(),
-        engagement: "80 views",
-        type: "text",
-        text: "Microservices",
-        timeAgo: "2d",
-        likes: "40"
-    }
-];
-
-  const analysic = anaysicResult?.result;
-
-  const navigate = useNavigate();
+  
   const [currentPage, setCurrentPage] = useState();
 
   const [limit, setLimit] = useState(5);
 
   const [name, setName] = useState("");
 
+  const token = isAutheticated();
+    const navigate = useNavigate();
+
+
+
+
+
+
+
+  const analysic = anaysicResult?.result;
+
+
 
 
   const handleSearch = (plan) => {
-    getanaysicResult(1, limit, plan);
+    getAllAnalysis(1, limit, plan);
   };
 
   const handleShowEntries = (e) => {
     let newlimit = e.target.value;
+ 
     setLimit(newlimit)
-    getanaysicResult(1, newlimit, undefined, undefined);
+    getAllAnalysis(1, newlimit, name);
   };
 
 
@@ -180,13 +148,13 @@ const dummyPosts = [
                         >
                           <TextField
                             variant="outlined"
-                            placeholder="Search Name..."
+                            placeholder="Search Name or Title..."
                             value={name}
                             name="name"
                             onChange={(e) => {
                               const val = e.target.value;
                               setName(val);
-                              getanaysicResult(1, limit, val, undefined);
+                              getAllAnalysis(1, limit, val);
                             }}
                             fullWidth
                             InputProps={{
@@ -221,8 +189,7 @@ const dummyPosts = [
                         <tr>
                           {tableheading.map((name) => (
                             <th
-
-                            >
+>
                               {name}
                             </th>
                           ))}
@@ -321,7 +288,7 @@ const dummyPosts = [
                           page={anaysicResult.currentPage}
                           onChange={(e, value) => {
                             setCurrentPage(value);
-                            getanaysicResult(value, undefined, undefined, undefined);
+                            getAllAnalysis(value, undefined, undefined, undefined);
                           }}
                           color="primary"
                           shape="rounded"

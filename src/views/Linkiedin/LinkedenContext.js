@@ -111,6 +111,7 @@ export const LinkedinProvider = ({ children }) => {
         setName,
         setPackagePrice,
         setPageLimit,
+        setPage,
         anaysicResult,
         handleLinkedinDelete,
         linkedindelLoading,
