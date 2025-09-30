@@ -111,84 +111,66 @@ export const getLinkedinUploadFile = async (req, res) => {
 }
 
 
-// export const getLinkedinAnalysisResult = async (req, res) => {
-//     const page = parseInt(req.query.page) || 1
-//     const limit = parseInt(req.query.limit) || 5
-//     try {
-//         const { name } = req.query
-//         let filter = {}
-//         let skip = (page - 1) * limit
-//         if (name) {
-//             filter.name = { $regex: new RegExp(name, "i") }
-//         }
-
-//         let linkedinCondition = {
-//             $or: [{ LinkedinPostId: { $exists: true, $ne: null } }, { LinkedinContentId: { $exists: true, $ne: null } }]
-//         }
-//         const total = await UserModel.countDocuments({
-//             ...linkedinCondition,
-//             ...filter
-//         });
-//         const result = await UserModel.find({
-//             ...linkedinCondition,
-//             ...filter
-//         })
-//             .populate("LinkedinPostId")
-//             .populate("LinkedinContentId")
-//             .sort({ createdAt: -1 })
-//             .skip((page - 1) * limit)
-//             .limit(limit);
-
-//         return res.status(200).json({
-//             result,
-//             currentPage: page,
-//             totalPages: Math.ceil(total / limit),
-//             totalItems: total,
-//         });
-
-//     } catch (error) {
-//         return res.status(500).json({ message: error.message })
-//     }
-// }
 
 
 export const getLinkedinAnalysisResult = async (req, res) => {
-    const page = parseInt(req.query.page) || 1
-    const limit = parseInt(req.query.limit) || 5
-    let skip = (page - 1) * limit
-    try {
-        const { name } = req.query
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 5;
+    const skip = (page - 1) * limit;
 
-        let linkedinCondition = {
-            $or: [{ LinkedinPostId: { $exists: true, $ne: null } }, { LinkedinContentId: { $exists: true, $ne: null } }]
+    try {
+        const { name } = req.query;  // ✅ get name from query params
+
+        // build match for populate
+        let match = {};
+        if (name) {
+            match.$or = [
+                { name: { $regex: new RegExp(name, "i") } },
+                { title: { $regex: new RegExp(name, "i") } }
+            ];
         }
 
-        let result = await UserModel.find(linkedinCondition).populate("LinkedinPostId")
+        let linkedinCondition = {
+            $or: [
+                { LinkedinPostId: { $exists: true, $ne: null } },
+                { LinkedinContentId: { $exists: true, $ne: null } }
+            ]
+        };
+
+        // fetch paginated results
+        let result = await UserModel.find(linkedinCondition)
+            .populate("LinkedinPostId")
             .populate({
                 path: "LinkedinContentId",
-                match: name ? { name: { $regex: new RegExp(name, "i") } } : {},
-            }).sort({ createdAt: -1 }).skip(skip).limit(limit)
+                match  // ✅ use the new match object here
+            })
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
 
+        // filter out docs where LinkedinContentId didn’t match
+        result = result.filter(u => u.LinkedinContentId);
 
-        result = result.filter(u => u.LinkedinContentId)
-        let total = await UserModel.find(linkedinCondition)
+        // fetch total count
+        let totalDocs = await UserModel.find(linkedinCondition)
             .populate({
                 path: "LinkedinContentId",
-                match: name ? { name: { $regex: new RegExp(name, "i") } } : {},
+                match  // ✅ also here
             });
 
-        total = total.filter(u => u.LinkedinContentId).length;
+        const total = totalDocs.filter(u => u.LinkedinContentId).length;
 
         return res.status(200).json({
             result,
             currentPage: page,
             totalPages: Math.ceil(total / limit),
             totalItems: total,
-        })
+        });
+
     } catch (error) {
-        return res.status(500).json({ message: error.message })
+        return res.status(500).json({ message: error.message });
     }
-}
+};
 
 
 
