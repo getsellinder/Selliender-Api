@@ -27,3 +27,14 @@
     .sidebar-brand{
       background-color: blue;
     }
+
+    .box-style{
+      display: flex;
+      justify-content: start;
+      gap: 1rem;
+      width: 100%;
+
+    }
+   /* .likedin-head{
+    width: 70%;
+   } */

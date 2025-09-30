@@ -7,10 +7,9 @@ import axios from "axios";
 import swal from "sweetalert";
 import {
   Box,
-  FormControl,
+
   IconButton,
-  InputLabel,
-  MenuItem,
+
   Pagination,
   Select,
   TextField,

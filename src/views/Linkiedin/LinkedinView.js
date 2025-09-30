@@ -16,7 +16,10 @@ const LinkedinView = () => {
   const fontstyle = {
     fontWeight: "600", color: "black"
   }
-  const content=linkedinPlanData?.LinkedinContentId
+  console.log("linkedinPlanData", linkedinPlanData)
+  const content = linkedinPlanData?.LinkedinContentId
+  console.log("content", content)
+
   return (
     <Container>
       <Typography style={{
@@ -36,62 +39,113 @@ const LinkedinView = () => {
             <Typography style={{ ...fontstyle }}>{linkedinPlanData?.email || "test@gmail.com"}</Typography>
           </Box>
 
-              <Box sx={{ display: "flex", gap: "5rem", fontWeight: "600" }}>
-            <Typography style={{ ...fontstyle, width: "10%" }}>Recommendations</Typography>
+          <Box sx={{ display: "flex", gap: "5rem", fontWeight: "600" }}>
+            <Typography style={{ ...fontstyle, width: "10%" }}>Location</Typography>
             <Typography style={{ ...fontstyle }}>:</Typography>
-            {linkedinPlanData?.recommendations?.map((item) => <Typography style={{ ...fontstyle }}>
-              {item || "Sports"}
-            </Typography>)}
+
+            <Typography style={{ ...fontstyle }}>
+              {content?.location}
+            </Typography>
 
           </Box>
-          <Box sx={{ display: "flex", gap: "5rem", fontWeight: "600" }}>
+          <Box sx={{ display: "flex", gap: "5rem", fontWeight: "600", width: "100%" }}>
             <Typography style={{ ...fontstyle, width: "10%" }}>Education</Typography>
             <Typography style={{ ...fontstyle }}>:</Typography>
-            <Typography style={{ ...fontstyle }}>{linkedinPlanData?.education || "Betch"}</Typography>
+            <Typography style={{ ...fontstyle }}>{content?.education.map((c) => {
+              return (
+                <div style={{ display: "flex", gap: "10px", flexDirection: "column" }}>
+                  <div className='box-style' style={{ width: "100%" }}>
+                    <span className='likedin-head' style={{ width: "40%" }} >School</span>
+                    <span>:</span>
+                    <span>{c.school}</span>
+                  </div>
+                  <div className='box-style'>
+                    <span>Degree</span>
+                    <span>:</span>
+                    <span>{c.degree}</span>
+                  </div>
+                  <div className='box-style'>
+                    <span>Year</span>
+                    <span>:</span>
+                    <span>{c.year}</span>
+                  </div>
+
+                </div>
+              )
+            })}</Typography>
           </Box>
 
 
           <Box sx={{ display: "flex", gap: "5rem", fontWeight: "600" }}>
             <Typography style={{ ...fontstyle, width: "10%" }}>Skills</Typography>
             <Typography style={{ ...fontstyle }}>:</Typography>
-        
-            {linkedinPlanData?.skills?.map((item) => <Typography style={{ ...fontstyle }}>
-              {item || "IT"}
+
+            {content?.skills?.map((item) => <Typography style={{ ...fontstyle }}>
+              {item}
             </Typography>)}
+
+          </Box>
+
+
+          <Box sx={{ display: "flex", gap: "5rem", fontWeight: "600" }}>
+            <Typography style={{ ...fontstyle, width: "10%" }}>Title</Typography>
+            <Typography style={{ ...fontstyle }}>:</Typography>
+
+            <Typography style={{ ...fontstyle }}>
+              {content?.title}
+            </Typography>
 
           </Box>
 
           <Box sx={{ display: "flex", gap: "5rem", fontWeight: "600" }}>
             <Typography style={{ ...fontstyle, width: "10%" }}>Certifications</Typography>
             <Typography style={{ ...fontstyle }}>:</Typography>
-            <Typography style={{ ...fontstyle }}>{linkedinPlanData?.certifications || "Adhar"}</Typography>
+            <Typography style={{ ...fontstyle }}>{content?.certifications.map((c) => {
+              return (
+                <div style={{ display: "flex", gap: "10px", flexDirection: "column" }}>
+                  <div className='box-style' style={{ width: "100%" }}>
+                    <span className='likedin-head' >Name</span>
+                    <span>:</span>
+                    <span>{c.name}</span>
+                  </div>
+                  <div className='box-style'>
+                    <span>IssueDate</span>
+                    <span>:</span>
+                    <span>{c.issueDate}</span>
+                  </div>
+                  <div className='box-style'>
+                    <span>Issuer</span>
+                    <span>:</span>
+                    <span>{c.issuer}</span>
+                  </div>
+                  <div className='box-style'>
+                    <span>CredentialId</span>
+                    <span>:</span>
+                    <span>{c.credentialId}</span>
+                  </div>
+
+                </div>
+              )
+            })}</Typography>
           </Box>
 
           <Box sx={{ display: "flex", gap: "5rem", fontWeight: "600" }}>
             <Typography style={{ ...fontstyle, width: "10%" }}>Posts
             </Typography>
             <Typography style={{ ...fontstyle }}>:</Typography>
-            <Typography style={{ ...fontstyle }}>{linkedinPlanData?.posts  || "POST1"
-            }</Typography>
+            <Typography style={{ ...fontstyle }}>{content?.posts.length}</Typography>
           </Box>
           <Box sx={{ display: "flex", gap: "5rem", fontWeight: "600" }}>
             <Typography style={{ ...fontstyle, width: "10%" }}>Languages</Typography>
             <Typography style={{ ...fontstyle }}>:</Typography>
-            {linkedinPlanData?.Languages?.map((item) => <Typography style={{ ...fontstyle }}>
-              {item || "Btech"}
+            {content?.languages?.map((item) => <Typography style={{ ...fontstyle }}>
+              {item}
             </Typography>)}
 
           </Box>
 
 
-          <Box sx={{ display: "flex", gap: "5rem", fontWeight: "600" }}>
-            <Typography style={{ ...fontstyle, width: "10%" }}>Publications</Typography>
-            <Typography style={{ ...fontstyle }}>:</Typography>
-            {linkedinPlanData?.publications?.map((item) => <Typography style={{ ...fontstyle }}>
-              {item || "Publications"}
-            </Typography>)}
 
-          </Box>
 
         </Box>}
 
