@@ -111,46 +111,84 @@ export const getLinkedinUploadFile = async (req, res) => {
 }
 
 
+// export const getLinkedinAnalysisResult = async (req, res) => {
+//     const page = parseInt(req.query.page) || 1
+//     const limit = parseInt(req.query.limit) || 5
+//     try {
+//         const { name } = req.query
+//         let filter = {}
+//         let skip = (page - 1) * limit
+//         if (name) {
+//             filter.name = { $regex: new RegExp(name, "i") }
+//         }
+
+//         let linkedinCondition = {
+//             $or: [{ LinkedinPostId: { $exists: true, $ne: null } }, { LinkedinContentId: { $exists: true, $ne: null } }]
+//         }
+//         const total = await UserModel.countDocuments({
+//             ...linkedinCondition,
+//             ...filter
+//         });
+//         const result = await UserModel.find({
+//             ...linkedinCondition,
+//             ...filter
+//         })
+//             .populate("LinkedinPostId")
+//             .populate("LinkedinContentId")
+//             .sort({ createdAt: -1 })
+//             .skip((page - 1) * limit)
+//             .limit(limit);
+
+//         return res.status(200).json({
+//             result,
+//             currentPage: page,
+//             totalPages: Math.ceil(total / limit),
+//             totalItems: total,
+//         });
+
+//     } catch (error) {
+//         return res.status(500).json({ message: error.message })
+//     }
+// }
+
+
 export const getLinkedinAnalysisResult = async (req, res) => {
     const page = parseInt(req.query.page) || 1
     const limit = parseInt(req.query.limit) || 5
+    let skip = (page - 1) * limit
     try {
         const { name } = req.query
-        let filter = {}
-        let skip = (page - 1) * limit
-        if (name) {
-            filter.name = { $regex: new RegExp(name, "i") }
-        }
 
         let linkedinCondition = {
             $or: [{ LinkedinPostId: { $exists: true, $ne: null } }, { LinkedinContentId: { $exists: true, $ne: null } }]
         }
-        const total = await UserModel.countDocuments({
-            ...linkedinCondition,
-            ...filter
-        });
-        const result = await UserModel.find({
-            ...linkedinCondition,
-            ...filter
-        })
-            .populate("LinkedinPostId")
-            .populate("LinkedinContentId")
-            .sort({ createdAt: -1 })
-            .skip((page - 1) * limit)
-            .limit(limit);
+
+        let result = await UserModel.find(linkedinCondition).populate("LinkedinPostId")
+            .populate({
+                path: "LinkedinContentId",
+                match: name ? { name: { $regex: new RegExp(name, "i") } } : {},
+            }).sort({ createdAt: -1 }).skip(skip).limit(limit)
+
+
+        result = result.filter(u => u.LinkedinContentId)
+        let total = await UserModel.find(linkedinCondition)
+            .populate({
+                path: "LinkedinContentId",
+                match: name ? { name: { $regex: new RegExp(name, "i") } } : {},
+            });
+
+        total = total.filter(u => u.LinkedinContentId).length;
 
         return res.status(200).json({
             result,
             currentPage: page,
             totalPages: Math.ceil(total / limit),
             totalItems: total,
-        });
-
+        })
     } catch (error) {
         return res.status(500).json({ message: error.message })
     }
 }
-
 
 
 
