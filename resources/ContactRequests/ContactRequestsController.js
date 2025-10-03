@@ -2,11 +2,11 @@ import { ContactRequest } from "./ContactRequestsModel.js";
 
 export const AddNewContactRequest = async (req, res) => {
   try {
-    const { name, email, message } = req.body
+    const { name, eamil, message } = req.body
     const add = {
-      name, email, message
+      name, eamil, message
     }
-    if (!name || !email || !message) {
+    if (!name || !eamil || !message) {
       return res.status(500).json({ message: "Please fil the Fields" })
     }
 
