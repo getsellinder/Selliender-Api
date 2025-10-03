@@ -130,9 +130,9 @@ const _nav = [
 
     {
         component: CNavItem,
-        name: "Linkedin Profile",
+        name: "Usage",
         icon: <CIcon icon={cibLinkedin} customClassName="nav-icon"  />,
-        to: "/Linkedin",
+        to: "/Usage",
         group: "Customer Service",
       },
     

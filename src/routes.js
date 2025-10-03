@@ -674,14 +674,14 @@ const routes = [
     navName: "Website Related",
   },
   {
-    path: "/Linkedin",
-    name: "Linkedin",
+    path: "/Usage",
+    name: "Usage",
     element: Linkedin,
     navName: "Website Related",
   },
   {
-    path: "/Linkedin-user/view/:id",
-    name: "Linkedin",
+    path: "/Usage-user/view/:id",
+    name: "Usage",
     element: LinkedinView,
     navName: "Website Related",
   },

@@ -67,14 +67,14 @@ const Linkedin = () => {
 
   const tableheading = [
 
-    "Name",
-    "Title",
-    "Education",
-    "Skills",
-    "Comapany",
-    "Languages",
-    "Posts",
-    "Awards",
+    "Id",
+    "Customer",
+    "Profile",
+    "Date",
+    // "Comapany",
+    // "Languages",
+    // "Posts",
+    // "Awards",
 
     "",
     "",
@@ -96,7 +96,7 @@ const Linkedin = () => {
                      "
               >
                 <div style={{ fontSize: "22px" }} className="fw-bold">
-                  Linkedin Profiles
+                 Usage
                 </div>
 
 
@@ -148,7 +148,7 @@ const Linkedin = () => {
                         >
                           <TextField
                             variant="outlined"
-                            placeholder="Search Name or Title..."
+                            placeholder="Search Customer.."
                             value={name}
                             name="name"
                             onChange={(e) => {
@@ -216,11 +216,10 @@ const Linkedin = () => {
 
                             return (
                               <tr key={i}>
-                                <td className="text-start">{user?.LinkedinContentId?.name || "test"}</td>
+                                  <td className="text-start">{user?.LinkedinContentId?._id}</td>
+                                <td className="text-start">{user?.LinkedinContentId?.name}</td>
 
-                                <td className="text-center">
-                                  {content.title}
-                                </td>
+                              
                                 <td className="">{(content.education.map(e => e.degree + " at " + e.school))}</td>
                                   <td className="text-center">
                                   {" "}
@@ -242,7 +241,7 @@ const Linkedin = () => {
 
 
                                 <td className="text-start">
-                                  <Link to={`/Linkedin-user/view/${user?._id}`}>
+                                  <Link to={`/Usage-user/view/${user?._id}`}>
                                     <button
                                       style={{
                                         fontWeight: "600",
@@ -259,7 +258,7 @@ const Linkedin = () => {
                                     </button>
                                   </Link>
                                 </td>
-                                <td className="text-start">
+                                {/* <td className="text-start">
                                   <button
                                     onClick={() =>
                                       handleLinkedinDelete(user?._id)
@@ -278,7 +277,7 @@ const Linkedin = () => {
                                       "Delete"
                                     )}
                                   </button>
-                                </td>
+                                </td> */}
                               </tr>
                             );
                           })
