@@ -9,7 +9,10 @@ export const AddNewContactRequest = async (req, res) => {
     if (!name || !eamil || !message) {
       return res.status(500).json({ message: "Please fil the Fields" })
     }
-
+    const findEmail = await ContactRequest.findOne({ eamil: eamil })
+    if (findEmail) {
+      return res.status(400).json({ message: "Your message already exists" })
+    }
     const contactRequest = await ContactRequest.create(add);
 
     res.status(201).json({
