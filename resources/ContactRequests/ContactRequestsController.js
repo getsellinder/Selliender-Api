@@ -1,14 +1,21 @@
 import { ContactRequest } from "./ContactRequestsModel.js";
+
 export const AddNewContactRequest = async (req, res) => {
   try {
-    // if (!req?.user) return res.status(400).json({ message: "please login !" });
+    const { name, email, message } = req.body
+    const add = {
+      name, email, message
+    }
+    if (!name || !email || !message) {
+      return res.status(500).json({ message: "Please fil the Fields" })
+    }
 
-    const contactRequest = await ContactRequest.create(req.body);
+    const contactRequest = await ContactRequest.create(add);
 
     res.status(201).json({
       success: true,
       contactRequest,
-      message: "ContactRequest Added",
+      message: "You request sucessfully send the management",
     });
   } catch (error) {
     res.status(500).json({
@@ -20,9 +27,6 @@ export const AddNewContactRequest = async (req, res) => {
 
 export const FindAllContactRequest = async (req, res) => {
   try {
-    // if (!req?.user) return res.status(400).json({ message: "please login !" });
-    // console.log(req?.user)
-
     const contactRequest = await ContactRequest.find().sort({ createdAt: -1 });
     if (contactRequest) {
       return res.status(200).json({

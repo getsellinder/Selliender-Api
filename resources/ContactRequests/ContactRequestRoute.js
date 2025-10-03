@@ -10,6 +10,5 @@ const router = express.Router();
 router.route("/new").post(AddNewContactRequest);
 router.route("/getAll").get(FindAllContactRequest);
 
-// router.route("/product/getAll/").get(getAllProduct)
 
 export default router;
