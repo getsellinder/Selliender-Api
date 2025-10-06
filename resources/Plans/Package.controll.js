@@ -250,8 +250,12 @@ export const PlanPurchese = async (req, res) => {
 
     const findPlan = await packageModel.findById(id)
 
+    const finduser = await UserModel.findById(userId)
     if (!findPlan) {
       return res.status(505).json({ message: "Plan not found" })
+    }
+    if (!finduser) {
+      return res.status(506).json({ message: "User not found" })
     }
     let planAmount = 0
     if (durationType === "monthly") {
