@@ -251,7 +251,7 @@ export const PlanPurchese = async (req, res) => {
     const findPlan = await packageModel.findById(id)
 
     if (!findPlan) {
-      return res.status(500).json({ message: "Plan not found" })
+      return res.status(505).json({ message: "Plan not found" })
     }
     let planAmount = 0
     if (durationType === "monthly") {
