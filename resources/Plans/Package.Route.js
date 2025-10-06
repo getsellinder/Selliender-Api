@@ -5,9 +5,11 @@ import {
   countSearchlimit,
   getAllPackages,
   getByIdPackage,
+  InvoiceDetailsById,
   PackageCreate,
   PackageDelete,
   PackageUpdate,
+  PlanPurchese,
 } from "./Package.controll.js";
 
 const Router = express.Router();
@@ -48,8 +50,15 @@ Router.put(
 );
 
 
+Router.post("/purchase/:id",
+  isAuthenticatedUser,
+  authorizeRoles(...roles),
+  PlanPurchese)
 
-
+Router.get("/get/invoice/:id",
+  isAuthenticatedUser,
+  authorizeRoles(...roles),
+  InvoiceDetailsById)
 
 
 export default Router;

@@ -28,7 +28,7 @@ import { rolesAdmin } from "../../Utils/authorizeRoles.js";
 import {
   AddCusstomer,
   getAllCustomer,
-} from "./customers/Customer.Controller.js";
+} from "../customers/Customer.Controller.js";
 
 
 const router = express.Router();

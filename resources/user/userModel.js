@@ -6,6 +6,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 
+
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -78,16 +79,12 @@ const userSchema = new mongoose.Schema(
     },
     googleId: String,
     accessTo: {},
-    // createdAt: {
-    //     type: Date,
-    //     default: Date.now,
-    // },
-    wishlist: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
-      },
-    ],
+
+    PlanId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "package"
+    },
+
     resetPasswordToken: String,
     resetPasswordExpire: Date,
   },

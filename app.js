@@ -9,6 +9,7 @@ import cors from "cors";
 
 import cookieParser from "cookie-parser";
 import { googleSigninAndLogin } from "./resources/user/userController.js";
+import CustomerRoute from "./resources/customers/Customer.Route.js"
 
 import MessageRouter from "./resources/message/Message.Route.js";
 import PackageRoute from "./resources/Plans/Package.Route.js";
@@ -197,9 +198,10 @@ import ReviewRoute from "./resources/ReviewStatus/reviewStatusRoutes.js";
 import ReportsRoute from "./resources/report/reportsRouter.js";
 import AuthRouter from "./resources/authentication/AuthenticationRoute.js";
 
-// Point of Sale
+// Point of Sale router
 app.use("/api/v1/", user);
 
+app.use("/api/v1/", CustomerRoute);
 //Product
 app.use("/api", ProductRouter);
 // Chapter

@@ -1,5 +1,5 @@
-import catchAsyncErrors from "../../../middlewares/catchAsyncErrors.js";
-import User from "../userModel.js";
+import catchAsyncErrors from "../../middlewares/catchAsyncErrors.js";
+import User from "../user/userModel.js";
 
 export const AddCusstomer = async (req, res) => {
   try {

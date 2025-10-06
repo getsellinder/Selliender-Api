@@ -1,5 +1,8 @@
+import { timeFormat } from "../../Utils/formatDateToIST .js";
 import UserModel from "../user/userModel.js";
+import Invoice from "./Invoice.js";
 import packageModel from "./Package.model.js";
+
 
 export const PackageCreate = async (req, res) => {
   try {
@@ -189,3 +192,77 @@ export const PackageUpdate = async (req, res) => {
 };
 
 
+// User purcheing the Plan APIS
+
+export const PlanPurchese = async (req, res) => {
+  try {
+    const { id } = req.params
+    const userId = req.user._id
+
+    const { TransactionId, status, durationType } = req.body;
+    if (!TransactionId) {
+      return res.status(500).json({ message: "Please Mention TransactionId" })
+    }
+    const findPlan = await packageModel.findById(id)
+
+    if (!findPlan) {
+      return res.status(500).json({ message: "Plan not found" })
+    }
+    let startDate = new Date()
+    let expiryDate = new Date(startDate)
+
+    if (durationType === "monthly") {
+      expiryDate.setMonth(expiryDate.getMonth() + 1)
+    } else if (durationType === "yearly") {
+      expiryDate.setFullYear(expiryDate.getFullYear() + 1)
+    }
+    const add = {
+      InvoiceNo: `INV-${Date.now()}`,
+      userId,
+      PlanId: id,
+      status,
+      plan_start_date: startDate,
+      plan_expiry_date: expiryDate,
+      Amount: durationType === "yearly" ? findPlan.Total_Yearly_Price : findPlan.Total_Monthly_Price,
+      TransactionId,
+
+    }
+    let invoiceId = await Invoice.create(add)
+    const userUpdate = await UserModel.findByIdAndUpdate(userId,
+      { InvoiceId: invoiceId._id, PlanId: id, }, { new: true })
+
+    return res.status(200).json({ invoiceId, userUpdate })
+
+
+  } catch (error) {
+    console.log("error PlanPurchese", error)
+    return res.status(500).json({ message: error.message })
+  }
+}
+
+
+// get invoice Details\
+
+export const InvoiceDetailsById = async (req, res) => {
+  const { id } = req.params
+  try {
+
+    const getinvoice = await Invoice.find({ userId: id })
+      .populate("userId", "name _id").populate("PlanId", "Package _id").sort({ createdAt: -1 })
+    if (!getinvoice) {
+      return res.status(500).json({ message: "Invoice not found" })
+    }
+
+    const invoicesWithIndianDates = getinvoice.map(inv => ({
+      ...inv.toObject(),
+      plan_start_date: timeFormat(inv.plan_start_date),
+      plan_expiry_date: timeFormat(inv.plan_expiry_date),
+      createdAt: timeFormat(inv.createdAt),
+      updatedAt: timeFormat(inv.updatedAt),
+    }))
+    return res.status(200).json(invoicesWithIndianDates)
+  } catch (error) {
+    console.log("error in InvoiceDetailsById", error)
+    return res.status(500).json({ message: error.message })
+  }
+}
