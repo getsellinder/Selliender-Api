@@ -308,8 +308,8 @@ export const PlanPurchese = async (req, res) => {
 
 
   } catch (error) {
-    console.error("❌ PlanPurchese Error:", error.response?.data || error.message, error.stack);
-    return res.status(500).json({ message: error.message });
+    console.error("❌ PlanPurchese Error:", error);
+    return res.status(500).json({ message: error });
   }
 }
 // get invoice Details\
