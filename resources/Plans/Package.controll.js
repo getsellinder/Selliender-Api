@@ -1,4 +1,5 @@
 import { timeFormat } from "../../Utils/formatDateToIST .js";
+import razorpayInstance from "../../Utils/razorpay.js";
 import UserModel from "../user/userModel.js";
 import Invoice from "./Invoice.js";
 import packageModel from "./Package.model.js";
@@ -194,20 +195,80 @@ export const PackageUpdate = async (req, res) => {
 
 // User purcheing the Plan APIS
 
+// export const PlanPurchese = async (req, res) => {
+//   try {
+//     const { id } = req.params
+//     const userId = req.user._id
+
+//     const { TransactionId, status, durationType } = req.body;
+//     if (!TransactionId) {
+//       return res.status(500).json({ message: "Please Mention TransactionId" })
+//     }
+//     const findPlan = await packageModel.findById(id)
+
+//     if (!findPlan) {
+//       return res.status(500).json({ message: "Plan not found" })
+//     }
+//     let startDate = new Date()
+//     let expiryDate = new Date(startDate)
+
+//     if (durationType === "monthly") {
+//       expiryDate.setMonth(expiryDate.getMonth() + 1)
+//     } else if (durationType === "yearly") {
+//       expiryDate.setFullYear(expiryDate.getFullYear() + 1)
+//     }
+//     const add = {
+//       InvoiceNo: `INV-${Date.now()}`,
+//       userId,
+//       PlanId: id,
+//       status,
+//       plan_start_date: startDate,
+//       plan_expiry_date: expiryDate,
+//       Amount: durationType === "yearly" ? findPlan.Total_Yearly_Price : findPlan.Total_Monthly_Price,
+//       TransactionId,
+
+//     }
+//     let invoiceId = await Invoice.create(add)
+//     const userUpdate = await UserModel.findByIdAndUpdate(userId,
+//       { InvoiceId: invoiceId._id, PlanId: id, }, { new: true })
+
+//     return res.status(200).json({ invoiceId, userUpdate })
+
+
+//   } catch (error) {
+//     console.log("error PlanPurchese", error)
+//     return res.status(500).json({ message: error.message })
+//   }
+// }
+
 export const PlanPurchese = async (req, res) => {
   try {
     const { id } = req.params
     const userId = req.user._id
 
-    const { TransactionId, status, durationType } = req.body;
-    if (!TransactionId) {
-      return res.status(500).json({ message: "Please Mention TransactionId" })
-    }
+    const { durationType } = req.body;
+
     const findPlan = await packageModel.findById(id)
 
     if (!findPlan) {
       return res.status(500).json({ message: "Plan not found" })
     }
+    let planAmount = 0
+    if (durationType === "monthly") {
+      planAmount = findPlan.Total_Monthly_Price
+    } else if (durationType === "yearly") {
+      planAmount = findPlan.Total_Yearly_Price;
+    }
+    else {
+      return res.status(400).json({ message: "Invalid duration type" });
+    }
+    const options = {
+      amount: planAmount * 100,
+      currency: "INR",
+      receipt: `receipt_${Date.now()}`,
+
+    }
+    const order = await razorpayInstance.orders.create(options)
     let startDate = new Date()
     let expiryDate = new Date(startDate)
 
@@ -219,28 +280,34 @@ export const PlanPurchese = async (req, res) => {
     const add = {
       InvoiceNo: `INV-${Date.now()}`,
       userId,
-      PlanId: id,
-      status,
+      PlanId: findPlan._id,
       plan_start_date: startDate,
       plan_expiry_date: expiryDate,
-      Amount: durationType === "yearly" ? findPlan.Total_Yearly_Price : findPlan.Total_Monthly_Price,
-      TransactionId,
+      Amount: planAmount,
+      TransactionId: order.id,
+      status: "success"
 
     }
     let invoiceId = await Invoice.create(add)
-    const userUpdate = await UserModel.findByIdAndUpdate(userId,
+    await UserModel.findByIdAndUpdate(userId,
       { InvoiceId: invoiceId._id, PlanId: id, }, { new: true })
 
-    return res.status(200).json({ invoiceId, userUpdate })
+    res.status(200).json({
+      success: true,
+
+      key_id: process.env.RAZORPAY_KEY_ID,
+      order_id: order.id,
+      amount: planAmount,
+      currency: "INR",
+      message: "Order created successfully",
+    });
 
 
   } catch (error) {
-    console.log("error PlanPurchese", error)
-    return res.status(500).json({ message: error.message })
+    console.error("❌ PlanPurchese Error:", error.response?.data || error.message, error.stack);
+    return res.status(500).json({ message: error.message });
   }
 }
-
-
 // get invoice Details\
 
 export const InvoiceDetailsById = async (req, res) => {
