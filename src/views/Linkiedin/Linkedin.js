@@ -21,7 +21,7 @@ import { isAutheticated } from "src/auth";
 import { useLinkedin } from "./LinkedenContext";
 
 const Linkedin = () => {
-    const {
+  const {
     anaysicResult,
     handleLinkedinDelete,
     linkedindelLoading,
@@ -32,7 +32,7 @@ const Linkedin = () => {
     getAllAnalysis,
     setPage
   } = useLinkedin();
-  
+
   const [currentPage, setCurrentPage] = useState();
 
   const [limit, setLimit] = useState(5);
@@ -40,7 +40,7 @@ const Linkedin = () => {
   const [name, setName] = useState("");
 
   const token = isAutheticated();
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
 
 
@@ -59,7 +59,7 @@ const Linkedin = () => {
 
   const handleShowEntries = (e) => {
     let newlimit = e.target.value;
- 
+
     setLimit(newlimit)
     getAllAnalysis(1, newlimit, name);
   };
@@ -71,14 +71,11 @@ const Linkedin = () => {
     "Customer",
     "Profile",
     "Date",
-    // "Comapany",
+    "Action",
     // "Languages",
     // "Posts",
     // "Awards",
 
-    "",
-    "",
-    "",
   ];
 
   return (
@@ -96,7 +93,7 @@ const Linkedin = () => {
                      "
               >
                 <div style={{ fontSize: "22px" }} className="fw-bold">
-                 Usage
+                  Usage
                 </div>
 
 
@@ -188,8 +185,8 @@ const Linkedin = () => {
                       >
                         <tr>
                           {tableheading.map((name) => (
-                            <th
->
+                            <th style={{textAlign:"center"}}
+                            >
                               {name}
                             </th>
                           ))}
@@ -211,36 +208,29 @@ const Linkedin = () => {
                           </tr>
                         ) : (
                           analysic.map((user, i) => {
-                            let content=user?.LinkedinContentId
-                            console.log("content", content)
+                            let content = user?.LinkedinContentId
+                     
 
                             return (
                               <tr key={i}>
-                                  <td className="text-start">{user?.LinkedinContentId?._id}</td>
-                                <td className="text-start">{user?.LinkedinContentId?.name}</td>
+                                <td className="text-center">{user?.LinkedinContentId?._id}</td>
+                                <td className="text-center">{user?.LinkedinContentId?.name}</td>
 
-                              
-                                <td className="">{(content.education.map(e => e.degree + " at " + e.school))}</td>
-                                  <td className="text-center">
-                                  {" "}
-                                  {content.skills.map((e)=>e).join(", ")}
-                                </td>
-                               
-                                <td className="">{content.company || "IT"}</td>
-                             
+
+                                <td className="text-center">{(content.education.map(e => e.degree + " at " + e.school))}</td>
                                 <td className="text-center">
-                                  {" "}
-                                  {content.languages.map((e)=>e).join(", ")}
+                                 {user?.createdAt}
                                 </td>
 
-                                <td className="text-center">{content.posts.length || "POST1"}</td>
+
+
+
+
+
+
+
 
                                 <td className="text-center">
-                                  {content.awards?.map((e)=>e)}
-                                </td>
-
-
-                                <td className="text-start">
                                   <Link to={`/Usage-user/view/${user?._id}`}>
                                     <button
                                       style={{

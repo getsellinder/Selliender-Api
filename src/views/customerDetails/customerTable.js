@@ -85,7 +85,7 @@ const CustomerTable = () => {
     getUsers();
   }, [success]);
 
-  const tableheading = ["Customer Name", "Login Type"];
+  const tableheading = ["Id", "Customer","Plan Name","Plan Amount","Registation","Action"];
 
   return (
     <div className="main-content">
@@ -206,7 +206,7 @@ const CustomerTable = () => {
                       >
                         <tr>
                           {tableheading.map((name) => (
-                            <th>{name}</th>
+                            <th style={{textAlign:"center"}}>{name}</th>
                           ))}
                         </tr>
                       </thead>
@@ -228,7 +228,10 @@ const CustomerTable = () => {
                           showData?.customers?.map((user, i) => {
                             return (
                               <tr key={i}>
-                                <td className="text-start">{user.name}</td>
+                                <td className="text-start" style={{textAlign:"center"}}>{user._id}</td>
+                                 <td className="text-start">{user.name}</td>
+                                     <td className="text-start">{user._id}</td>
+                                 {/* <td className="text-start">{user.name}</td> */}
                                 <td>
                                   {user.logintype
                                     ? user.logintype
@@ -249,18 +252,7 @@ const CustomerTable = () => {
                                     }
                                   )}
                                 </td>
-                                {/* {loading1 && (
-                                  <>
-                                    <td className="text-start">loading...</td>
-                                    <td className="text-start">loading...</td>
-                                  </>
-                                )} */}
-
-                                {/* <OrderDetails
-                                  _id={user?._id}
-                                  setLoading1={setLoading1}
-                                /> */}
-
+                          
                                 <td className="text-start">
                                   <Link to={`/customers-details/${user?._id}`}>
                                     <button
@@ -268,6 +260,14 @@ const CustomerTable = () => {
                                       className="mt-1 btn btn-info btn-sm  waves-effect waves-light btn-table ml-2"
                                     >
                                       View
+                                    </button>
+                                  </Link>
+                                   <Link >
+                                    <button style={{background:"orange"}}
+                                      type="button"
+                                      className="mt-1 btn btn-info btn-sm  waves-effect waves-light btn-table ml-2"
+                                    >
+                                      Invoices
                                     </button>
                                   </Link>
                                 </td>
