@@ -12,13 +12,13 @@ export const PackageCreate = async (req, res) => {
       GST,
       yearlyUserLimit,
       monthlyUserLimit,
-        SearchLimitMonthly,
+      SearchLimitMonthly,
       SearchLimitYearly,
       Yearly_Price,
       Monthly_Price,
       Total_Monthly_Price,
       Total_Yearly_Price,
-    
+
       name,
       Monthly_features,
       Yearly_features,
@@ -166,9 +166,9 @@ export const PackageUpdate = async (req, res) => {
     const {
       Package,
       GST,
-          yearlyUserLimit,
+      yearlyUserLimit,
       monthlyUserLimit,
-        SearchLimitMonthly,
+      SearchLimitMonthly,
       SearchLimitYearly,
       Yearly_Price,
       Monthly_Price,
@@ -188,9 +188,9 @@ export const PackageUpdate = async (req, res) => {
     let data = {
       Package,
       GST,
-    yearlyUserLimit,
+      yearlyUserLimit,
       monthlyUserLimit,
-        SearchLimitMonthly,
+      SearchLimitMonthly,
       SearchLimitYearly,
       Yearly_Price,
       Monthly_Price,
@@ -310,12 +310,12 @@ export const PlanPurchese = async (req, res) => {
     if (durationType === "monthly") {
       planAmount = findPlan?.Total_Monthly_Price ?? 0
     } else if (durationType === "yearly") {
-      planAmount = findPlan?.Total_Monthly_Price ?? 0
+      planAmount = findPlan?.Total_Yearly_Price ?? 0
     }
     else {
       return res.status(400).json({ message: "Invalid duration type" });
     }
-       if (planAmount === 0) {
+    if (planAmount === 0) {
       const startDate = new Date();
       const expiryDate = new Date(startDate);
 
