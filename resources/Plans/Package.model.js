@@ -12,6 +12,7 @@ const PackageScheme = new mongoose.Schema(
     },
     monthlyUserLimit: {
       type: Number,
+     
     },
     yearlyUserLimit: {
       type: Number,
