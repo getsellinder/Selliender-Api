@@ -215,51 +215,80 @@ export const PackageUpdate = async (req, res) => {
 
 // User purcheing the Plan APIS
 
+
+
 // export const PlanPurchese = async (req, res) => {
 //   try {
 //     const { id } = req.params
 //     const userId = req.user._id
 
-//     const { TransactionId, status, durationType } = req.body;
-//     if (!TransactionId) {
-//       return res.status(500).json({ message: "Please Mention TransactionId" })
-//     }
+//     const { durationType } = req.body;
+
 //     const findPlan = await packageModel.findById(id)
 
+//     const finduser = await UserModel.findById(userId)
 //     if (!findPlan) {
-//       return res.status(500).json({ message: "Plan not found" })
+//       return res.status(505).json({ message: "Plan not found" })
 //     }
-//     let startDate = new Date()
-//     let expiryDate = new Date(startDate)
-
+//     if (!finduser) {
+//       return res.status(506).json({ message: "User not found" })
+//     }
+//     let planAmount = 0
 //     if (durationType === "monthly") {
-//       expiryDate.setMonth(expiryDate.getMonth() + 1)
+//       planAmount = findPlan?.Total_Monthly_Price ?? 0
 //     } else if (durationType === "yearly") {
-//       expiryDate.setFullYear(expiryDate.getFullYear() + 1)
+//       planAmount = findPlan?.Total_Monthly_Price ?? 0
 //     }
-//     const add = {
-//       InvoiceNo: `INV-${Date.now()}`,
-//       userId,
-//       PlanId: id,
-//       status,
-//       plan_start_date: startDate,
-//       plan_expiry_date: expiryDate,
-//       Amount: durationType === "yearly" ? findPlan.Total_Yearly_Price : findPlan.Total_Monthly_Price,
-//       TransactionId,
+//     else {
+//       return res.status(400).json({ message: "Invalid duration type" });
+//     }
+//     const options = {
+//       amount: planAmount * 100,
+//       currency: "INR",
+//       receipt: `receipt_${Date.now()}`,
 
 //     }
-//     let invoiceId = await Invoice.create(add)
-//     const userUpdate = await UserModel.findByIdAndUpdate(userId,
-//       { InvoiceId: invoiceId._id, PlanId: id, }, { new: true })
+//     const order = await razorpayInstance.orders.create(options)
+//     // let startDate = new Date()
+//     // let expiryDate = new Date(startDate)
 
-//     return res.status(200).json({ invoiceId, userUpdate })
+//     // if (durationType === "monthly") {
+//     //   expiryDate.setMonth(expiryDate.getMonth() + 1)
+//     // } else if (durationType === "yearly") {
+//     //   expiryDate.setFullYear(expiryDate.getFullYear() + 1)
+//     // }
+//     // const add = {
+//     //   InvoiceNo: `INV-${Date.now()}`,
+//     //   userId,
+//     //   PlanId: findPlan._id,
+//     //   plan_start_date: startDate,
+//     //   plan_expiry_date: expiryDate,
+//     //   Amount: planAmount,
+//     //   TransactionId: order.id,
+//     //   status: "success"
+
+//     // }
+//     // let invoiceId = await Invoice.create(add)
+//     // await UserModel.findByIdAndUpdate(userId,
+//     //   { InvoiceId: invoiceId._id, PlanId: id, }, { new: true })
+
+//     res.status(200).json({
+//       success: true,
+
+//       key_id: process.env.RAZORPAY_KEY_ID,
+//       order_id: order.id,
+//       amount: planAmount || 0,
+//       currency: "INR",
+//       message: "Order created successfully",
+//     });
 
 
 //   } catch (error) {
-//     console.log("error PlanPurchese", error)
-//     return res.status(500).json({ message: error.message })
+//     console.error("❌ PlanPurchese Error:", error);
+//     return res.status(500).json({ message: error });
 //   }
 // }
+
 
 export const PlanPurchese = async (req, res) => {
   try {
@@ -286,12 +315,51 @@ export const PlanPurchese = async (req, res) => {
     else {
       return res.status(400).json({ message: "Invalid duration type" });
     }
+       if (planAmount === 0) {
+      const startDate = new Date();
+      const expiryDate = new Date(startDate);
+
+      if (durationType === "monthly") {
+        expiryDate.setMonth(expiryDate.getMonth() + 1);
+      } else {
+        expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+      }
+
+      // Create free invoice record
+      const add = {
+        InvoiceNo: `INV-${Date.now()}`,
+        userId,
+        PlanId: findPlan._id,
+        plan_start_date: startDate,
+        plan_expiry_date: expiryDate,
+        Amount: 0,
+        TransactionId: null,
+        status: "success",
+      };
+
+      const invoice = await Invoice.create(add);
+
+      // Update user with free plan info
+      await UserModel.findByIdAndUpdate(
+        userId,
+        { InvoiceId: invoice._id, PlanId: id },
+        { new: true }
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: "Free plan activated successfully",
+        planId: id,
+      });
+    }
+
     const options = {
       amount: planAmount * 100,
       currency: "INR",
       receipt: `receipt_${Date.now()}`,
 
     }
+
     const order = await razorpayInstance.orders.create(options)
     // let startDate = new Date()
     // let expiryDate = new Date(startDate)
