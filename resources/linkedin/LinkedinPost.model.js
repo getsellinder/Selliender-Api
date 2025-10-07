@@ -6,7 +6,7 @@ const PostSchema = new mongoose.Schema({
     content: String,
     extractedAt: Date,
     timestamp: String
-}, { _id: false }); 
+}, { _id: false });
 const LinkedinPostSchema = new mongoose.Schema(
     {
         name: String,

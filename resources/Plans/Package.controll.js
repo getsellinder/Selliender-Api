@@ -88,7 +88,7 @@ export const getAllPackages = async (req, res) => {
     let getpackages = await packageModel
       .find(filter)
       .populate("GST", "name Gst active")
-      .sort({ createdAt: -1 })
+      .sort({ createdAt: 1 })
       .skip(skip)
 
       .limit(limit);

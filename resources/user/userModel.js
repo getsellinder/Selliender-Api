@@ -56,16 +56,19 @@ const userSchema = new mongoose.Schema(
       type: Number
 
     },
-    LinkedinPostId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "LinkedinPost"
+    // LinkedinPostId: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "LinkedinPost"
 
-    },
-    LinkedinContentId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "LinkedinContent"
+    // },
+    // LinkedinContentId: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "LinkedinContent"
 
-    },
+    // },
+
+    LinkedinContent: { type: mongoose.Schema.Types.Mixed, default: null },
+  LinkedinPosts: { type: [mongoose.Schema.Types.Mixed], default: [] },
     city: { type: String },
     state: { type: String },
     country: { type: String, default: "India" },

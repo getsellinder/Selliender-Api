@@ -37,12 +37,10 @@ const PostSchema = new mongoose.Schema({
 }, { _id: false });
 const LinkedinContentSchema = new mongoose.Schema(
     {
-        LinkedinURL: {
-            type: [String],
-            default: []
-        },
+        LinkedinURL: String,
         LinkedinDec: String,
         name: String,
+        
         title: String,
         company: String,
         location: String,

@@ -46,20 +46,21 @@ export const LinkedinUploadFile = async (req, res) => {
                 savePosts.push(post);
             }
         }
+      
 
         if (id) {
             await UserModel.findByIdAndUpdate(id, {
                 LinkedinContentId: savePfofile ? savePfofile._id : null,
                 LinkedinPostId: savePosts.length > 0 ? savePosts[0]._id : null
-            })
+            });
+          
+
         }
-
-
-
         res.status(200).json({
             message: "Files uploaded successfully",
             profile: savePfofile,
-            posts: savePosts
+            posts: savePosts,
+           
         });
     } catch (error) {
         console.error("Error uploading file:", error);
