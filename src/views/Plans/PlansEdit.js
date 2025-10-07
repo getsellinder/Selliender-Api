@@ -40,6 +40,11 @@ const PlanEdit = () => {
     Monthly_Price: singlePlanData?.Monthly_Price || "",
     PlanLimit: singlePlanData?.PlanLimit || "",
     name: singlePlanData?.name || "",
+    yearlyUserLimit: singlePlanData?.yearlyUserLimit || "",
+    monthlyUserLimit: singlePlanData?.yearlyUserLimit || "",
+
+    SearchLimitMonthly: singlePlanData?.SearchLimitMonthly || "",
+    SearchLimitYearly: singlePlanData?.SearchLimitYearly || "",
     Monthly_features: [""],
     Yearly_features: [""],
   });
@@ -156,7 +161,7 @@ const PlanEdit = () => {
         <Box component="form" onSubmit={handleSubmit}>
           <Grid container spacing={3}>
             {/* Plan Name */}
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={4}>
               <TextField
                 fullWidth
                 label="Plan Name"
@@ -168,7 +173,7 @@ const PlanEdit = () => {
             </Grid>
 
             {/* Plan Type */}
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={4}>
               <TextField
                 select
                 fullWidth
@@ -184,7 +189,7 @@ const PlanEdit = () => {
             </Grid>
 
             {/* Monthly Price */}
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={4}>
               <TextField
                 fullWidth
                 label="Monthly Price (₹)"
@@ -196,7 +201,7 @@ const PlanEdit = () => {
             </Grid>
 
             {/* Yearly Price */}
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={4}>
               <TextField
                 fullWidth
                 label="Yearly Price (₹)"
@@ -206,18 +211,9 @@ const PlanEdit = () => {
                 onChange={handleChange}
               />
             </Grid>
-            <Grid item xs={12} sm={12}>
-              <TextField
-                fullWidth
-                label="Plan Limit 50 members "
-                name="PlanLimit"
-                value={plan.PlanLimit}
-                onChange={handleChange}
 
-              />
-            </Grid>
             {/* gst */}
-            <Grid item xs={12} sm={12}>
+            <Grid item xs={12} sm={4}>
               <TextField
                 select
                 fullWidth
@@ -235,7 +231,7 @@ const PlanEdit = () => {
             </Grid>
 
             {/* Monthly Price with gst */}
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={4}>
               <TextField
                 fullWidth
                 label="Monthly Price (₹) with GST"
@@ -248,7 +244,7 @@ const PlanEdit = () => {
             </Grid>
 
             {/* Yearly Price wit gst*/}
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={4}>
               <TextField
                 fullWidth
                 label="Yearly Price (₹) With GST"
@@ -257,6 +253,60 @@ const PlanEdit = () => {
                 value={plan.Total_Yearly_Price}
                 onChange={handleChange}
                 disabled
+              />
+            </Grid>
+
+            {/* Monthly Search limit */}
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                variant="outlined"
+                label="Search Limit Yearly"
+                name="SearchLimitYearly"
+                type="number"
+                value={plan.SearchLimitYearly}
+                onChange={handleChange}
+                   InputLabelProps={{ shrink: true }}  
+              />
+            </Grid>
+
+
+            {/* Monthly Search limit */}
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                label="Search Limit Monthly"
+                name="SearchLimitMonthly"
+                type="number"
+                value={plan.SearchLimitMonthly}
+                onChange={handleChange}
+                   InputLabelProps={{ shrink: true }}  
+              />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                 variant="outlined"
+                label="User Limit Yearly"
+                name="yearlyUserLimit"
+                type="number"
+                value={plan.yearlyUserLimit}
+                onChange={handleChange}
+                   InputLabelProps={{ shrink: true }}  
+              />
+            </Grid>
+
+
+            {/* Monthly User limit */}
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                label="User Limit Monthly"
+                name="monthlyUserLimit"
+                type="number"
+                value={plan.monthlyUserLimit}
+                onChange={handleChange}
+                 InputLabelProps={{ shrink: true }}   
               />
             </Grid>
 

@@ -34,13 +34,14 @@ const PlanAdd = () => {
     GST: "" || null,
     yearlyUserLimit: "",
     monthlyUserLimit: "",
+    
+    SearchLimitMonthly: "",
+    SearchLimitYearly: "",
     Yearly_Price: "",
     Monthly_Price: "",
     Total_Monthly_Price: "",
     Total_Yearly_Price: "",
 
-    SearchLimitMonthly: "",
-    SearchLimitYearly: "",
     name: "",
     Monthly_features: [""],
     Yearly_features: [""],
