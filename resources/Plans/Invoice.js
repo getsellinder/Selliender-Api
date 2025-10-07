@@ -12,7 +12,7 @@ const InvoicesSchema = new mongoose.Schema({
     },
     PlanId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "package"
+        ref: "plan"
     },
 
     TransactionId: {

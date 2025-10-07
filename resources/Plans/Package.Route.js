@@ -2,6 +2,7 @@ import express from "express";
 import { authorizeRoles, isAuthenticatedUser } from "../../middlewares/auth.js";
 import { roles, rolesAdmin } from "../../Utils/authorizeRoles.js";
 import {
+  ConfirmPayment,
   countSearchlimit,
   getAllPackages,
   getByIdPackage,
@@ -54,6 +55,11 @@ Router.post("/purchase/:id",
   isAuthenticatedUser,
   authorizeRoles(...roles),
   PlanPurchese)
+
+Router.post("/confirm/pyment/:id",
+  isAuthenticatedUser,
+  authorizeRoles(...roles),
+  ConfirmPayment)
 
 Router.get("/get/invoice/:id",
   isAuthenticatedUser,

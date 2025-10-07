@@ -357,7 +357,7 @@ export const getSingleUser = catchAsyncErrors(async (req, res, next) => {
   if (!req.params.id) {
     return next(new ErrorHander(`please send User ID`, 404));
   }
-  const user = await User.findById(req.params.id).populate("PlanId", "Package PlanLimit name");
+  const user = await User.findById(req.params.id).populate("PlanId", "Package SearchLimitMonthly SearchLimitYearly name");
 
   if (!user) {
     return next(

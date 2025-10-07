@@ -50,7 +50,7 @@ const userSchema = new mongoose.Schema(
     },
     PlanId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "package"
+      ref: "plan"
     },
     SearchLimit: {
       type: Number
@@ -82,7 +82,7 @@ const userSchema = new mongoose.Schema(
 
     PlanId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "package"
+      ref: "plan"
     },
 
     resetPasswordToken: String,

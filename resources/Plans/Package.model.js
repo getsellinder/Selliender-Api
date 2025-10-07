@@ -10,7 +10,17 @@ const PackageScheme = new mongoose.Schema(
       enum: ["Free", "Pro", "Growth", "Enterprise"],
       required: true,
     },
-    PlanLimit: {
+    monthlyUserLimit: {
+      type: Number,
+    },
+    yearlyUserLimit: {
+      type: Number,
+    },
+    SearchLimitMonthly: {
+      type: Number,
+      // required: true,
+    },
+    SearchLimitYearly: {
       type: Number,
       // required: true,
     },
@@ -61,6 +71,6 @@ const PackageScheme = new mongoose.Schema(
   { timestamps: true }
 );
 
-const packageModel = mongoose.model("package", PackageScheme);
+const packageModel = mongoose.model("plan", PackageScheme);
 
 export default packageModel;

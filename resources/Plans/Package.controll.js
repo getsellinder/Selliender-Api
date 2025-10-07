@@ -10,11 +10,14 @@ export const PackageCreate = async (req, res) => {
     const {
       Package,
       GST,
+      yearlyUserLimit,
+      monthlyUserLimit,
       Yearly_Price,
       Monthly_Price,
       Total_Monthly_Price,
       Total_Yearly_Price,
-      PlanLimit,
+      SearchLimitMonthly,
+      SearchLimitYearly,
       name,
       Monthly_features,
       Yearly_features,
@@ -24,12 +27,14 @@ export const PackageCreate = async (req, res) => {
     let data = {
       Package,
       GST,
-
+      yearlyUserLimit,
+      monthlyUserLimit,
       Yearly_Price,
       Monthly_Price,
       Total_Monthly_Price,
       Total_Yearly_Price,
-      PlanLimit,
+      SearchLimitMonthly,
+      SearchLimitYearly,
       name,
       Monthly_features,
       Yearly_features,
@@ -132,9 +137,16 @@ export const countSearchlimit = async (req, res) => {
     if (!getplanLimit) {
       return res.status(404).json({ message: "Plan not found" })
     }
-    let limit = getplanLimit.PlanLimit
-    let currentLimit = getUser.SearchLimit || 0
-    if (currentLimit >= limit) {
+    console.log("getplanLimit", getplanLimit)
+    let limitMonth = getplanLimit?.SearchLimitMonthly ?? 0
+    let limitYear = getplanLimit?.SearchLimitYearly ?? 0
+    let currentLimit = getUser?.SearchLimit ?? 0
+
+    let activeLimit = getplanLimit.Total_Yearly_Price == null ? limitMonth : limitYear
+
+
+
+    if (currentLimit >= activeLimit) {
       return res.status(405).json({ message: "Your search limit is over" });
     }
 
@@ -259,9 +271,9 @@ export const PlanPurchese = async (req, res) => {
     }
     let planAmount = 0
     if (durationType === "monthly") {
-      planAmount = findPlan.Total_Monthly_Price
+      planAmount = findPlan?.Total_Monthly_Price ?? 0
     } else if (durationType === "yearly") {
-      planAmount = findPlan.Total_Yearly_Price;
+      planAmount = findPlan?.Total_Monthly_Price ?? 0
     }
     else {
       return res.status(400).json({ message: "Invalid duration type" });
@@ -273,6 +285,55 @@ export const PlanPurchese = async (req, res) => {
 
     }
     const order = await razorpayInstance.orders.create(options)
+    // let startDate = new Date()
+    // let expiryDate = new Date(startDate)
+
+    // if (durationType === "monthly") {
+    //   expiryDate.setMonth(expiryDate.getMonth() + 1)
+    // } else if (durationType === "yearly") {
+    //   expiryDate.setFullYear(expiryDate.getFullYear() + 1)
+    // }
+    // const add = {
+    //   InvoiceNo: `INV-${Date.now()}`,
+    //   userId,
+    //   PlanId: findPlan._id,
+    //   plan_start_date: startDate,
+    //   plan_expiry_date: expiryDate,
+    //   Amount: planAmount,
+    //   TransactionId: order.id,
+    //   status: "success"
+
+    // }
+    // let invoiceId = await Invoice.create(add)
+    // await UserModel.findByIdAndUpdate(userId,
+    //   { InvoiceId: invoiceId._id, PlanId: id, }, { new: true })
+
+    res.status(200).json({
+      success: true,
+
+      key_id: process.env.RAZORPAY_KEY_ID,
+      order_id: order.id,
+      amount: planAmount || 0,
+      currency: "INR",
+      message: "Order created successfully",
+    });
+
+
+  } catch (error) {
+    console.error("❌ PlanPurchese Error:", error);
+    return res.status(500).json({ message: error });
+  }
+}
+
+
+export const ConfirmPayment = async (req, res) => {
+  try {
+    const { id } = req.params
+    const userId = req.user._id;
+    const { durationType, razorpayPaymentId, planAmount, orderId } = req.body;
+    const findPlan = await packageModel.findById(id);
+    if (!findPlan) return res.status(404).json({ message: "Plan not found" });
+
     let startDate = new Date()
     let expiryDate = new Date(startDate)
 
@@ -288,30 +349,20 @@ export const PlanPurchese = async (req, res) => {
       plan_start_date: startDate,
       plan_expiry_date: expiryDate,
       Amount: planAmount,
-      TransactionId: order.id,
+      TransactionId: razorpayPaymentId,
       status: "success"
 
     }
     let invoiceId = await Invoice.create(add)
     await UserModel.findByIdAndUpdate(userId,
       { InvoiceId: invoiceId._id, PlanId: id, }, { new: true })
-
-    res.status(200).json({
-      success: true,
-
-      key_id: process.env.RAZORPAY_KEY_ID,
-      order_id: order.id,
-      amount: planAmount,
-      currency: "INR",
-      message: "Order created successfully",
-    });
-
-
+    res.status(200).json({ success: true, message: "Payment confirmed Successfully and invoice stored" });
   } catch (error) {
-    console.error("❌ PlanPurchese Error:", error);
-    return res.status(500).json({ message: error });
+    console.log("ConfirmPayment.error", error)
+    return res.status(500).json({ message: error.message })
   }
 }
+
 // get invoice Details\
 
 export const InvoiceDetailsById = async (req, res) => {
