@@ -12,12 +12,13 @@ export const PackageCreate = async (req, res) => {
       GST,
       yearlyUserLimit,
       monthlyUserLimit,
+        SearchLimitMonthly,
+      SearchLimitYearly,
       Yearly_Price,
       Monthly_Price,
       Total_Monthly_Price,
       Total_Yearly_Price,
-      SearchLimitMonthly,
-      SearchLimitYearly,
+    
       name,
       Monthly_features,
       Yearly_features,
@@ -165,6 +166,10 @@ export const PackageUpdate = async (req, res) => {
     const {
       Package,
       GST,
+          yearlyUserLimit,
+      monthlyUserLimit,
+        SearchLimitMonthly,
+      SearchLimitYearly,
       Yearly_Price,
       Monthly_Price,
       Total_Monthly_Price,
@@ -183,7 +188,10 @@ export const PackageUpdate = async (req, res) => {
     let data = {
       Package,
       GST,
-
+    yearlyUserLimit,
+      monthlyUserLimit,
+        SearchLimitMonthly,
+      SearchLimitYearly,
       Yearly_Price,
       Monthly_Price,
       Total_Monthly_Price,
