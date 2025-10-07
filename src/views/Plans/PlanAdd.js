@@ -22,18 +22,25 @@ import { useNavigate } from "react-router-dom";
 const PlanAdd = () => {
   const token = isAutheticated();
   const [planLoading, setPlanLoading] = useState(false);
-  const { getgst, allPackages, getAllpackages} = usePlan();
+  const { getgst, allPackages, getAllpackages } = usePlan();
   console.log("allPackages", allPackages)
 
 
   const [plan, setPlan] = useState({
     Package: "",
-    GST:  "" || null,
+    gstMonthlyPrice: "" || 0,
+
+    gstYearlyPrice: "" || 0,
+    GST: "" || null,
+    yearlyUserLimit: "",
+    monthlyUserLimit: "",
     Yearly_Price: "",
+    Monthly_Price: "",
     Total_Monthly_Price: "",
     Total_Yearly_Price: "",
-    Monthly_Price: "",
-    PlanLimit: "",
+
+    SearchLimitMonthly: "",
+    SearchLimitYearly: "",
     name: "",
     Monthly_features: [""],
     Yearly_features: [""],
@@ -69,31 +76,35 @@ const PlanAdd = () => {
   // };
 
   const handleChange = (e) => {
-  const { name, value } = e.target;
+    const { name, value } = e.target;
 
-  setPlan((prevPlan) => {
-    // Handle GST change
-    if (name === "GST") {
-      const gstPercent = getgst?.find((item) => item._id === value)?.Gst || 0;
+    setPlan((prevPlan) => {
+      // Handle GST change
+      if (name === "GST") {
+        const gstPercent = getgst?.find((item) => item._id === value)?.Gst || 0;
 
-      const monthlyPrice = parseFloat(prevPlan.Monthly_Price) || 0;
-      const yearlyPrice = parseFloat(prevPlan.Yearly_Price) || 0;
+        const monthlyPrice = parseFloat(prevPlan.Monthly_Price) || 0;
+        const yearlyPrice = parseFloat(prevPlan.Yearly_Price) || 0;
 
-      const totalMonthly = monthlyPrice + (monthlyPrice * gstPercent) / 100 || 0;
-      const totalYearly = yearlyPrice + (yearlyPrice * gstPercent) / 100 || 0;
+        plan.gstMonthlyPrice = (monthlyPrice * gstPercent) / 100
 
-      return {
-        ...prevPlan,
-         GST: value ? value : null,
-        Total_Monthly_Price: totalMonthly,
-        Total_Yearly_Price: totalYearly,
-      };
-    }
+        plan.gstYearlyPrice = (yearlyPrice * gstPercent) / 100
 
-    // Handle other fields
-    return { ...prevPlan, [name]: value };
-  });
-};
+        const totalMonthly = monthlyPrice + (monthlyPrice * gstPercent) / 100 || 0;
+        const totalYearly = yearlyPrice + (yearlyPrice * gstPercent) / 100 || 0;
+
+        return {
+          ...prevPlan,
+          GST: value ? value : null,
+          Total_Monthly_Price: totalMonthly,
+          Total_Yearly_Price: totalYearly,
+        };
+      }
+
+      // Handle other fields
+      return { ...prevPlan, [name]: value };
+    });
+  };
 
 
   const addfeature = (type) => {
@@ -125,7 +136,7 @@ const PlanAdd = () => {
       });
       toast.success(res?.data?.message);
       navigate("/Pricing-Plans")
-      getAllpackages(1,undefined,undefined,undefined)
+      getAllpackages(1, undefined, undefined, undefined)
 
     } catch (error) {
       let message = error?.response?.data?.message;
@@ -134,8 +145,7 @@ const PlanAdd = () => {
       setPlanLoading(false);
     }
   };
-
-  console.log("Yearly_features", plan?.Yearly_features);
+  console.log("gst items", getgst)
   return (
     <Container maxWidth="md">
       <Paper elevation={4} sx={{ p: 4, borderRadius: 3 }}>
@@ -145,7 +155,7 @@ const PlanAdd = () => {
         <Box component="form" onSubmit={handleSubmit}>
           <Grid container spacing={3}>
             {/* Plan Name */}
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={4}>
               <TextField
                 fullWidth
                 label="Plan Name"
@@ -157,7 +167,7 @@ const PlanAdd = () => {
             </Grid>
 
             {/* Plan Type */}
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={4}>
               <TextField
                 select
                 fullWidth
@@ -172,8 +182,20 @@ const PlanAdd = () => {
               </TextField>
             </Grid>
 
+            {/* Yearly Price */}
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                label="Yearly Price (₹)"
+                name="Yearly_Price"
+                type="number"
+                value={plan.Yearly_Price}
+                onChange={handleChange}
+              />
+            </Grid>
+
             {/* Monthly Price */}
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={4}>
               <TextField
                 fullWidth
                 label="Monthly Price (₹)"
@@ -184,29 +206,8 @@ const PlanAdd = () => {
               />
             </Grid>
 
-            {/* Yearly Price */}
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Yearly Price (₹)"
-                name="Yearly_Price"
-                type="number"
-                value={plan.Yearly_Price}
-                onChange={handleChange}
-              />
-            </Grid>
-            <Grid item xs={12} sm={12}>
-              <TextField
-                fullWidth
-                label="Plan Limit 50 members "
-                name="PlanLimit"
-                value={plan.PlanLimit}
-                onChange={handleChange}
-                required
-              />
-            </Grid>
             {/* gst */}
-            <Grid item xs={12} sm={12}>
+            <Grid item xs={12} sm={4}>
               <TextField
                 select
                 fullWidth
@@ -215,14 +216,46 @@ const PlanAdd = () => {
                 // value={plan.GST}
                 onChange={handleChange}
               >
-                {getgst.map((item) => (
-                  <MenuItem value={item._id} key={item._id}>{item.Gst}%</MenuItem>
-                ))}
+                {getgst.map((item) => {
+
+                  return (
+                    <MenuItem value={item._id} key={item._id}>{item.Gst}%</MenuItem>
+                  )
+                })}
               </TextField>
             </Grid>
 
+
+
+            {/* Yearly GST Price */}
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                label="Yearly GST Price (₹)"
+                name="gstPrice"
+                type="number"
+                value={plan.gstYearlyPrice}
+                onChange={handleChange}
+                disabled
+              />
+            </Grid>
+
+            {/* Monthly Gst Price */}
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                label="Monthly GST Price (₹)"
+                name="gstMonthlyPrice"
+                type="number"
+                value={plan.gstMonthlyPrice}
+                onChange={handleChange}
+                disabled
+              />
+            </Grid>
+
+
             {/* Monthly Price with gst */}
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={4}>
               <TextField
                 fullWidth
                 label="Monthly Price (₹) with GST"
@@ -235,7 +268,7 @@ const PlanAdd = () => {
             </Grid>
 
             {/* Yearly Price wit gst*/}
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={4}>
               <TextField
                 fullWidth
                 label="Yearly Price (₹) With GST"
@@ -246,6 +279,59 @@ const PlanAdd = () => {
                 disabled
               />
             </Grid>
+
+
+
+            {/* Monthly Search limit */}
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                label="Search Limit Yearly"
+                name="SearchLimitYearly"
+                type="number"
+                value={plan.SearchLimitYearly}
+                onChange={handleChange}
+              />
+            </Grid>
+
+
+            {/* Monthly Search limit */}
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                label="Search Limit Monthly"
+                name="SearchLimitMonthly"
+                type="number"
+                value={plan.SearchLimitMonthly}
+                onChange={handleChange}
+              />
+            </Grid>
+
+            {/* Yearly User limit */}
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                label="User Limit Yearly"
+                name="yearlyUserLimit"
+                type="number"
+                value={plan.yearlyUserLimit}
+                onChange={handleChange}
+              />
+            </Grid>
+
+
+            {/* Monthly User limit */}
+            <Grid item xs={12} sm={12}>
+              <TextField
+                fullWidth
+                label="User Limit Monthly"
+                name="monthlyUserLimit"
+                type="number"
+                value={plan.monthlyUserLimit}
+                onChange={handleChange}
+              />
+            </Grid>
+
 
             {/* yeaerFeatures */}
             <Grid item xs={12}>

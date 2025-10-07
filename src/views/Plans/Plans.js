@@ -100,7 +100,7 @@ const Plans = () => {
                 {/* <div className="page-title-right">
                   <Button
                     variant="contained"
-                    color="primary"
+                    color="primary" 
                     style={{
                       fontWeight: "bold",
                       marginBottom: "1rem",
@@ -299,7 +299,7 @@ const Plans = () => {
                                     </button>
                                   </Link>
                                 </td>
-                                <td className="text-start">
+                                {/* <td className="text-start">
                                   <button
                                     onClick={() =>
                                       handlePackageDelete(user?._id)
@@ -318,7 +318,7 @@ const Plans = () => {
                                       "Delete"
                                     )}
                                   </button>
-                                </td>
+                                </td> */}
                               </tr>
                             );
                           })
