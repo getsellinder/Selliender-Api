@@ -1,3 +1,4 @@
+import { timeFormat } from "../../Utils/formatDateToIST .js";
 import { ContactRequest } from "./ContactRequestsModel.js";
 
 export const AddNewContactRequest = async (req, res) => {
@@ -53,6 +54,50 @@ export const ContactSalesRequest = async (req, res) => {
       success: false,
       message: error.message ? error.message : "Something went Wrong",
     });
+  }
+};
+
+
+export const getAllContactSalesRequest = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 5;
+
+    const { name } = req.query;
+
+    const filter = {
+      // Status: "Active",
+      contactType: "Contact Sale"
+    };
+    let skip = (page - 1) * limit;
+
+    if (name) {
+      filter.name = { $regex: new RegExp(name, "i") };
+    }
+
+    const total = await ContactRequest.countDocuments(filter);
+    let getcotactsales = await ContactRequest
+      .find(filter)
+
+      .sort({ createdAt: 1 })
+      .skip(skip)
+
+      .limit(limit);
+    let data = getcotactsales.map((val) => ({
+      ...val.toObject(),
+      createdAt: timeFormat(val.createdAt),
+      updatedAt: timeFormat(val.updatedAt)
+    }))
+
+    return res.status(200).json({
+      result: data,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+      totalItems: total,
+    });
+  } catch (error) {
+    console.log("Erron in the getAllContactSalesRequest", error);
+    return res.status(500).json({ message: error });
   }
 };
 
