@@ -20,6 +20,11 @@ const ContactRequestSchema = new mongoose.Schema(
             maxLength: [500, "message cannot exceed 500 characters"],
             required: [true, "Please Enter  message"],
         },
+        contactType: {
+            type: String,
+            enum: ["Contact Sale", "Contact Us"],
+            required: true
+        },
         status: {
             type: String,
             enum: ["PROCESS", "PENDING", "FINISHED"],
