@@ -3,14 +3,14 @@ import { ContactRequest } from "./ContactRequestsModel.js";
 
 export const AddNewContactRequest = async (req, res) => {
   try {
-    const { name, eamil, message } = req.body
+    const { name, email, message } = req.body
     const add = {
-      name, eamil, message, contactType: "Contact Us"
+      name, email, message, contactType: "Contact Us"
     }
-    if (!name || !eamil || !message) {
+    if (!name || !email || !message) {
       return res.status(500).json({ message: "Please fil the Fields" })
     }
-    const findEmail = await ContactRequest.findOne({ eamil: eamil })
+    const findEmail = await ContactRequest.findOne({ email: email })
     if (findEmail) {
       return res.status(400).json({ message: "Your message already exists" })
     }
@@ -31,14 +31,14 @@ export const AddNewContactRequest = async (req, res) => {
 
 export const ContactSalesRequest = async (req, res) => {
   try {
-    const { name, eamil, message } = req.body
+    const { name, email, message } = req.body
     const add = {
-      name, eamil, message, contactType: "Contact Sale"
+      name, email, message, contactType: "Contact Sale"
     }
-    if (!name || !eamil || !message) {
+    if (!name || !email || !message) {
       return res.status(500).json({ message: "Please fil the Fields" })
     }
-    const findEmail = await ContactRequest.findOne({ eamil: eamil })
+    const findEmail = await ContactRequest.findOne({ email: email })
     if (findEmail) {
       return res.status(400).json({ message: "Your message already exists" })
     }

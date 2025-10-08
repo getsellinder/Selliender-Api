@@ -10,7 +10,7 @@ const ContactRequestSchema = new mongoose.Schema(
             maxLength: [25, "name cannot exceed 25 characters"],
             required: [true, "Please Enter name "],
         },
-        eamil: {
+        email: {
             type: String,
 
             required: [true, "Please Enter title "],
