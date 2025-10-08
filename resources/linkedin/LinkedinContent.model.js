@@ -1,14 +1,14 @@
 import mongoose from "mongoose";
 const ExperienceSchema = new mongoose.Schema({
-    title: { type: String, required: true },
-    company: { type: String, required: true },
+    title: { type: String, },
+    company: { type: String, },
     duration: { type: String }
 }, { _id: false });
 
 const EducationSchema = new mongoose.Schema({
-    school: { type: String, required: true },
-    degree: { type: String, required: true },
-    year: { type: Number, required: true },
+    school: { type: String },
+    degree: { type: String },
+    year: { type: Number },
 }, { _id: false });
 
 const CertificationSchema = new mongoose.Schema({
@@ -49,18 +49,18 @@ const LinkedinContentSchema = new mongoose.Schema(
 
         experience: {
             type: [ExperienceSchema],
-            required: [true, 'Experience is required'],
-            validate: v => v.length > 0 // ensures at least one entry
+            // required: [true, 'Experience is required'],
+            // validate: v => v.length > 0 // ensures at least one entry
         },
         education: {
             type: [EducationSchema],
-            required: [true, 'Education is required'],
-            validate: v => v.length > 0
+            // required: [true, 'Education is required'],
+            // validate: v => v.length > 0
         },
         skills: {
             type: [String],
-            required: [true, 'Skills are required'],
-            validate: v => v.length > 0
+            // required: [true, 'Skills are required'],
+            // validate: v => v.length > 0
         },
         followerCount: Number,
         connectionCount: Number,
