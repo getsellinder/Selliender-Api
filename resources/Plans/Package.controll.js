@@ -429,9 +429,9 @@ export const ConfirmPayment = async (req, res) => {
       status: "success"
 
     }
-    let invoiceId = await Invoice.create(add)
-    await UserModel.findByIdAndUpdate(userId,
-      { InvoiceId: invoiceId._id, PlanId: id, }, { new: true })
+    await Invoice.create(add)
+    // await UserModel.findByIdAndUpdate(userId,
+    //   { InvoiceId: invoiceId._id, PlanId: id, }, { new: true })
     res.status(200).json({ success: true, message: "Payment confirmed Successfully and invoice stored" });
   } catch (error) {
     console.log("ConfirmPayment.error", error)
