@@ -7,20 +7,14 @@ import LinkedinPost from "./LinkedinPost.model.js";
 export const LinkedinUploadFile = async (req, res) => {
     const { id } = req.params
     const { LinkedinURL, LinkedinDec, content, posts } = req.body;
-    // const { files } = req
-    try {
-        // if (!files || (!files.content && !files.posts)) {
-        //     return res.status(400).json({ message: "No file uploaded" });
-        // }
 
-        // Convert uploaded buffer to JSON
+    try {
+
         let savePfofile = null;
         let savePosts = [];
-        // save content
+        console.log("Incoming body:", { LinkedinURL, LinkedinDec, content, posts });
+
         if (content) {
-            // const contentBuffe = files.content[0].buffer
-            // const contentJson = JSON.parse(contentBuffe.toString("utf8"))
-            // // insert profile (add LinkedinURL, LinkedinDec)
             savePfofile = await LinkedinContent.create({
                 LinkedinURL,
                 LinkedinDec,
@@ -46,27 +40,91 @@ export const LinkedinUploadFile = async (req, res) => {
                 savePosts.push(post);
             }
         }
-      
+
 
         if (id) {
             await UserModel.findByIdAndUpdate(id, {
                 LinkedinContentId: savePfofile ? savePfofile._id : null,
                 LinkedinPostId: savePosts.length > 0 ? savePosts[0]._id : null
             });
-          
+
 
         }
         res.status(200).json({
             message: "Files uploaded successfully",
             profile: savePfofile,
             posts: savePosts,
-           
+
         });
     } catch (error) {
         console.error("Error uploading file:", error);
         res.status(500).json({ message: error.message });
     }
 };
+
+// export const LinkedinUploadFile = async (req, res) => {
+//     const { id } = req.params
+//     const { LinkedinURL, LinkedinDec, content, posts } = req.body;
+
+//     try {
+//         let saveProfile = null;
+//         let savePosts = [];
+//         console.log("Incoming body:", { LinkedinURL, LinkedinDec, content, posts });
+
+//         if (content && Object.keys(content).length > 0) {
+//             saveProfile = await LinkedinContent.create({
+//                 LinkedinURL,
+//                 LinkedinDec,
+//                 ...content
+//             })
+//             console.log("✅ Saved content:", saveProfile._id);
+//         } else {
+//             return res.status(400).json({ message: "No content provided." })
+//         }
+
+
+//         // ---------- Save Posts ----------
+//         if (posts && Array.isArray(posts) && posts.length > 0) {
+//             savePosts = await LinkedinPost.insertMany(posts.map((p) => ({
+//                 ...p,
+//                 profileId: saveProfile ? saveProfile._id : null
+//             })))
+//             console.log("✅ Saved posts:", savePosts.length)
+//         } else if (posts && typeof posts === "object" && Object.keys(posts).length > 0) {
+//             const post = await LinkedinPost.create({
+//                 ...posts,
+//                 profileId: saveProfile ? saveProfile._id : null,
+//             })
+//             savePosts.push(post)
+//             console.log("✅ Saved single post:", post._id);
+//         } else {
+//             return res.status(400).json({ message: "No posts provided." })
+//         }
+
+
+//         if (id) {
+//             await UserModel.findByIdAndUpdate(id, {
+//                 LinkedinContentId: saveProfile ? saveProfile._id : null,
+//                 LinkedinPostId: savePosts.length > 0 ? savePosts[0]._id : null,
+//             });
+//             console.log("✅ Linked data to user:", id);
+
+
+//         }
+//         res.status(200).json({
+//             message: "Files uploaded successfully",
+//             profile: saveProfile,
+//             posts: savePosts,
+
+//         });
+//     } catch (error) {
+//         console.error("❌ Error uploading LinkedIn data:", error);
+//         res.status(500).json({ message: error.message });
+//     }
+// };
+
+
+
 
 
 export const getLinkedinUploadFile = async (req, res) => {
