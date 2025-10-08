@@ -74,8 +74,9 @@ export const registerUser = async (req, res) => {
       logintype: "email-password",
     };
     const add = await User.create(data)
-    return res.status(201).json({ message: "User registered successfully.", add });
-    // sendToken(user, 201, res);
+
+    sendToken(add, 201, res);
+    // return res.status(201).json({ message: "User registered successfully.", add });
   } catch (e) {
     return res.status(400).json({ success: false, message: e.message });
   }
