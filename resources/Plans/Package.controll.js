@@ -337,7 +337,7 @@ export const PlanPurchese = async (req, res) => {
         status: "success",
       };
 
-      const invoice = await Invoice.create(add);
+      await Invoice.create(add);
 
       // Update user with free plan info
       // await UserModel.findByIdAndUpdate(
