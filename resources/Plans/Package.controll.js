@@ -340,11 +340,11 @@ export const PlanPurchese = async (req, res) => {
       const invoice = await Invoice.create(add);
 
       // Update user with free plan info
-      await UserModel.findByIdAndUpdate(
-        userId,
-        { InvoiceId: invoice._id, PlanId: id },
-        { new: true }
-      );
+      // await UserModel.findByIdAndUpdate(
+      //   userId,
+      //   { InvoiceId: invoice._id, PlanId: id },
+      //   { new: true }
+      // );
 
       return res.status(200).json({
         success: true,
@@ -361,28 +361,7 @@ export const PlanPurchese = async (req, res) => {
     }
 
     const order = await razorpayInstance.orders.create(options)
-    // let startDate = new Date()
-    // let expiryDate = new Date(startDate)
 
-    // if (durationType === "monthly") {
-    //   expiryDate.setMonth(expiryDate.getMonth() + 1)
-    // } else if (durationType === "yearly") {
-    //   expiryDate.setFullYear(expiryDate.getFullYear() + 1)
-    // }
-    // const add = {
-    //   InvoiceNo: `INV-${Date.now()}`,
-    //   userId,
-    //   PlanId: findPlan._id,
-    //   plan_start_date: startDate,
-    //   plan_expiry_date: expiryDate,
-    //   Amount: planAmount,
-    //   TransactionId: order.id,
-    //   status: "success"
-
-    // }
-    // let invoiceId = await Invoice.create(add)
-    // await UserModel.findByIdAndUpdate(userId,
-    //   { InvoiceId: invoiceId._id, PlanId: id, }, { new: true })
 
     res.status(200).json({
       success: true,
