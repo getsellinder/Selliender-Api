@@ -125,12 +125,16 @@ export const PackageDelete = async (req, res) => {
   }
 };
 export const countSearchlimit = async (req, res) => {
-  const { id } = req.params
+  const { id } = req.params // User id
 
   try {
     const getUser = await UserModel.findById(id)
+    const getUserInvoice = await Invoice.findOne({ id: id }).sort({ createdAt: -1 })
     if (!getUser) {
       return res.status(404).json({ message: "User not found" })
+    }
+    if (!getUserInvoice) {
+      return res.status(500).json({ message: "Invoice not found" })
     }
     let PlanId = getUser.PlanId
 
@@ -160,6 +164,52 @@ export const countSearchlimit = async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error", Error: error.message })
   }
 }
+
+// export const countSearchlimit = async (req, res) => {
+//   const { id } = req.params // User id
+
+//   try {
+//     const getUser = await UserModel.findById(id)
+//     const getUserInvoice = await Invoice.findOne({ id: id }).sort({ createdAt: -1 })
+//     if (!getUser) {
+//       return res.status(404).json({ message: "User not found" })
+//     }
+//     if (!getUserInvoice) {
+//       return res.status(500).json({ message: "Invoice not found" })
+//     }
+//     let PlanId = getUserInvoice.PlanId
+
+//     let getplanLimit = await packageModel.findById(PlanId)
+//     if (!getplanLimit) {
+//       return res.status(404).json({ message: "Plan not found" })
+//     }
+//     console.log("getplanLimit", getplanLimit)
+//     let limitMonth = getplanLimit?.SearchLimitMonthly ?? 0
+//     let limitYear = getplanLimit?.SearchLimitYearly ?? 0
+//     let currentLimit = getUser?.SearchLimit ?? 0
+
+//     let activeLimit = getplanLimit.Total_Yearly_Price == null ? limitMonth : limitYear
+
+
+
+//     if (currentLimit >= activeLimit) {
+//       return res.status(405).json({ message: "Your search limit is over" });
+//     }
+
+//     const updatedUser = await UserModel.findByIdAndUpdate(id, { $inc: { SearchLimit: 1 } }, { new: true })
+
+
+//     return res.status(200).json({ message: "Search count updated", searchCount: updatedUser.SearchLimit, remaining: limit - updatedUser.SearchLimit })
+//   } catch (error) {
+//     console.log("countSearchlimit.error", error)
+//     return res.status(500).json({ message: "Internal Server Error", Error: error.message })
+//   }
+// }
+
+
+
+
+
 export const PackageUpdate = async (req, res) => {
   try {
     const { id } = req.params;
@@ -315,6 +365,7 @@ export const PlanPurchese = async (req, res) => {
     else {
       return res.status(400).json({ message: "Invalid duration type" });
     }
+
     if (planAmount === 0) {
       const startDate = new Date();
       const expiryDate = new Date(startDate);
@@ -352,9 +403,10 @@ export const PlanPurchese = async (req, res) => {
         planId: id,
       });
     }
-
+    let amountInPaise = Math.round(planAmount * 100)
+    console.log("amountInPaise", amountInPaise)
     const options = {
-      amount: planAmount * 100,
+      amount: amountInPaise,
       currency: "INR",
       receipt: `receipt_${Date.now()}`,
 
@@ -409,8 +461,7 @@ export const ConfirmPayment = async (req, res) => {
 
     }
     await Invoice.create(add)
-    // await UserModel.findByIdAndUpdate(userId,
-    //   { InvoiceId: invoiceId._id, PlanId: id, }, { new: true })
+
     res.status(200).json({ success: true, message: "Payment confirmed Successfully and invoice stored" });
   } catch (error) {
     console.log("ConfirmPayment.error", error)
