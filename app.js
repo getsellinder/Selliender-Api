@@ -14,6 +14,7 @@ import CustomerRoute from "./resources/customers/Customer.Route.js"
 import MessageRouter from "./resources/message/Message.Route.js";
 import PackageRoute from "./resources/Plans/Package.Route.js";
 import LinkedinRoute from "./resources/linkedin/Linkedin.Route.js"
+import DISCProfileRoute from "./resources/DISCProfile/DISCProfileRoute.js";
 
 // Design Route
 import designRoute from "./resources/Design/designRouter.js";
@@ -219,6 +220,7 @@ app.use("/api/category", categoryRoute);
 
 app.use("/api/package", PackageRoute);
 app.use("/api/linked", LinkedinRoute)
+app.use("/api/disc", DISCProfileRoute);
 
 app.use("/api/collection", CollectionRoute);
 app.use("/api/color", ColorRoute);

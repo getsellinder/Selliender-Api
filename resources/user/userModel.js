@@ -66,6 +66,8 @@ const userSchema = new mongoose.Schema(
       ref: "LinkedinContent"
 
     },
+    pendingLinkedInURL: { type: String },
+    pendingProductDescription: { type: String },
     city: { type: String },
     state: { type: String },
     country: { type: String, default: "India" },

@@ -2,62 +2,192 @@ import { timeFormat } from "../../Utils/formatDateToIST .js";
 import UserModel from "../user/userModel.js";
 import LinkedinContent from "./LinkedinContent.model.js";
 import LinkedinPost from "./LinkedinPost.model.js";
+import DISCProfile from "../DISCProfile/DISCProfileModel.js";
+import { analyzeLinkedInProfile } from "../DISCProfile/analysisEngine.js";
+import { calculateConfidenceScore } from "../DISCProfile/confidenceScoring.js";
 
 
 export const LinkedinUploadFile = async (req, res) => {
     const { id } = req.params
-    const { LinkedinURL, LinkedinDec, content, posts } = req.body;
+    const { LinkedinURL, content, posts } = req.body;
 
     try {
-
         let savePfofile = null;
         let savePosts = [];
-        console.log("Incoming body:", { LinkedinURL, LinkedinDec, content, posts });
+        console.log("📥 Uploading LinkedIn data (without product description)");
 
         if (content) {
             savePfofile = await LinkedinContent.create({
                 LinkedinURL,
-                LinkedinDec,
                 ...content
             })
+            console.log("✅ Profile saved:", savePfofile._id);
         }
 
-
-        // ---------- Save Posts ----------
         if (posts) {
             if (Array.isArray(posts)) {
                 savePosts = await LinkedinPost.insertMany(posts.map(p => ({
                     ...p,
                     profileId: savePfofile ? savePfofile._id : null
                 })))
+                console.log("✅ Posts saved:", savePosts.length);
             }
             else {
                 const post = await LinkedinPost.create({
                     ...posts,
                     profileId: savePfofile ? savePfofile._id : null
-
                 })
                 savePosts.push(post);
+                console.log("✅ Single post saved");
             }
         }
-
 
         if (id) {
             await UserModel.findByIdAndUpdate(id, {
                 LinkedinContentId: savePfofile ? savePfofile._id : null,
                 LinkedinPostId: savePosts.length > 0 ? savePosts[0]._id : null
             });
-
-
+            console.log("✅ Linked to user:", id);
         }
+
         res.status(200).json({
-            message: "Files uploaded successfully",
+            message: "LinkedIn data uploaded successfully",
             profile: savePfofile,
             posts: savePosts,
-
+            profileId: savePfofile?._id,
+            postId: savePosts.length > 0 ? savePosts[0]._id : null
         });
     } catch (error) {
-        console.error("Error uploading file:", error);
+        console.error("❌ Error uploading file:", error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+export const saveDISCRequest = async (req, res) => {
+    const { userId } = req.params;
+    const { LinkedinURL, productDescription } = req.body;
+
+    try {
+        if (!userId) {
+            return res.status(400).json({ message: "User ID is required" });
+        }
+
+        if (!LinkedinURL || !productDescription) {
+            return res.status(400).json({ message: "LinkedIn URL and product description are required" });
+        }
+
+        const user = await UserModel.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        await UserModel.findByIdAndUpdate(userId, {
+            pendingLinkedInURL: LinkedinURL,
+            pendingProductDescription: productDescription
+        });
+
+        console.log("✅ Product description saved for user:", userId);
+
+        res.status(200).json({
+            message: "Request saved successfully. Ready for analysis.",
+            LinkedinURL,
+            productDescription
+        });
+
+    } catch (error) {
+        console.error("❌ Error saving DISC request:", error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+export const analyzeDISCProfile = async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const user = await UserModel.findById(userId)
+            .populate('LinkedinContentId')
+            .populate('LinkedinPostId');
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        if (!user.pendingProductDescription) {
+            return res.status(400).json({ message: "No product description found. Please save it first." });
+        }
+
+        if (!user.LinkedinContentId) {
+            return res.status(400).json({ message: "No LinkedIn profile data found. Please upload profile first." });
+        }
+
+        console.log("🔄 Starting DISC analysis...");
+
+        const profileData = user.LinkedinContentId.toObject ? user.LinkedinContentId.toObject() : user.LinkedinContentId;
+
+        const allPosts = await LinkedinPost.find({ 
+            profileId: user.LinkedinContentId._id 
+        }).sort({ createdAt: -1 }).limit(30);
+
+        const postsData = allPosts.map(p => p.toObject ? p.toObject() : p);
+
+        console.log(`📊 Analyzing profile: ${profileData.name} with ${postsData.length} posts`);
+
+        const analysisResult = await analyzeLinkedInProfile(
+            profileData,
+            postsData,
+            user.pendingProductDescription
+        );
+
+        console.log("✅ Analysis engine completed");
+
+        const profileDISC = analysisResult.personality.disc;
+        const confidenceResult = calculateConfidenceScore(
+            profileData,
+            postsData,
+            profileDISC,
+            profileDISC,
+            profileDISC,
+            profileDISC
+        );
+
+        const dataSources = [];
+        if (user.LinkedinContentId._id) dataSources.push(`profile_${user.LinkedinContentId._id}`);
+        if (postsData.length > 0) dataSources.push(`posts_${postsData.length}_items`);
+        dataSources.push('about_section', 'experience_section', 'skills_section');
+
+        const discProfileDoc = new DISCProfile({
+            userId: userId,
+            linkedinContentId: user.LinkedinContentId._id,
+            linkedinPostId: user.LinkedinPostId?._id || null,
+            productDescription: user.pendingProductDescription,
+            executive: analysisResult.executive,
+            personality: analysisResult.personality,
+            talkingPoints: analysisResult.talkingPoints,
+            openingScripts: analysisResult.openingScripts,
+            objectionHandling: analysisResult.objectionHandling,
+            personalizationCues: analysisResult.personalizationCues,
+            nextActions: analysisResult.nextActions,
+            confidence: confidenceResult,
+            dataSources,
+            analysisMetadata: analysisResult.analysisMetadata
+        });
+
+        await discProfileDoc.save();
+
+        await UserModel.findByIdAndUpdate(userId, {
+            $unset: { pendingLinkedInURL: "", pendingProductDescription: "" }
+        });
+
+        console.log("✅ DISC analysis completed successfully");
+
+        res.status(200).json({
+            message: "DISC analysis completed successfully",
+            analysisId: discProfileDoc._id,
+            analysis: discProfileDoc
+        });
+
+    } catch (error) {
+        console.error("❌ DISC analysis failed:", error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -281,6 +411,161 @@ export const LinkedinuserDelete = async (req, res) => {
         return res.status(200).json({ message: "User LinkedIn data removed", user: Finduser });
     } catch (error) {
         console.log("Erron in the PackageDelete", error);
+        return res.status(500).json({ message: error.message });
+    }
+};
+
+export const getLatestDISCAnalysis = async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        const user = await UserModel.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const latestAnalysis = await DISCProfile.findOne({ userId })
+            .sort({ createdAt: -1 })
+            .populate('linkedinContentId')
+            .populate('linkedinPostId');
+
+        if (!latestAnalysis) {
+            return res.status(404).json({ 
+                message: "No DISC analysis found for this user. Please analyze a profile first." 
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            analysis: latestAnalysis
+        });
+
+    } catch (error) {
+        console.error("Error fetching latest DISC analysis:", error);
+        return res.status(500).json({ message: error.message });
+    }
+};
+
+export const getDISCAnalysisById = async (req, res) => {
+    try {
+        const { analysisId } = req.params;
+
+        const analysis = await DISCProfile.findById(analysisId)
+            .populate('userId')
+            .populate('linkedinContentId')
+            .populate('linkedinPostId');
+
+        if (!analysis) {
+            return res.status(404).json({ message: "Analysis not found" });
+        }
+
+        return res.status(200).json({
+            success: true,
+            analysis: analysis
+        });
+
+    } catch (error) {
+        console.error("Error fetching DISC analysis:", error);
+        return res.status(500).json({ message: error.message });
+    }
+};
+
+export const getAllDISCAnalysesByUser = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        const user = await UserModel.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const analyses = await DISCProfile.find({ userId })
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
+            .populate('linkedinContentId', 'name title company LinkedinURL')
+            .populate('linkedinPostId');
+
+        const total = await DISCProfile.countDocuments({ userId });
+
+        return res.status(200).json({
+            success: true,
+            count: analyses.length,
+            total: total,
+            currentPage: page,
+            totalPages: Math.ceil(total / limit),
+            analyses: analyses.map(analysis => ({
+                _id: analysis._id,
+                profileName: analysis.linkedinContentId?.name || 'Unknown',
+                profileTitle: analysis.linkedinContentId?.title || 'N/A',
+                profileCompany: analysis.linkedinContentId?.company || 'N/A',
+                linkedinURL: analysis.linkedinContentId?.LinkedinURL || '',
+                productDescription: analysis.productDescription,
+                primaryType: analysis.personality?.primaryType || 'N/A',
+                confidenceScore: analysis.confidence?.score || 0,
+                createdAt: analysis.createdAt,
+                analysisPreview: {
+                    executive: analysis.executive,
+                    disc: analysis.personality?.disc
+                }
+            }))
+        });
+
+    } catch (error) {
+        console.error("Error fetching user DISC analyses:", error);
+        return res.status(500).json({ message: error.message });
+    }
+};
+
+export const getDISCAnalysisSummary = async (req, res) => {
+    try {
+        const { analysisId } = req.params;
+
+        const analysis = await DISCProfile.findById(analysisId)
+            .populate('linkedinContentId', 'name title company location profilePicture LinkedinURL');
+
+        if (!analysis) {
+            return res.status(404).json({ message: "Analysis not found" });
+        }
+
+        const summary = {
+            _id: analysis._id,
+            profile: {
+                name: analysis.linkedinContentId?.name || 'Unknown',
+                title: analysis.linkedinContentId?.title || 'N/A',
+                company: analysis.linkedinContentId?.company || 'N/A',
+                location: analysis.linkedinContentId?.location || 'N/A',
+                profilePicture: analysis.linkedinContentId?.profilePicture || '',
+                linkedinURL: analysis.linkedinContentId?.LinkedinURL || ''
+            },
+            productDescription: analysis.productDescription,
+            executive: analysis.executive,
+            personality: {
+                disc: analysis.personality.disc,
+                bullets: analysis.personality.bullets,
+                primaryType: analysis.personality.primaryType,
+                secondaryType: analysis.personality.secondaryType
+            },
+            talkingPoints: analysis.talkingPoints.slice(0, 5),
+            openingScripts: analysis.openingScripts,
+            objectionHandling: analysis.objectionHandling.slice(0, 5),
+            personalizationCues: analysis.personalizationCues.slice(0, 5),
+            nextActions: analysis.nextActions,
+            confidence: analysis.confidence,
+            analysisMetadata: analysis.analysisMetadata,
+            createdAt: analysis.createdAt
+        };
+
+        return res.status(200).json({
+            success: true,
+            summary: summary
+        });
+
+    } catch (error) {
+        console.error("Error fetching DISC analysis summary:", error);
         return res.status(500).json({ message: error.message });
     }
 };
