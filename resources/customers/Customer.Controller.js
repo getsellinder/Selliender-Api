@@ -1,4 +1,9 @@
 import catchAsyncErrors from "../../middlewares/catchAsyncErrors.js";
+import { timeFormat } from "../../Utils/formatDateToIST .js";
+import Invoice from "../Plans/Invoice.js";
+import packageModel from "../Plans/Package.model.js";
+import UserModel from "../user/userModel.js";
+
 import User from "../user/userModel.js";
 
 export const AddCusstomer = async (req, res) => {
@@ -39,31 +44,138 @@ export const AddCusstomer = async (req, res) => {
   }
 };
 
-export const getAllCustomer = catchAsyncErrors(async (req, res, next) => {
+// export const getAllCustomer = catchAsyncErrors(async (req, res) => {
+//   let limit = parseInt(req.query?.limit) || 4;
+//   let page = parseInt(req.query?.page) || 1;
+//   let search=req.query?.search || ""
+
+//   let obj = {
+//     status: "success",
+//   };
+//   let userMatch = {};
+//   if (req.query?.name) {
+//     if (req.query?.name) {
+//       userMatch.name = { $regex: new RegExp(req.query.name, "i") };
+//     }
+//   }
+
+//   let planMatch = {};
+//   if (req.query?.plan) {
+//     planMatch.Package = { $regex: new RegExp(req.query.plan, "i") };
+//   }
+//   let findUser = await UserModel.find(userMatch).populate(
+//     "PlanId",
+//     "Package _id"
+//   );
+
+//   let userIds = findUser.map((u) => u._id);
+
+//   let total = await UserModel.countDocuments(userMatch);
+
+//   let customers = await Invoice.find({ ...obj, userId: { $in: userIds } })
+//     .populate({
+//       path: "userId",
+//       select: "name email _id",
+//       match: userMatch,
+//     })
+//     .populate({
+//       path: "PlanId",
+//       select: "Package _id",
+//       match: planMatch,
+//     })
+//     .limit(limit)
+//     .skip((page - 1) * limit)
+//     .sort({ createdAt: -1 });
+//   customers = customers.filter((c) => c.userId && c.PlanId);
+//   if (customers.length === 0) {
+//     return res.status(200).json({ message: "No Customer Found" });
+//   }
+//   const data = customers.map((val) => ({
+//     ...val.toObject(),
+//     createdAt: timeFormat(val.createdAt),
+//     Amount: val.Amount.toLocaleString(),
+//   }));
+
+//   res.status(200).json({
+//     success: true,
+//     data,
+//     currentPage: page,
+//     totalItems: total,
+//     totalPages: Math.ceil(total / limit),
+//   });
+// });
+
+export const getAllCustomer = catchAsyncErrors(async (req, res) => {
   let limit = parseInt(req.query?.limit) || 4;
   let page = parseInt(req.query?.page) || 1;
-  let obj = {
-    role: "Customer",
-  };
-  if (req.query?.name) {
-    obj.name = {
-      $regex: new RegExp(req.query?.name),
-      $options: "i",
-    };
-  }
-  let total = await User.countDocuments(obj);
+  let search = req.query?.name || ""; // one search box for both user + plan
 
-  const customers = await User.find(obj)
-    .limit(limit)
-    .skip((page - 1) * limit)
-    .sort({
-      createdAt: -1,
-    });
+  const searchRegex = new RegExp(search, "i");
+
+  // ✅ 1. Find matching users and plans
+  const users = await UserModel.find({ name: { $regex: searchRegex } }).select(
+    "_id"
+  );
+  const plans = await packageModel
+    .find({ Package: { $regex: searchRegex } })
+    .select("_id");
+
+  const userIds = users.map((u) => u._id);
+  const planIds = plans.map((p) => p._id);
+
+  // ✅ 2. Build the invoice filter (either user name or plan name matches)
+  const filter = {
+    status: "success",
+    $or: [{ userId: { $in: userIds } }, { PlanId: { $in: planIds } }],
+  };
+
+  // ✅ 3. Get invoices with populate
+  let invoices = await Invoice.find(filter)
+    .populate({
+      path: "userId",
+      select: "name email _id",
+    })
+    .populate({
+      path: "PlanId",
+      select: "Package _id",
+    })
+    .sort({ createdAt: -1 });
+
+  // ✅ 4. Remove duplicates (one invoice per user)
+  const seenUserIds = new Set();
+  const uniqueInvoices = [];
+
+  for (const inv of invoices) {
+    if (inv.userId && !seenUserIds.has(inv.userId._id.toString())) {
+      seenUserIds.add(inv.userId._id.toString());
+      uniqueInvoices.push(inv);
+    }
+  }
+
+  // ✅ 5. Pagination
+  const totalItems = uniqueInvoices.length;
+  const startIndex = (page - 1) * limit;
+  const paginatedInvoices = uniqueInvoices.slice(
+    startIndex,
+    startIndex + limit
+  );
+
+  if (paginatedInvoices.length === 0) {
+    return res.status(200).json({ message: "No Customer Found" });
+  }
+
+  // ✅ 6. Format response
+  const data = paginatedInvoices.map((val) => ({
+    ...val.toObject(),
+    createdAt: timeFormat(val.createdAt),
+    Amount: val.Amount?.toLocaleString(),
+  }));
 
   res.status(200).json({
     success: true,
-    customers,
-    total_data: total,
-    total_pages: Math.ceil(total / limit),
+    data,
+    currentPage: page,
+    totalItems,
+    totalPages: Math.ceil(totalItems / limit),
   });
 });

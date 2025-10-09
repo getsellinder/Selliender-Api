@@ -202,7 +202,7 @@ import AuthRouter from "./resources/authentication/AuthenticationRoute.js";
 // Point of Sale router
 app.use("/api/v1/", user);
 
-app.use("/api/v1/", CustomerRoute);
+app.use("/api/customer/", CustomerRoute);
 //Product
 app.use("/api", ProductRouter);
 // Chapter
