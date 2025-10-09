@@ -33,6 +33,11 @@ const InvoicesSchema = new mongoose.Schema({
         type: String,
         enum: ["success", "failed"]
 
+    },
+    invoice_status: {
+        type: String,
+        enum: ["Active", "Deactive"],
+        default: "Active"
     }
 
 

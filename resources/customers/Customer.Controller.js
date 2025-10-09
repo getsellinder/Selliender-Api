@@ -1,4 +1,7 @@
 import catchAsyncErrors from "../../middlewares/catchAsyncErrors.js";
+import { timeFormat } from "../../Utils/formatDateToIST .js";
+import Invoice from "../Plans/Invoice.js";
+
 import User from "../user/userModel.js";
 
 export const AddCusstomer = async (req, res) => {
@@ -39,11 +42,18 @@ export const AddCusstomer = async (req, res) => {
   }
 };
 
-export const getAllCustomer = catchAsyncErrors(async (req, res, next) => {
+
+
+
+
+export const getAllCustomer = catchAsyncErrors(async (req, res) => {
+
   let limit = parseInt(req.query?.limit) || 4;
   let page = parseInt(req.query?.page) || 1;
+
   let obj = {
-    role: "Customer",
+    status: "success",
+
   };
   if (req.query?.name) {
     obj.name = {
@@ -51,18 +61,28 @@ export const getAllCustomer = catchAsyncErrors(async (req, res, next) => {
       $options: "i",
     };
   }
-  let total = await User.countDocuments(obj);
+  let total = await Invoice.countDocuments(obj);
 
-  const customers = await User.find(obj)
+
+  const customers = await Invoice.find(obj).populate("userId", "name email").populate("PlanId", "Package")
     .limit(limit)
     .skip((page - 1) * limit)
     .sort({
       createdAt: -1,
     });
 
+  if (customers.length === 0) {
+    return res.status(200).json({ message: "No Customer Found" })
+  }
+  const data = customers.map((val) => ({
+    ...val.toObject(),
+    createdAt: timeFormat(val.createdAt)
+
+  }))
+
   res.status(200).json({
     success: true,
-    customers,
+    data,
     total_data: total,
     total_pages: Math.ceil(total / limit),
   });
