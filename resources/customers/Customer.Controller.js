@@ -55,22 +55,37 @@ export const getAllCustomer = catchAsyncErrors(async (req, res) => {
     status: "success",
 
   };
+  let userMatch = {}
   if (req.query?.name) {
-    obj.name = {
-      $regex: new RegExp(req.query?.name),
-      $options: "i",
-    };
+    if (req.query?.name) {
+      userMatch.name = { $regex: new RegExp(req.query.name, "i") }
+    }
+  }
+
+  let planMatch = {};
+  if (req.query?.plan) {
+    planMatch.Package = { $regex: new RegExp(req.query.plan, "i") }
   }
   let total = await Invoice.countDocuments(obj);
 
 
-  const customers = await Invoice.find(obj).populate("userId", "name email").populate("PlanId", "Package")
+  // const customers = await Invoice.find(obj).populate("userId", "name email").populate("PlanId", "Package")
+
+  let customers = await Invoice.find(obj)
+    .populate({
+      path: "userId",
+      select: "name email",
+      match: userMatch,
+    })
+    .populate({
+      path: "PlanId",
+      select: "Package",
+      match: planMatch,
+    })
     .limit(limit)
     .skip((page - 1) * limit)
-    .sort({
-      createdAt: -1,
-    });
-
+    .sort({ createdAt: -1 });
+  customers = customers.filter(c => c.userId && c.PlanId);
   if (customers.length === 0) {
     return res.status(200).json({ message: "No Customer Found" })
   }
@@ -80,10 +95,13 @@ export const getAllCustomer = catchAsyncErrors(async (req, res) => {
 
   }))
 
+
+
   res.status(200).json({
     success: true,
     data,
-    total_data: total,
-    total_pages: Math.ceil(total / limit),
+    currentPage: page,
+    totalItems: total,
+    totalPages: Math.ceil(total / limit),
   });
 });
