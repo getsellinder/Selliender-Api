@@ -27,7 +27,7 @@ import { isAuthenticatedUser, authorizeRoles } from "../../middlewares/auth.js";
 import { rolesAdmin } from "../../Utils/authorizeRoles.js";
 import {
   AddCusstomer,
-  getAllCustomer,
+
 } from "../customers/Customer.Controller.js";
 
 
@@ -49,6 +49,14 @@ router.route("/user/password/forgot").post(forgotPassword);
 router.route("/user/password/reset/:token").put(resetPassword);
 
 router.route("/user/logout").get(logout);
+// router
+//   .route("/admin/customer")
+//   .get(
+//     isAuthenticatedUser,
+//     authorizeRoles("admin", "Customer"),
+//     getAllCustomer
+//   );
+
 
 router.route("/user/details").get(isAuthenticatedUser, getUserDetails);
 
@@ -71,21 +79,8 @@ router
     authorizeRoles("admin", "Customer"),
     deleteEmployeeById
   );
-router
-  .route("/admin/customer")
-  .get(
-    isAuthenticatedUser,
-    authorizeRoles("admin", "Customer"),
-    getAllCustomer
-  );
 
-router
-  .route("/admin/employee")
-  .get(
-    isAuthenticatedUser,
-    authorizeRoles("admin", "Customer"),
-    getAllCustomer
-  );
+
 router
   .route("/admin/update-employee/:id")
   .put(
