@@ -1,6 +1,8 @@
 import catchAsyncErrors from "../../middlewares/catchAsyncErrors.js";
 import { timeFormat } from "../../Utils/formatDateToIST .js";
 import Invoice from "../Plans/Invoice.js";
+import packageModel from "../Plans/Package.model.js";
+import UserModel from "../user/userModel.js";
 
 import User from "../user/userModel.js";
 
@@ -42,61 +44,56 @@ export const AddCusstomer = async (req, res) => {
   }
 };
 
-
-
-
-
 export const getAllCustomer = catchAsyncErrors(async (req, res) => {
-
   let limit = parseInt(req.query?.limit) || 4;
   let page = parseInt(req.query?.page) || 1;
 
   let obj = {
     status: "success",
-
   };
-  let userMatch = {}
+  let userMatch = {};
   if (req.query?.name) {
     if (req.query?.name) {
-      userMatch.name = { $regex: new RegExp(req.query.name, "i") }
+      userMatch.name = { $regex: new RegExp(req.query.name, "i") };
     }
   }
 
   let planMatch = {};
   if (req.query?.plan) {
-    planMatch.Package = { $regex: new RegExp(req.query.plan, "i") }
+    planMatch.Package = { $regex: new RegExp(req.query.plan, "i") };
   }
-  let total = await Invoice.countDocuments(obj);
-
+  let findUser = await UserModel.find().populate("PlanId", "Package _id");
+  // console.log("findUser", findUser);
+  let userIds = findUser.map((u) => u._id);
+  // console.log("userIds", userIds);
+  // let findInvoice = await Invoice.find(planIds);
+  let total = await UserModel.countDocuments(obj);
 
   // const customers = await Invoice.find(obj).populate("userId", "name email").populate("PlanId", "Package")
 
   let customers = await Invoice.find(obj)
     .populate({
       path: "userId",
-      select: "name email",
+      select: "name email _id",
       match: userMatch,
     })
     .populate({
       path: "PlanId",
-      select: "Package",
+      select: "Package _id",
       match: planMatch,
     })
     .limit(limit)
     .skip((page - 1) * limit)
     .sort({ createdAt: -1 });
-  customers = customers.filter(c => c.userId && c.PlanId);
+  customers = customers.filter((c) => c.userId && c.PlanId);
   if (customers.length === 0) {
-    return res.status(200).json({ message: "No Customer Found" })
+    return res.status(200).json({ message: "No Customer Found" });
   }
   const data = customers.map((val) => ({
     ...val.toObject(),
     createdAt: timeFormat(val.createdAt),
-    Amount: val.Amount.toLocaleString()
-
-  }))
-
-
+    Amount: val.Amount.toLocaleString(),
+  }));
 
   res.status(200).json({
     success: true,
@@ -106,3 +103,61 @@ export const getAllCustomer = catchAsyncErrors(async (req, res) => {
     totalPages: Math.ceil(total / limit),
   });
 });
+
+// export const getAllCustomer = catchAsyncErrors(async (req, res) => {
+
+//   let limit = parseInt(req.query?.limit) || 4;
+//   let page = parseInt(req.query?.page) || 1;
+
+//   let obj = {
+//     status: "success",
+
+//   };
+//   let userMatch = {}
+//   if (req.query?.name) {
+//     if (req.query?.name) {
+//       userMatch.name = { $regex: new RegExp(req.query.name, "i") }
+//     }
+//   }
+
+//   let planMatch = {};
+//   if (req.query?.plan) {
+//     planMatch.Package = { $regex: new RegExp(req.query.plan, "i") }
+//   }
+//   let total = await Invoice.countDocuments(obj);
+
+//   // const customers = await Invoice.find(obj).populate("userId", "name email").populate("PlanId", "Package")
+
+//   let customers = await Invoice.find(obj)
+//     .populate({
+//       path: "userId",
+//       select: "name email _id",
+//       match: userMatch,
+//     })
+//     .populate({
+//       path: "PlanId",
+//       select: "Package _id",
+//       match: planMatch,
+//     })
+//     .limit(limit)
+//     .skip((page - 1) * limit)
+//     .sort({ createdAt: -1 });
+//   customers = customers.filter(c => c.userId && c.PlanId);
+//   if (customers.length === 0) {
+//     return res.status(200).json({ message: "No Customer Found" })
+//   }
+//   const data = customers.map((val) => ({
+//     ...val.toObject(),
+//     createdAt: timeFormat(val.createdAt),
+//     Amount: val.Amount.toLocaleString()
+
+//   }))
+
+//   res.status(200).json({
+//     success: true,
+//     data,
+//     currentPage: page,
+//     totalItems: total,
+//     totalPages: Math.ceil(total / limit),
+//   });
+// });

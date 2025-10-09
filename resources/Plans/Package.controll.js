@@ -4,7 +4,6 @@ import UserModel from "../user/userModel.js";
 import Invoice from "./Invoice.js";
 import packageModel from "./Package.model.js";
 
-
 export const PackageCreate = async (req, res) => {
   try {
     const {
@@ -23,7 +22,6 @@ export const PackageCreate = async (req, res) => {
       Monthly_features,
       Yearly_features,
     } = req.body;
-
 
     let data = {
       Package,
@@ -125,45 +123,55 @@ export const PackageDelete = async (req, res) => {
   }
 };
 export const countSearchlimit = async (req, res) => {
-  const { id } = req.params // User id
+  const { id } = req.params; // User id
 
   try {
-    const getUser = await UserModel.findById(id)
-    const getUserInvoice = await Invoice.findOne({ id: id }).sort({ createdAt: -1 })
+    const getUser = await UserModel.findById(id);
+    const getUserInvoice = await Invoice.findOne({ id: id }).sort({
+      createdAt: -1,
+    });
     if (!getUser) {
-      return res.status(404).json({ message: "User not found" })
+      return res.status(404).json({ message: "User not found" });
     }
     if (!getUserInvoice) {
-      return res.status(500).json({ message: "Invoice not found" })
+      return res.status(500).json({ message: "Invoice not found" });
     }
-    let PlanId = getUser.PlanId
+    let PlanId = getUser.PlanId;
 
-    let getplanLimit = await packageModel.findById(PlanId)
+    let getplanLimit = await packageModel.findById(PlanId);
     if (!getplanLimit) {
-      return res.status(404).json({ message: "Plan not found" })
+      return res.status(404).json({ message: "Plan not found" });
     }
-    console.log("getplanLimit", getplanLimit)
-    let limitMonth = getplanLimit?.SearchLimitMonthly ?? 0
-    let limitYear = getplanLimit?.SearchLimitYearly ?? 0
-    let currentLimit = getUser?.SearchLimit ?? 0
+    console.log("getplanLimit", getplanLimit);
+    let limitMonth = getplanLimit?.SearchLimitMonthly ?? 0;
+    let limitYear = getplanLimit?.SearchLimitYearly ?? 0;
+    let currentLimit = getUser?.SearchLimit ?? 0;
 
-    let activeLimit = getplanLimit.Total_Yearly_Price == null ? limitMonth : limitYear
-
-
+    let activeLimit =
+      getplanLimit.Total_Yearly_Price == null ? limitMonth : limitYear;
 
     if (currentLimit >= activeLimit) {
       return res.status(405).json({ message: "Your search limit is over" });
     }
 
-    const updatedUser = await UserModel.findByIdAndUpdate(id, { $inc: { SearchLimit: 1 } }, { new: true })
+    const updatedUser = await UserModel.findByIdAndUpdate(
+      id,
+      { $inc: { SearchLimit: 1 } },
+      { new: true }
+    );
 
-
-    return res.status(200).json({ message: "Search count updated", searchCount: updatedUser.SearchLimit, remaining: limit - updatedUser.SearchLimit })
+    return res.status(200).json({
+      message: "Search count updated",
+      searchCount: updatedUser.SearchLimit,
+      remaining: limit - updatedUser.SearchLimit,
+    });
   } catch (error) {
-    console.log("countSearchlimit.error", error)
-    return res.status(500).json({ message: "Internal Server Error", Error: error.message })
+    console.log("countSearchlimit.error", error);
+    return res
+      .status(500)
+      .json({ message: "Internal Server Error", Error: error.message });
   }
-}
+};
 
 // export const countSearchlimit = async (req, res) => {
 //   const { id } = req.params // User id
@@ -190,14 +198,11 @@ export const countSearchlimit = async (req, res) => {
 
 //     let activeLimit = getplanLimit.Total_Yearly_Price == null ? limitMonth : limitYear
 
-
-
 //     if (currentLimit >= activeLimit) {
 //       return res.status(405).json({ message: "Your search limit is over" });
 //     }
 
 //     const updatedUser = await UserModel.findByIdAndUpdate(id, { $inc: { SearchLimit: 1 } }, { new: true })
-
 
 //     return res.status(200).json({ message: "Search count updated", searchCount: updatedUser.SearchLimit, remaining: limit - updatedUser.SearchLimit })
 //   } catch (error) {
@@ -205,10 +210,6 @@ export const countSearchlimit = async (req, res) => {
 //     return res.status(500).json({ message: "Internal Server Error", Error: error.message })
 //   }
 // }
-
-
-
-
 
 export const PackageUpdate = async (req, res) => {
   try {
@@ -262,10 +263,7 @@ export const PackageUpdate = async (req, res) => {
   }
 };
 
-
 // User purcheing the Plan APIS
-
-
 
 // export const PlanPurchese = async (req, res) => {
 //   try {
@@ -332,37 +330,34 @@ export const PackageUpdate = async (req, res) => {
 //       message: "Order created successfully",
 //     });
 
-
 //   } catch (error) {
 //     console.error("❌ PlanPurchese Error:", error);
 //     return res.status(500).json({ message: error });
 //   }
 // }
 
-
 export const PlanPurchese = async (req, res) => {
   try {
-    const { id } = req.params
-    const userId = req.user._id
+    const { id } = req.params;
+    const userId = req.user._id;
 
     const { durationType } = req.body;
 
-    const findPlan = await packageModel.findById(id)
+    const findPlan = await packageModel.findById(id);
 
-    const finduser = await UserModel.findById(userId)
+    const finduser = await UserModel.findById(userId);
     if (!findPlan) {
-      return res.status(505).json({ message: "Plan not found" })
+      return res.status(505).json({ message: "Plan not found" });
     }
     if (!finduser) {
-      return res.status(506).json({ message: "User not found" })
+      return res.status(506).json({ message: "User not found" });
     }
-    let planAmount = 0
+    let planAmount = 0;
     if (durationType === "monthly") {
-      planAmount = findPlan?.Total_Monthly_Price ?? 0
+      planAmount = findPlan?.Total_Monthly_Price ?? 0;
     } else if (durationType === "yearly") {
-      planAmount = findPlan?.Total_Yearly_Price ?? 0
-    }
-    else {
+      planAmount = findPlan?.Total_Yearly_Price ?? 0;
+    } else {
       return res.status(400).json({ message: "Invalid duration type" });
     }
 
@@ -390,12 +385,11 @@ export const PlanPurchese = async (req, res) => {
 
       await Invoice.create(add);
 
-      // Update user with free plan info
-      // await UserModel.findByIdAndUpdate(
-      //   userId,
-      //   { InvoiceId: invoice._id, PlanId: id },
-      //   { new: true }
-      // );
+      await UserModel.findByIdAndUpdate(
+        userId,
+        { PlanId: findPlan._id },
+        { new: true }
+      );
 
       return res.status(200).json({
         success: true,
@@ -403,17 +397,15 @@ export const PlanPurchese = async (req, res) => {
         planId: id,
       });
     }
-    let amountInPaise = Math.round(planAmount * 100)
-    console.log("amountInPaise", amountInPaise)
+    let amountInPaise = Math.round(planAmount * 100);
+    console.log("amountInPaise", amountInPaise);
     const options = {
       amount: amountInPaise,
       currency: "INR",
       receipt: `receipt_${Date.now()}`,
+    };
 
-    }
-
-    const order = await razorpayInstance.orders.create(options)
-
+    const order = await razorpayInstance.orders.create(options);
 
     res.status(200).json({
       success: true,
@@ -424,30 +416,27 @@ export const PlanPurchese = async (req, res) => {
       currency: "INR",
       message: "Order created successfully",
     });
-
-
   } catch (error) {
     console.error("❌ PlanPurchese Error:", error);
     return res.status(500).json({ message: error });
   }
-}
-
+};
 
 export const ConfirmPayment = async (req, res) => {
   try {
-    const { id } = req.params
+    const { id } = req.params;
     const userId = req.user._id;
     const { durationType, razorpayPaymentId, planAmount, orderId } = req.body;
     const findPlan = await packageModel.findById(id);
     if (!findPlan) return res.status(404).json({ message: "Plan not found" });
 
-    let startDate = new Date()
-    let expiryDate = new Date(startDate)
+    let startDate = new Date();
+    let expiryDate = new Date(startDate);
 
     if (durationType === "monthly") {
-      expiryDate.setMonth(expiryDate.getMonth() + 1)
+      expiryDate.setMonth(expiryDate.getMonth() + 1);
     } else if (durationType === "yearly") {
-      expiryDate.setFullYear(expiryDate.getFullYear() + 1)
+      expiryDate.setFullYear(expiryDate.getFullYear() + 1);
     }
     const add = {
       InvoiceNo: `INV-${Date.now()}`,
@@ -457,37 +446,44 @@ export const ConfirmPayment = async (req, res) => {
       plan_expiry_date: expiryDate,
       Amount: planAmount,
       TransactionId: razorpayPaymentId,
-      status: "success"
-
-    }
-    await Invoice.create(add)
-
-    res.status(200).json({ success: true, message: "Payment confirmed Successfully and invoice stored" });
+      status: "success",
+    };
+    await Invoice.create(add);
+    await UserModel.findByIdAndUpdate(
+      userId,
+      { PlanId: findPlan._id },
+      { new: true }
+    );
+    res.status(200).json({
+      success: true,
+      message: "Payment confirmed Successfully and invoice stored",
+    });
   } catch (error) {
-    console.log("ConfirmPayment.error", error)
-    return res.status(500).json({ message: error.message })
+    console.log("ConfirmPayment.error", error);
+    return res.status(500).json({ message: error.message });
   }
-}
+};
 
 // get invoice Details\
 
 export const InvoiceDetailsById = async (req, res) => {
-  const { id } = req.params  //user id
+  const { id } = req.params; //user id
   try {
-
     const getinvoice = await Invoice.findById(id)
-      .populate("userId", "name ").populate("PlanId", "Package ").sort({ createdAt: -1 })
+      .populate("userId", "name ")
+      .populate("PlanId", "Package ")
+      .sort({ createdAt: -1 });
     if (!getinvoice) {
-      return res.status(500).json({ message: "Invoice not found" })
+      return res.status(500).json({ message: "Invoice not found" });
     }
-    let invoiceData = getinvoice.toObject()
-    invoiceData.plan_start_date = timeFormat(invoiceData.plan_start_date)
-    invoiceData.plan_expiry_date = timeFormat(invoiceData.plan_expiry_date)
-    invoiceData.Amount = invoiceData.Amount.toLocaleString()
+    let invoiceData = getinvoice.toObject();
+    invoiceData.plan_start_date = timeFormat(invoiceData.plan_start_date);
+    invoiceData.plan_expiry_date = timeFormat(invoiceData.plan_expiry_date);
+    invoiceData.Amount = invoiceData.Amount.toLocaleString();
 
-    return res.status(200).json(invoiceData)
+    return res.status(200).json(invoiceData);
   } catch (error) {
-    console.log("error in InvoiceDetailsById", error)
-    return res.status(500).json({ message: error.message })
+    console.log("error in InvoiceDetailsById", error);
+    return res.status(500).json({ message: error.message });
   }
-}
+};
