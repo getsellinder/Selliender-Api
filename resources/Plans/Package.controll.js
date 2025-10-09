@@ -398,7 +398,7 @@ export const PlanPurchese = async (req, res) => {
       });
     }
     let amountInPaise = Math.round(planAmount * 100);
-    console.log("amountInPaise", amountInPaise);
+
     const options = {
       amount: amountInPaise,
       currency: "INR",
