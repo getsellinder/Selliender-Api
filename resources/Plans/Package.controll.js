@@ -398,7 +398,7 @@ export const PlanPurchese = async (req, res) => {
       });
     }
     let amountInPaise = Math.round(planAmount * 100);
-    console.log("amountInPaise", amountInPaise);
+
     const options = {
       amount: amountInPaise,
       currency: "INR",
@@ -469,17 +469,20 @@ export const ConfirmPayment = async (req, res) => {
 export const InvoiceDetailsById = async (req, res) => {
   const { id } = req.params; //user id
   try {
-    const getinvoice = await Invoice.findById(id)
+    const getinvoice = await Invoice.find({ userId: id })
       .populate("userId", "name ")
       .populate("PlanId", "Package ")
       .sort({ createdAt: -1 });
     if (!getinvoice) {
       return res.status(500).json({ message: "Invoice not found" });
     }
-    let invoiceData = getinvoice.toObject();
-    invoiceData.plan_start_date = timeFormat(invoiceData.plan_start_date);
-    invoiceData.plan_expiry_date = timeFormat(invoiceData.plan_expiry_date);
-    invoiceData.Amount = invoiceData.Amount.toLocaleString();
+
+    let invoiceData = getinvoice.map((val) => ({
+      ...val.toObject(),
+      plan_start_date: timeFormat(val.plan_start_date),
+      plan_expiry_date: timeFormat(val.plan_expiry_date),
+      Amount: val.Amount.toLocaleString(),
+    }));
 
     return res.status(200).json(invoiceData);
   } catch (error) {
