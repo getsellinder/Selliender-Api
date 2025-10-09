@@ -91,7 +91,8 @@ export const getAllCustomer = catchAsyncErrors(async (req, res) => {
   }
   const data = customers.map((val) => ({
     ...val.toObject(),
-    createdAt: timeFormat(val.createdAt)
+    createdAt: timeFormat(val.createdAt),
+    Amount: val.Amount.toLocaleString()
 
   }))
 

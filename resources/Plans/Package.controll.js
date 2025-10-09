@@ -472,23 +472,20 @@ export const ConfirmPayment = async (req, res) => {
 // get invoice Details\
 
 export const InvoiceDetailsById = async (req, res) => {
-  const { id } = req.params
+  const { id } = req.params  //user id
   try {
 
-    const getinvoice = await Invoice.find({ userId: id })
-      .populate("userId", "name _id").populate("PlanId", "Package _id").sort({ createdAt: -1 })
+    const getinvoice = await Invoice.findById(id)
+      .populate("userId", "name ").populate("PlanId", "Package ").sort({ createdAt: -1 })
     if (!getinvoice) {
       return res.status(500).json({ message: "Invoice not found" })
     }
+    let invoiceData = getinvoice.toObject()
+    invoiceData.plan_start_date = timeFormat(invoiceData.plan_start_date)
+    invoiceData.plan_expiry_date = timeFormat(invoiceData.plan_expiry_date)
+    invoiceData.Amount = invoiceData.Amount.toLocaleString()
 
-    const invoicesWithIndianDates = getinvoice.map(inv => ({
-      ...inv.toObject(),
-      plan_start_date: timeFormat(inv.plan_start_date),
-      plan_expiry_date: timeFormat(inv.plan_expiry_date),
-      createdAt: timeFormat(inv.createdAt),
-      updatedAt: timeFormat(inv.updatedAt),
-    }))
-    return res.status(200).json(invoicesWithIndianDates)
+    return res.status(200).json(invoiceData)
   } catch (error) {
     console.log("error in InvoiceDetailsById", error)
     return res.status(500).json({ message: error.message })
