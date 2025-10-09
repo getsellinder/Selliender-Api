@@ -38,3 +38,9 @@
    /* .likedin-head{
     width: 70%;
    } */
+
+
+   .nav-icon {
+  width: 18px;   /* smaller width */
+  height: 18px;  /* smaller height */
+}

@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import Button from "@material-ui/core/Button";
+
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import { isAutheticated } from "src/auth";
-import swal from "sweetalert";
+
 import {
   Box,
   FormControl,
@@ -16,86 +13,55 @@ import {
   TextField,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import Fuse from "fuse.js";
-import { InputAdornment, Typography } from "@material-ui/core";
-import OrderDetails from "./orderDetails";
-const CustomerTable = () => {
-  const token = isAutheticated();
+
+
+import { CircularProgress } from "@mui/material";
+
+import { isAutheticated } from "src/auth";
+import { useLeeds } from "./LeedsContext";
+import { InputAdornment } from "@material-ui/core";
+
+const Leeds = () => {
+
+  const {
+    allLeeds,
+    
+    packageLoading,
+   
+    getAllLeeds,
+  } = useLeeds();
+  const leeds = allLeeds?.result;
+  console.log("leeds",leeds)
 
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [query, setQuery] = useState("");
-  const [loading1, setLoading1] = useState(true);
-  const [success, setSuccess] = useState(true);
-  const [users, setUsers] = useState([]);
-
   const [currentPage, setCurrentPage] = useState();
   const [itemPerPage, setItemPerPage] = useState();
-  const [totalpages, setTotalPages] = useState();
-  const [showData, setShowData] = useState([]);
+  const [limit, setLimit] = useState(5);
 
   const [name, setName] = useState("");
-  const [plan, setPlan] = useState("");
 
-  const getUsers = async (
-    searchName = name,
-    page = currentPage,
-    limit = itemPerPage
-  ) => {
-    axios
-      .get(`/api/customer/customers`, {
-        params: {
-          limit: limit,
-          page: page,
-          name: searchName,
-        },
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => {
-        setShowData(res?.data.data);
-        setTotalPages(res.data.total_pages);
-        setLoading(false);
-      })
-      .catch((error) => {
-        swal({
-          title: error,
-          text: "please login to access the resource or refresh the page  ",
-          icon: "error",
-          button: "Retry",
-          dangerMode: true,
-        });
-        setLoading(false);
-      });
+
+
+  const handleSearch = (plan) => {
+    getAllLeeds(1, limit, plan);
   };
-  const handleSearch = (name) => {
-    setCurrentPage(1);
-    getUsers(name, 1, itemPerPage);
-    setName(name);
-    setPlan(name);
-  };
+
   const handleShowEntries = (e) => {
     let newlimit = e.target.value;
-    setCurrentPage(1);
-    setItemPerPage(newlimit);
-    getUsers(name, 1, newlimit);
+    setLimit(newlimit)
+    getAllLeeds(1, newlimit, undefined);
   };
 
-  useEffect(() => {
-    getUsers();
-  }, [success]);
 
   const tableheading = [
-    "Id",
+
     "Customer",
-    "Plan Name",
-    "Plan Amount",
+    "Email", 
+  "Message",
     "Status",
-    "Registation",
-    "Action",
-  ];
-  console.log("showData", showData);
+    "Created",
+];
+
   return (
     <div className="main-content">
       <div className="page-content">
@@ -104,32 +70,16 @@ const CustomerTable = () => {
             <div className="col-12">
               <div
                 className="
-                    page-title-box
-                    d-flex
-                    align-items-center
-                    justify-content-between
-                  "
+                       page-title-box
+                       d-flex
+                       align-items-center
+                       justify-content-between
+                     "
               >
                 <div style={{ fontSize: "22px" }} className="fw-bold">
-                  All Customers
+                  All Leeds
                 </div>
-                {/* 
-                <div className="page-title-right">
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    style={{
-                      fontWeight: "bold",
-                      marginBottom: "1rem",
-                      textTransform: "capitalize",
-                    }}
-                    onClick={() => {
-                      navigate("/add-customer");
-                    }}
-                  >
-                    Add Customer
-                  </Button>
-                </div> */}
+
               </div>
             </div>
           </div>
@@ -152,12 +102,13 @@ const CustomerTable = () => {
                           <select
                             style={{ width: "10%" }}
                             name=""
+
                             onChange={(e) => handleShowEntries(e)}
                             className="
-                                select-w
-                                custom-select custom-select-sm
-                                form-control form-control-sm
-                              "
+                                   select-w
+                                   custom-select custom-select-sm
+                                   form-control form-control-sm
+                                 "
                           >
                             <option value="5">5</option>
                             <option value="10">10</option>
@@ -177,13 +128,13 @@ const CustomerTable = () => {
                         >
                           <TextField
                             variant="outlined"
-                            placeholder="Search customers..."
+                            placeholder="Search Customer..."
                             value={name}
                             name="name"
                             onChange={(e) => {
-                              let val = e.target.value;
-                              setName(val)
-                              getUsers(val, 1, itemPerPage);
+                              const val = e.target.value;
+                              setName(val);
+                              getAllLeeds(1, limit, val);
                             }}
                             fullWidth
                             InputProps={{
@@ -217,75 +168,98 @@ const CustomerTable = () => {
                       >
                         <tr>
                           {tableheading.map((name) => (
-                            <th style={{ textAlign: "center" }}>{name}</th>
+                            <th
+
+                            >
+                              {name}
+                            </th>
                           ))}
                         </tr>
                       </thead>
                       <tbody>
-                        {!loading && showData?.length === 0 && (
+                        {!packageLoading && leeds.length === 0 && (
                           <tr className="text-center">
-                            <td colSpan="6">
+                            <td colSpan="12">
                               <h5>No Data Available</h5>
                             </td>
                           </tr>
                         )}
-                        {loading ? (
+                        {packageLoading ? (
                           <tr>
-                            <td className="text-center" colSpan="6">
+                            <td className="text-center" colSpan="12">
                               Loading...
                             </td>
                           </tr>
                         ) : (
-                          showData?.map((user, i) => {
-                            console.log("showData", showData);
+                          leeds.map((user, i) => {
+                            console.log("user", user)
+
                             return (
                               <tr key={i}>
-                                <td className="text-center">{user.userId._id}</td>
+                                <td className="text-start">{user.name}</td>
+
                                 <td className="text-center">
-                                  {user.userId.name}
+                                {user.email}
                                 </td>
-                                <td className="text-center">
-                                  {user.PlanId.Package}
-                                </td>
-                                <td className="text-center">
-                                  {user.Amount === "0" ? 0 : `₹${user.Amount}`}
-                                </td>
-                                <td className="text-center">{user.status}</td>
+                       
+                                <td className="">{user.message}</td>
+
+
+                                <td className="text-center"> {user.status}</td>
+
                                 <td className="text-center">
                                   {user.createdAt}
                                 </td>
+                                {/* 
+                                <td className="text-start">
+                                  <Link to={`/Pricing-Plans/view/${user?._id}`}>
+                                    <button
 
-                                <td className="text-center">
-                                  {/* <Link to={`/customers-details/${user?._id}`}>
-                                    <button
+                                      style={{
+                                        fontWeight: "600",
+                                        color: "#000",
+                                      }}
                                       type="button"
                                       className="mt-1 btn btn-info btn-sm  waves-effect waves-light btn-table ml-2"
                                     >
-                                      View
-                                    </button>
-                                  </Link> */}
-                                  <Link
-                                    to={`/${user.userId.name}/invoice/${user?.userId?._id}`}
-                                  >
-                                    <button
-                                      style={{ background: "orange" }}
-                                      type="button"
-                                      className="mt-1 btn btn-info btn-sm  waves-effect waves-light btn-table ml-2"
-                                    >
-                                      Invoice
+                                      {packageviewLoading === user._id ? (
+                                        <CircularProgress size={25} />
+                                      ) : (
+                                        "View"
+                                      )}
                                     </button>
                                   </Link>
-                                </td>
+                                </td> */}
+                                {/* <td className="text-start">
+                                  <button
+                                    onClick={() =>
+                                      handlePackageDelete(user?._id)
+                                    }
+                                    style={{
+                                      background: "red",
+                                      fontWeight: "600",
+                                      color: "#000",
+                                    }}
+                                    type="button"
+                                    className="mt-1 btn btn-info btn-sm  waves-effect waves-light btn-table ml-2"
+                                  >
+                                    {packagedelLoading === user?._id ? (
+                                      <CircularProgress size={25} />
+                                    ) : (
+                                      "Delete"
+                                    )}
+                                  </button>
+                                </td> */}
                               </tr>
                             );
                           })
                         )}
-                        <Pagination
-                          count={totalpages}
-                          page={currentPage}
+                        <Pagination sx={{ textAlign: "end" }}
+                          count={allLeeds.totalPages}
+                          page={allLeeds.currentPage}
                           onChange={(e, value) => {
                             setCurrentPage(value);
-                            getUsers(name, value, itemPerPage);
+                            getAllLeeds(value, undefined, undefined);
                           }}
                           color="primary"
                           shape="rounded"
@@ -303,4 +277,4 @@ const CustomerTable = () => {
   );
 };
 
-export default CustomerTable;
+export default Leeds;

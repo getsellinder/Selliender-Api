@@ -3,6 +3,7 @@ import CIcon from "@coreui/icons-react";
 import { TbDeviceIpadMinus } from "react-icons/tb";
 import { FiLinkedin } from "react-icons/fi";
 import { cibLinkedin } from "@coreui/icons";
+import { cilBriefcase } from "@coreui/icons";
 
 
 import {
@@ -135,6 +136,15 @@ const _nav = [
         to: "/Usage",
         group: "Customer Service",
       },
+
+       {
+        component: CNavItem, 
+        name: "Leeds",
+        icon: <CIcon icon={cilBriefcase} customClassName="nav-icon"  />,
+        to: "/leeds",
+        group: "Customer Service",
+      },
+ 
     
   {
     component: CNavItem,

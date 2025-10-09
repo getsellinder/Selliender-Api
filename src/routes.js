@@ -151,6 +151,8 @@ import PlanEdit from "./views/Plans/PlansEdit";
 import PlanView from "./views/Plans/PlansView";
 import Linkedin from "./views/Linkiedin/Linkedin";
 import LinkedinView from "./views/Linkiedin/LinkedinView";
+import Leeds from "./views/Leeds/Leeds";
+import Invoice from "./views/customerDetails/Invoice";
 
 
 
@@ -685,7 +687,19 @@ const routes = [
     element: LinkedinView,
     navName: "Website Related",
   },
+  {
+    path: "/leeds",
+    name: "Leeds",
+    element: Leeds,
+    navName: "Website Related",
+  },
 
+    {
+    path: "/:name/invoice/:id",
+    name: "Invoice",
+    element: Invoice,
+    navName: "Website Related",
+  },
   // {
   //   path: "/home/panel-4",
   //   name: "EditPanel4",

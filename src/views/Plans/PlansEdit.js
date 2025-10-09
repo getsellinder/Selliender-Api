@@ -47,6 +47,8 @@ const PlanEdit = () => {
     SearchLimitYearly: singlePlanData?.SearchLimitYearly || "",
     Monthly_features: [""],
     Yearly_features: [""],
+    gstMonthlyPrice: "" || 0,
+    gstYearlyPrice: "" || 0
   });
 
 
@@ -79,6 +81,10 @@ const PlanEdit = () => {
       const gstPercent = gstItem ? gstItem.Gst : 18;
       const monthlyPrice = parseFloat(updatePlans.Monthly_Price) || 0;
       const yearlyPrice = parseFloat(updatePlans.Yearly_Price) || 0;
+
+
+      updatePlans.gstMonthlyPrice = (monthlyPrice * gstPercent) / 100
+      updatePlans.gstYearlyPrice = (yearlyPrice * gstPercent) / 100
 
       updatePlans.Total_Monthly_Price = monthlyPrice + (monthlyPrice * gstPercent) / 100;
       updatePlans.Total_Yearly_Price = yearlyPrice + (yearlyPrice * gstPercent) / 100;
@@ -229,6 +235,33 @@ const PlanEdit = () => {
                 ))}
               </TextField>
             </Grid>
+            {/* Yearly GST Price */}
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                label="Yearly GST Price (₹)"
+                name="gstPrice"
+                type="number"
+                value={plan.gstYearlyPrice}
+                onChange={handleChange}
+                disabled
+                InputLabelProps={{ shrink: true }}
+              />
+            </Grid>
+
+            {/* Monthly Gst Price */}
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                label="Monthly GST Price (₹)"
+                name="gstMonthlyPrice"
+                type="number"
+                value={plan.gstMonthlyPrice}
+                onChange={handleChange}
+                disabled
+                InputLabelProps={{ shrink: true }}
+              />
+            </Grid>
 
             {/* Monthly Price with gst */}
             <Grid item xs={12} sm={4}>
@@ -240,6 +273,7 @@ const PlanEdit = () => {
                 value={plan.Total_Monthly_Price}
                 onChange={handleChange}
                 disabled
+                InputLabelProps={{ shrink: true }}
               />
             </Grid>
 
@@ -266,7 +300,7 @@ const PlanEdit = () => {
                 type="number"
                 value={plan.SearchLimitYearly}
                 onChange={handleChange}
-                   InputLabelProps={{ shrink: true }}  
+                InputLabelProps={{ shrink: true }}
               />
             </Grid>
 
@@ -280,19 +314,19 @@ const PlanEdit = () => {
                 type="number"
                 value={plan.SearchLimitMonthly}
                 onChange={handleChange}
-                   InputLabelProps={{ shrink: true }}  
+                InputLabelProps={{ shrink: true }}
               />
             </Grid>
             <Grid item xs={12} sm={4}>
               <TextField
                 fullWidth
-                 variant="outlined"
+                variant="outlined"
                 label="User Limit Yearly"
                 name="yearlyUserLimit"
                 type="number"
                 value={plan.yearlyUserLimit}
                 onChange={handleChange}
-                   InputLabelProps={{ shrink: true }}  
+                InputLabelProps={{ shrink: true }}
               />
             </Grid>
 
@@ -306,7 +340,7 @@ const PlanEdit = () => {
                 type="number"
                 value={plan.monthlyUserLimit}
                 onChange={handleChange}
-                 InputLabelProps={{ shrink: true }}   
+                InputLabelProps={{ shrink: true }}
               />
             </Grid>
 

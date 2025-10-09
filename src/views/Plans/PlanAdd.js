@@ -23,7 +23,7 @@ const PlanAdd = () => {
   const token = isAutheticated();
   const [planLoading, setPlanLoading] = useState(false);
   const { getgst, allPackages, getAllpackages } = usePlan();
-  console.log("allPackages", allPackages)
+
 
 
   const [plan, setPlan] = useState({
