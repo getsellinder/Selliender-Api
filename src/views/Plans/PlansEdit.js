@@ -38,7 +38,7 @@ const PlanEdit = () => {
     Total_Monthly_Price: singlePlanData?.Total_Monthly_Price || "",
     Total_Yearly_Price: singlePlanData?.Total_Yearly_Price || "",
     Monthly_Price: singlePlanData?.Monthly_Price || "",
-    PlanLimit: singlePlanData?.PlanLimit || "",
+
     name: singlePlanData?.name || "",
     yearlyUserLimit: singlePlanData?.yearlyUserLimit || "",
     monthlyUserLimit: singlePlanData?.yearlyUserLimit || "",
@@ -55,25 +55,7 @@ const PlanEdit = () => {
   // handle input change
   const handleChange = (e) => {
     const { name, value } = e.target;
-    // setPlan((prevPlan) => {
-    //   if (name === "GST") {
-    //     const getItem = getgst.find((item) => item._id === value);
-    //     const gstPercent = getItem ? getItem.Gst : 18;
 
-    //     const monthlyPrice = parseFloat(prevPlan.Monthly_Price) || 18;
-    //     let yearlyPrice = parseFloat(prevPlan.Yearly_Price) || 18;
-
-    //     let totalMonthly = monthlyPrice + (monthlyPrice * gstPercent) / 100;
-    //     const totalYearly = yearlyPrice + (yearlyPrice * gstPercent) / 100;
-    //     return {
-    //       ...prevPlan,
-    //       GST: value,
-    //       Total_Monthly_Price: totalMonthly,
-    //       Total_Yearly_Price: totalYearly,
-    //     };
-    //   }
-    //   return { ...prevPlan, [name]: value };
-    // });
 
     setPlan((prevPlan) => {
       const updatePlans = { ...prevPlan, [name]: value }
@@ -147,10 +129,14 @@ const PlanEdit = () => {
         Total_Monthly_Price: singlePlanData.Total_Monthly_Price || "",
         Total_Yearly_Price: singlePlanData.Total_Yearly_Price || "",
         Monthly_Price: singlePlanData.Monthly_Price || "",
-        PlanLimit: singlePlanData.PlanLimit || "",
+        yearlyUserLimit: singlePlanData?.yearlyUserLimit || "",
+    monthlyUserLimit: singlePlanData?.yearlyUserLimit || "",
         name: singlePlanData.name || "",
+           SearchLimitMonthly: singlePlanData?.SearchLimitMonthly || "",
+    SearchLimitYearly: singlePlanData?.SearchLimitYearly || "",
         Monthly_features: singlePlanData.Monthly_features || [""],
         Yearly_features: singlePlanData.Yearly_features || [""],
+
       });
     }
   }, [singlePlanData]);
@@ -332,7 +318,7 @@ const PlanEdit = () => {
 
 
             {/* Monthly User limit */}
-            <Grid item xs={12} sm={4}>
+            <Grid item xs={12} sm={12}>
               <TextField
                 fullWidth
                 label="User Limit Monthly"
