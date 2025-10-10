@@ -6,7 +6,6 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 
-
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -50,21 +49,18 @@ const userSchema = new mongoose.Schema(
     },
     PlanId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "plan"
+      ref: "plan",
     },
     SearchLimit: {
-      type: Number
-
+      type: Number,
     },
     LinkedinPostId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "LinkedinPost"
-
+      ref: "LinkedinPost",
     },
     LinkedinContentId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "LinkedinContent"
-
+      ref: "LinkedinContent",
     },
     city: { type: String },
     state: { type: String },
@@ -82,7 +78,7 @@ const userSchema = new mongoose.Schema(
 
     PlanId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "plan"
+      ref: "plan",
     },
 
     resetPasswordToken: String,
