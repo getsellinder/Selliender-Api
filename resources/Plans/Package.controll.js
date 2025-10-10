@@ -471,9 +471,9 @@ export const ConfirmPayment = async (req, res) => {
 // get invoice Details\
 
 export const InvoiceDetailsById = async (req, res) => {
-  const { id } = req.params; //user id
+  const { id } = req.params; //invoice id
   try {
-    const getinvoice = await Invoice.find({ userId: id })
+    const getinvoice = await Invoice.findById(id)
       .populate("userId", "name ")
       .populate("PlanId", "Package ")
       .sort({ createdAt: -1 });
@@ -481,12 +481,17 @@ export const InvoiceDetailsById = async (req, res) => {
       return res.status(500).json({ message: "Invoice not found" });
     }
 
-    let invoiceData = getinvoice.map((val) => ({
-      ...val.toObject(),
-      plan_start_date: timeFormat(val.plan_start_date),
-      plan_expiry_date: timeFormat(val.plan_expiry_date),
-      Amount: val.Amount.toLocaleString(),
-    }));
+    // let invoiceData = getinvoice.map((val) => ({
+    //   ...val.toObject(),
+    //   plan_start_date: timeFormat(val.plan_start_date),
+    //   plan_expiry_date: timeFormat(val.plan_expiry_date),
+    //   Amount: val.Amount.toLocaleString(),
+    // }));
+    let invoiceData = getinvoice.toObject();
+    (invoiceData.plan_start_date = timeFormat(invoiceData.plan_start_date)),
+      (invoiceData.plan_expiry_date = timeFormat(invoiceData.plan_expiry_date)),
+      (invoiceData.createdAt = timeFormat(invoiceData.createdAt)),
+      (invoiceData.Amount = invoiceData.Amount.toLocaleString());
 
     return res.status(200).json(invoiceData);
   } catch (error) {
