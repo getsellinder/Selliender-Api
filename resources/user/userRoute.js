@@ -25,24 +25,19 @@ import {
 } from "./userController.js";
 import { isAuthenticatedUser, authorizeRoles } from "../../middlewares/auth.js";
 import { rolesAdmin } from "../../Utils/authorizeRoles.js";
-import {
-  AddCusstomer,
-
-} from "../customers/Customer.Controller.js";
-
+import { AddCusstomer } from "../customers/Customer.Controller.js";
 
 const router = express.Router();
 
 router.route("/user/register").post(registerUser);
+router.route("/user/login").post(loginUser);
+
 router.route("/user/otp").post(VarificationOTP);
 
 //login and signin from google
 router.route("/user/googleLoginSingin").post(googleSigninAndLogin);
 // router.route("/google/callback").get(googlelogin);
 router.route("/google/callback").post(googlelogin);
-
-
-router.route("/user/login").post(loginUser);
 
 router.route("/user/password/forgot").post(forgotPassword);
 
@@ -56,7 +51,6 @@ router.route("/user/logout").get(logout);
 //     authorizeRoles("admin", "Customer"),
 //     getAllCustomer
 //   );
-
 
 router.route("/user/details").get(isAuthenticatedUser, getUserDetails);
 
@@ -80,7 +74,6 @@ router
     deleteEmployeeById
   );
 
-
 router
   .route("/admin/update-employee/:id")
   .put(
@@ -96,9 +89,7 @@ router
     getUserOrderForAdmin
   );
 
-router
-  .route("/admin/user/:id")
-  .get(getSingleUser);
+router.route("/admin/user/:id").get(getSingleUser);
 
 router.route("/user/password/update").put(isAuthenticatedUser, updatePassword);
 
@@ -125,7 +116,5 @@ router.post(
   authorizeRoles(...rolesAdmin),
   AddEmploye
 );
-
-
 
 export default router;
