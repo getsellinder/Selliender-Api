@@ -344,9 +344,9 @@ export const PackageUpdate = async (req, res) => {
 export const PlanPurchese = async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = req.user._id;
+    // const userId = req.user._id;
 
-    const { durationType } = req.body;
+    const { durationType, userId } = req.body;
 
     const findPlan = await packageModel.findById(id);
 
@@ -434,8 +434,8 @@ export const PlanPurchese = async (req, res) => {
 export const ConfirmPayment = async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = req.user._id;
-    const { durationType, razorpayPaymentId, planAmount, orderId } = req.body;
+    // const userId = req.user._id;
+    const { durationType, razorpayPaymentId, planAmount, userId } = req.body;
     const findPlan = await packageModel.findById(id);
     if (!findPlan) return res.status(404).json({ message: "Plan not found" });
 

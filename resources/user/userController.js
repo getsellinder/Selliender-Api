@@ -45,7 +45,6 @@ export const registerUser = async (req, res) => {
 
     let findUser = await User.findOne({ email });
 
-
     if (findUser) {
       return res
         .status(400)
@@ -54,7 +53,8 @@ export const registerUser = async (req, res) => {
 
     if (password.trim() !== confirmPassword.trim()) {
       return res.status(400).json({
-        message: "Password and Confirm Password do not match. Please try again."
+        message:
+          "Password and Confirm Password do not match. Please try again.",
       });
     }
 
@@ -73,7 +73,7 @@ export const registerUser = async (req, res) => {
       PlanId,
       logintype: "email-password",
     };
-    const add = await User.create(data)
+    const add = await User.create(data);
 
     sendToken(add, 201, res);
     // return res.status(201).json({ message: "User registered successfully.", add });
@@ -353,12 +353,14 @@ export const getUserDetails = catchAsyncErrors(async (req, res, next) => {
   });
 });
 
-
 export const getSingleUser = catchAsyncErrors(async (req, res, next) => {
   if (!req.params.id) {
     return next(new ErrorHander(`please send User ID`, 404));
   }
-  const user = await User.findById(req.params.id).populate("PlanId", "Package SearchLimitMonthly SearchLimitYearly name");
+  const user = await User.findById(req.params.id).populate(
+    "PlanId",
+    "Package SearchLimitMonthly SearchLimitYearly name"
+  );
 
   if (!user) {
     return next(
@@ -828,5 +830,3 @@ export const googlelogin = async (req, res) => {
     return res.status(500).json({ message: error.message || "Server error" });
   }
 };
-
-
