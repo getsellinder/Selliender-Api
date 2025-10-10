@@ -357,10 +357,13 @@ export const PlanPurchese = async (req, res) => {
       return res.status(506).json({ message: "User not found" });
     }
     let planAmount = 0;
+    let message = "";
     if (durationType === "monthly") {
       planAmount = findPlan?.Total_Monthly_Price ?? 0;
     } else if (durationType === "yearly") {
       planAmount = findPlan?.Total_Yearly_Price ?? 0;
+      planAmount = planAmount * 0.8; //20% discount on yearly plan
+      message = `You selected yearly plan. You got 20% discount!`;
     } else {
       return res.status(400).json({ message: "Invalid duration type" });
     }
@@ -442,6 +445,11 @@ export const ConfirmPayment = async (req, res) => {
     } else if (durationType === "yearly") {
       expiryDate.setFullYear(expiryDate.getFullYear() + 1);
     }
+    // let discountedPrice = planAmount;
+    // if (durationType === "yearly") {
+    //   discountedPrice = planAmount * 0.8;
+    // }
+    console.log("discountedPrice", discountedPrice);
     const add = {
       InvoiceNo: `INV-${Date.now()}`,
       userId,
@@ -474,8 +482,10 @@ export const InvoiceDetailsById = async (req, res) => {
   const { id } = req.params; //invoice id
   try {
     const getinvoice = await Invoice.findById(id)
-      .populate("userId", "name ")
-      .populate("PlanId", "Package ")
+      // .populate("userId", "name ")
+      // .populate("PlanId", "Package ")
+      .populate("userId", "phone name email")
+      .populate("PlanId")
       .sort({ createdAt: -1 });
     if (!getinvoice) {
       return res.status(500).json({ message: "Invoice not found" });
