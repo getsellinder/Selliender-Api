@@ -12,7 +12,6 @@ const PackageScheme = new mongoose.Schema(
     },
     monthlyUserLimit: {
       type: Number,
-
     },
     yearlyUserLimit: {
       type: Number,
@@ -28,30 +27,33 @@ const PackageScheme = new mongoose.Schema(
     GST: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Tax",
-      required: false
-
+      required: false,
     },
 
     Monthly_Price: {
       type: Number,
-      default: 0
-
+      default: 0,
     },
     Yearly_Price: {
       type: Number,
-      default: 0
-
-
+      default: 0,
     },
     Total_Yearly_Price: {
       type: Number,
-      default: 0
-
+      default: 0,
     },
+
     Total_Monthly_Price: {
       type: Number,
-      default: 0
-
+      default: 0,
+    },
+    gstMonthlyPrice: {
+      type: Number,
+      default: 0,
+    },
+    gstYearlyPrice: {
+      type: Number,
+      default: 0,
     },
     Monthly_features: {
       type: [],
