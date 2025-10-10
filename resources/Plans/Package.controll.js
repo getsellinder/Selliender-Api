@@ -448,7 +448,6 @@ export const ConfirmPayment = async (req, res) => {
       expiryDate.setFullYear(expiryDate.getFullYear() + 1);
     }
 
-    console.log("discountedPrice", discountedPrice);
     const add = {
       InvoiceNo: `INV-${Date.now()}`,
       userId,
