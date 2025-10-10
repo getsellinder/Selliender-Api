@@ -94,12 +94,13 @@ const Invoice = () => {
             </Typography>
           </Grid>
 
-          <Grid
+          <Grid color="text.secondary"
             item
             xs={4}
             sx={{
-              backgroundColor: "#1f6fb2",
-              color: "#fff",
+              // backgroundColor: "#1f6fb2",
+                    backgroundColor: "#dbeefb",
+              // color: "#fff",
               p: 2,
               textAlign: "right",
             }}
@@ -107,7 +108,7 @@ const Invoice = () => {
             <Typography variant="h4" fontWeight={700}>
               Invoice
             </Typography>
-            <Typography variant="body2" sx={{ mt: 1 }}>
+            <Typography variant="body2"  sx={{ mt: 1 }}>
               <div>
                 <strong>Invoice </strong> {invoice?.InvoiceNo}
               </div>
@@ -131,7 +132,7 @@ const Invoice = () => {
           <Grid container spacing={2} sx={{ mb: 2 }}>
             <Grid item xs={6}>
               <Typography variant="subtitle1" fontWeight={700}>
-                Bill To
+               Invoice To
               </Typography>
            <Typography>
   
@@ -144,7 +145,7 @@ const Invoice = () => {
             </Grid>
             <Grid item xs={6}>
               <Typography variant="subtitle1" fontWeight={700}>
-                Ship To
+                Recipient
               </Typography>
               {/* Using same customer for demo; replace with ship info if available */}
               <Typography>
@@ -158,7 +159,7 @@ const Invoice = () => {
 
           {/* Description table (two columns) */}
           <Box component={Paper} elevation={0} sx={{ mt: 1, mb: 2 }}>
-            <Grid container sx={{ backgroundColor: "#1f6fb2", color: "#fff" }}>
+            <Grid container sx={{ backgroundColor: "#dbeefb",  }} color="text.secondary">
               <Grid item xs={8} sx={{ p: 1.5 }}>
                 <strong>Plan</strong>
               </Grid>
@@ -214,7 +215,7 @@ const Invoice = () => {
                   {invoice?.duration == "yearly" && (
                     <>
                       <Grid item xs={8} sx={{ p: 1 }}>
-                        Original Amount
+                      Standard Price
                       </Grid>
                       <Grid item xs={4} sx={{ p: 1, textAlign: "right" }}>
                         ₹{invoice?.PlanId.Total_Yearly_Price}
@@ -225,7 +226,7 @@ const Invoice = () => {
                   {invoice?.duration == "yearly" && (
                     <>
                       <Grid item xs={8} sx={{ p: 1 }}>
-                        Discount @ 20%
+                       Annual Plan Savings @ 20%
                       </Grid>
                       <Grid item xs={4} sx={{ p: 1, textAlign: "right" }}>
                         ₹
@@ -262,9 +263,9 @@ const Invoice = () => {
 
           {/* Footer notes */}
           <Box sx={{ mt: 4 }}>
-            <Typography variant="body2" sx={{ mb: 1 }}>
+            {/* <Typography variant="body2" sx={{ mb: 1 }}>
               Make all checks payable to the Neonflake Enterprises OPC Pvt Ltd.
-            </Typography>
+            </Typography> */}
             <Typography variant="h6" sx={{ color: "#1976d2", mt: 2 }}>
               Thank you for your business!
             </Typography>
