@@ -130,7 +130,7 @@ const PlanEdit = () => {
         Total_Yearly_Price: singlePlanData.Total_Yearly_Price || "",
         Monthly_Price: singlePlanData.Monthly_Price || "",
         yearlyUserLimit: singlePlanData?.yearlyUserLimit || "",
-    monthlyUserLimit: singlePlanData?.yearlyUserLimit || "",
+    monthlyUserLimit: singlePlanData?.monthlyUserLimit || "",
         name: singlePlanData.name || "",
            SearchLimitMonthly: singlePlanData?.SearchLimitMonthly || "",
     SearchLimitYearly: singlePlanData?.SearchLimitYearly || "",
