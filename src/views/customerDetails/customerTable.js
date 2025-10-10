@@ -265,7 +265,7 @@ const CustomerTable = () => {
                                     </button>
                                   </Link> */}
                                   <Link
-                                    to={`/${user.userId.name}/invoice/${user?.userId?._id}`}
+                                    to={`/${user.userId.name}/invoice/${user?._id}`}
                                   >
                                     <button
                                       style={{ background: "orange" }}

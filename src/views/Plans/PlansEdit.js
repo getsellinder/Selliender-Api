@@ -137,6 +137,8 @@ const PlanEdit = () => {
         SearchLimitYearly: singlePlanData?.SearchLimitYearly || "",
         Monthly_features: singlePlanData.Monthly_features || [""],
         Yearly_features: singlePlanData.Yearly_features || [""],
+           gstMonthlyPrice:singlePlanData.gstMonthlyPrice || 0,
+    gstYearlyPrice:singlePlanData.gstYearlyPrice || 0,
       });
     }
   }, [singlePlanData]);
