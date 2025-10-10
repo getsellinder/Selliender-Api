@@ -44,67 +44,6 @@ export const AddCusstomer = async (req, res) => {
   }
 };
 
-// export const getAllCustomer = catchAsyncErrors(async (req, res) => {
-//   let limit = parseInt(req.query?.limit) || 4;
-//   let page = parseInt(req.query?.page) || 1;
-//   let search=req.query?.search || ""
-
-//   let obj = {
-//     status: "success",
-//   };
-//   let userMatch = {};
-//   if (req.query?.name) {
-//     if (req.query?.name) {
-//       userMatch.name = { $regex: new RegExp(req.query.name, "i") };
-//     }
-//   }
-
-//   let planMatch = {};
-//   if (req.query?.plan) {
-//     planMatch.Package = { $regex: new RegExp(req.query.plan, "i") };
-//   }
-//   let findUser = await UserModel.find(userMatch).populate(
-//     "PlanId",
-//     "Package _id"
-//   );
-
-//   let userIds = findUser.map((u) => u._id);
-
-//   let total = await UserModel.countDocuments(userMatch);
-
-//   let customers = await Invoice.find({ ...obj, userId: { $in: userIds } })
-//     .populate({
-//       path: "userId",
-//       select: "name email _id",
-//       match: userMatch,
-//     })
-//     .populate({
-//       path: "PlanId",
-//       select: "Package _id",
-//       match: planMatch,
-//     })
-//     .limit(limit)
-//     .skip((page - 1) * limit)
-//     .sort({ createdAt: -1 });
-//   customers = customers.filter((c) => c.userId && c.PlanId);
-//   if (customers.length === 0) {
-//     return res.status(200).json({ message: "No Customer Found" });
-//   }
-//   const data = customers.map((val) => ({
-//     ...val.toObject(),
-//     createdAt: timeFormat(val.createdAt),
-//     Amount: val.Amount.toLocaleString(),
-//   }));
-
-//   res.status(200).json({
-//     success: true,
-//     data,
-//     currentPage: page,
-//     totalItems: total,
-//     totalPages: Math.ceil(total / limit),
-//   });
-// });
-
 export const getAllCustomer = catchAsyncErrors(async (req, res) => {
   let limit = parseInt(req.query?.limit) || 4;
   let page = parseInt(req.query?.page) || 1;

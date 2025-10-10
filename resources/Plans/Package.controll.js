@@ -230,6 +230,8 @@ export const PackageUpdate = async (req, res) => {
       Monthly_features,
       Yearly_features,
       Status,
+      gstMonthlyPrice,
+      gstYearlyPrice,
     } = req.body;
     const getuser = await packageModel.findById(id);
     if (!getuser) {
@@ -252,6 +254,8 @@ export const PackageUpdate = async (req, res) => {
       Monthly_features,
       Yearly_features,
       Status,
+      gstMonthlyPrice,
+      gstYearlyPrice,
     };
     let update = await packageModel.findByIdAndUpdate(id, data, { new: true });
     return res
