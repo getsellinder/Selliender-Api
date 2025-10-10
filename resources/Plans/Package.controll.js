@@ -504,8 +504,20 @@ export const InvoiceDetailsById = async (req, res) => {
     (invoiceData.plan_start_date = timeFormat(invoiceData.plan_start_date)),
       (invoiceData.plan_expiry_date = timeFormat(invoiceData.plan_expiry_date)),
       (invoiceData.createdAt = timeFormat(invoiceData.createdAt)),
-      (invoiceData.Amount = invoiceData.Amount.toLocaleString());
-    invoiceData.GST = getgst.Gst;
+      (invoiceData.Amount = invoiceData.Amount.toLocaleString()),
+      (invoiceData.PlanId.Monthly_Price =
+        invoiceData.PlanId.Monthly_Price.toLocaleString()),
+      (invoiceData.PlanId.Yearly_Price =
+        invoiceData.PlanId.Yearly_Price.toLocaleString()),
+      (invoiceData.PlanId.Total_Yearly_Price =
+        invoiceData.PlanId.Total_Yearly_Price.toLocaleString()),
+      (invoiceData.PlanId.Total_Monthly_Price =
+        invoiceData.PlanId.Total_Monthly_Price.toLocaleString()),
+      (invoiceData.PlanId.gstMonthlyPrice =
+        invoiceData.PlanId.gstMonthlyPrice.toLocaleString()),
+      (invoiceData.PlanId.gstYearlyPrice =
+        invoiceData.PlanId.gstYearlyPrice.toLocaleString()),
+      (invoiceData.GST = getgst.Gst);
 
     return res.status(200).json(invoiceData);
   } catch (error) {
