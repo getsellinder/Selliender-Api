@@ -29,7 +29,7 @@ const CustomerTable = () => {
   const [success, setSuccess] = useState(true);
   const [users, setUsers] = useState([]);
 
-  const [currentPage, setCurrentPage] = useState();
+  const [currentPage, setCurrentPage] = useState(1);
   const [itemPerPage, setItemPerPage] = useState();
   const [totalpages, setTotalPages] = useState();
   const [showData, setShowData] = useState([]);
@@ -54,7 +54,7 @@ const CustomerTable = () => {
         },
       })
       .then((res) => {
-        setShowData(res?.data.data);
+        setShowData(res?.data);
         setTotalPages(res.data.total_pages);
         setLoading(false);
       })
@@ -222,7 +222,7 @@ const CustomerTable = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {!loading && showData?.length === 0 && (
+                        {!loading && showData.data?.length === 0 && (
                           <tr className="text-center">
                             <td colSpan="6">
                               <h5>No Data Available</h5>
@@ -236,7 +236,7 @@ const CustomerTable = () => {
                             </td>
                           </tr>
                         ) : (
-                          showData?.map((user, i) => {
+                          showData.data?.map((user, i) => {
                             console.log("showData", showData);
                             return (
                               <tr key={i}>
@@ -281,7 +281,7 @@ const CustomerTable = () => {
                           })
                         )}
                         <Pagination
-                          count={totalpages}
+                          count={showData.totalPages}
                           page={currentPage}
                           onChange={(e, value) => {
                             setCurrentPage(value);

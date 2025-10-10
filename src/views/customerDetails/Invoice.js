@@ -1,14 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
-
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
-
 import { isAutheticated } from "src/auth";
-import { usePlan } from "../Plans/PlanContext";
 import toast from "react-hot-toast";
 import { CircularProgress } from "@material-ui/core";
-
 import { Box, Typography, Grid, Paper, Button } from "@mui/material";
 
 const Invoice = () => {
@@ -139,9 +134,7 @@ const Invoice = () => {
                 Bill To
               </Typography>
            <Typography>
-  {/* {invoice?.userId?.name
-    ? invoice.userId.name.charAt(0).toUpperCase() + invoice.userId.name.slice(1)
-    : ""} */}
+  
     {invoice?.userId?.name?invoice.userId?.name.charAt(0).toUpperCase()+invoice.userId.name.slice(1):""}
 </Typography>
               <Typography variant="body2" color="text.secondary">
