@@ -22,11 +22,11 @@ import { useNavigate, useParams } from "react-router-dom";
 const PlanEdit = () => {
   const token = isAutheticated();
   const [planLoading, setPlanLoading] = useState(false);
-  const { getgst, singlePlanData, handleSinglePackage, getAllpackages } = usePlan();
+  const { getgst, singlePlanData, handleSinglePackage, getAllpackages } =
+    usePlan();
   const { id } = useParams();
 
-  console.log('update plan id', singlePlanData)
-
+  console.log("update plan id", singlePlanData);
 
   const plans = ["Free", "Pro", "Growth", "Enterprise"];
   const navigate = useNavigate();
@@ -48,32 +48,35 @@ const PlanEdit = () => {
     Monthly_features: [""],
     Yearly_features: [""],
     gstMonthlyPrice: "" || 0,
-    gstYearlyPrice: "" || 0
+    gstYearlyPrice: "" || 0,
   });
-
 
   // handle input change
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-
     setPlan((prevPlan) => {
-      const updatePlans = { ...prevPlan, [name]: value }
-      const gstItem = getgst.find((item) => item._id === updatePlans.GST)
+      const updatePlans = { ...prevPlan, [name]: value };
+      const gstItem = getgst.find((item) => item._id === updatePlans.GST);
       const gstPercent = gstItem ? gstItem.Gst : 18;
       const monthlyPrice = parseFloat(updatePlans.Monthly_Price) || 0;
       const yearlyPrice = parseFloat(updatePlans.Yearly_Price) || 0;
 
+      updatePlans.gstMonthlyPrice = ((monthlyPrice * gstPercent) / 100).toFixed(
+        2
+      );
 
-      updatePlans.gstMonthlyPrice = (monthlyPrice * gstPercent) / 100
-      updatePlans.gstYearlyPrice = (yearlyPrice * gstPercent) / 100
+      updatePlans.gstYearlyPrice = ((yearlyPrice * gstPercent) / 100).toFixed(
+        2
+      );
 
-      updatePlans.Total_Monthly_Price = monthlyPrice + (monthlyPrice * gstPercent) / 100;
-      updatePlans.Total_Yearly_Price = yearlyPrice + (yearlyPrice * gstPercent) / 100;
+      updatePlans.Total_Monthly_Price =
+    (    monthlyPrice + (monthlyPrice * gstPercent) / 100).toFixed(0)
+      updatePlans.Total_Yearly_Price =
+    (    yearlyPrice + (yearlyPrice * gstPercent) / 100).toFixed(0);
 
       return updatePlans;
-
-    })
+    });
   };
 
   const addfeature = (type) => {
@@ -94,7 +97,7 @@ const PlanEdit = () => {
 
   // submit form
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
     try {
       setPlanLoading(true);
       const res = await axios.put(`/api/package/update/${id}`, plan, {
@@ -105,10 +108,10 @@ const PlanEdit = () => {
       toast.success(res?.data?.message);
       navigate("/Pricing-Plans");
 
-      getAllpackages(1, undefined, undefined, undefined)
+      getAllpackages(1, undefined, undefined, undefined);
     } catch (error) {
       let message = error?.response?.data?.message;
-      console.log("message", message)
+      console.log("message", message);
       toast.error(message);
     } finally {
       setPlanLoading(false);
@@ -119,9 +122,7 @@ const PlanEdit = () => {
     handleSinglePackage(id);
   }, [id]);
   useEffect(() => {
-
     if (singlePlanData) {
-
       setPlan({
         Package: singlePlanData.Package || "",
         GST: singlePlanData.GST?._id || null,
@@ -130,19 +131,15 @@ const PlanEdit = () => {
         Total_Yearly_Price: singlePlanData.Total_Yearly_Price || "",
         Monthly_Price: singlePlanData.Monthly_Price || "",
         yearlyUserLimit: singlePlanData?.yearlyUserLimit || "",
-    monthlyUserLimit: singlePlanData?.monthlyUserLimit || "",
+        monthlyUserLimit: singlePlanData?.monthlyUserLimit || "",
         name: singlePlanData.name || "",
-           SearchLimitMonthly: singlePlanData?.SearchLimitMonthly || "",
-    SearchLimitYearly: singlePlanData?.SearchLimitYearly || "",
+        SearchLimitMonthly: singlePlanData?.SearchLimitMonthly || "",
+        SearchLimitYearly: singlePlanData?.SearchLimitYearly || "",
         Monthly_features: singlePlanData.Monthly_features || [""],
         Yearly_features: singlePlanData.Yearly_features || [""],
-
       });
     }
   }, [singlePlanData]);
-
-
-
 
   return (
     <Container maxWidth="md">
@@ -160,7 +157,6 @@ const PlanEdit = () => {
                 name="name"
                 value={plan.name}
                 onChange={handleChange}
-
               />
             </Grid>
 
@@ -290,7 +286,6 @@ const PlanEdit = () => {
               />
             </Grid>
 
-
             {/* Monthly Search limit */}
             <Grid item xs={12} sm={4}>
               <TextField
@@ -315,7 +310,6 @@ const PlanEdit = () => {
                 InputLabelProps={{ shrink: true }}
               />
             </Grid>
-
 
             {/* Monthly User limit */}
             <Grid item xs={12} sm={12}>

@@ -29,20 +29,17 @@ const PlanAdd = () => {
   const [plan, setPlan] = useState({
     Package: "",
     gstMonthlyPrice: "" || 0,
-
     gstYearlyPrice: "" || 0,
     GST: "" || null,
     yearlyUserLimit: "",
     monthlyUserLimit: "",
-    
     SearchLimitMonthly: "",
     SearchLimitYearly: "",
     Yearly_Price: "",
     Monthly_Price: "",
     Total_Monthly_Price: "",
     Total_Yearly_Price: "",
-
-    name: "",
+     name: "",
     Monthly_features: [""],
     Yearly_features: [""],
   });
@@ -87,9 +84,9 @@ const PlanAdd = () => {
         const monthlyPrice = parseFloat(prevPlan.Monthly_Price) || 0;
         const yearlyPrice = parseFloat(prevPlan.Yearly_Price) || 0;
 
-        plan.gstMonthlyPrice = (monthlyPrice * gstPercent) / 100
+        plan.gstMonthlyPrice =( (monthlyPrice * gstPercent) / 100).toFixed(2)
 
-        plan.gstYearlyPrice = (yearlyPrice * gstPercent) / 100
+        plan.gstYearlyPrice = ((yearlyPrice * gstPercent) / 100).toFixed(2)
 
         const totalMonthly = monthlyPrice + (monthlyPrice * gstPercent) / 100 || 0;
         const totalYearly = yearlyPrice + (yearlyPrice * gstPercent) / 100 || 0;

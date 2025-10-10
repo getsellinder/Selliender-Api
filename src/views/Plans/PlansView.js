@@ -14,12 +14,12 @@ const PlanView = () => {
   }, [id])
 
   const fontstyle = {
-          fontWeight: 700,
+      fontWeight: 700,
       mb: 1,
       fontSize: "15px",
       fontFamily: "'Poppins', sans-serif",
-      color: "#1E293B", // slate dark for title
-    // fontWeight: "600", color: "gray"
+      color: "#1E293B",
+    
   }
   return (
     <Container>

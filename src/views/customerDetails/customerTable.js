@@ -217,7 +217,7 @@ const CustomerTable = () => {
                       >
                         <tr>
                           {tableheading.map((name) => (
-                            <th style={{ textAlign: "center" }}>{name}</th>
+                            <th style={{ textAlign: "start" }}>{name}</th>
                           ))}
                         </tr>
                       </thead>
@@ -240,22 +240,22 @@ const CustomerTable = () => {
                             console.log("showData", showData);
                             return (
                               <tr key={i}>
-                                <td className="text-center">{user.userId._id}</td>
-                                <td className="text-center">
+                                <td className="text-start">{user.userId._id}</td>
+                                <td className="text-start">
                                   {user.userId.name}
                                 </td>
-                                <td className="text-center">
+                                <td className="text-start">
                                   {user.PlanId.Package}
                                 </td>
-                                <td className="text-center">
+                                <td className="text-start">
                                   {user.Amount === "0" ? 0 : `₹${user.Amount}`}
                                 </td>
-                                <td className="text-center">{user.status}</td>
-                                <td className="text-center">
+                                <td className="text-start">{user.status}</td>
+                                <td className="text-start">
                                   {user.createdAt}
                                 </td>
 
-                                <td className="text-center">
+                                <td className="text-start">
                                   {/* <Link to={`/customers-details/${user?._id}`}>
                                     <button
                                       type="button"
