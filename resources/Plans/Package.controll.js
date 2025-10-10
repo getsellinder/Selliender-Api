@@ -1,5 +1,6 @@
 import { timeFormat } from "../../Utils/formatDateToIST .js";
 import razorpayInstance from "../../Utils/razorpay.js";
+import { Tax } from "../Tax/tax_model.js";
 import UserModel from "../user/userModel.js";
 import Invoice from "./Invoice.js";
 import packageModel from "./Package.model.js";
@@ -386,6 +387,7 @@ export const PlanPurchese = async (req, res) => {
         plan_start_date: startDate,
         plan_expiry_date: expiryDate,
         Amount: 0,
+        duration: durationType,
         TransactionId: null,
         status: "success",
       };
@@ -445,10 +447,7 @@ export const ConfirmPayment = async (req, res) => {
     } else if (durationType === "yearly") {
       expiryDate.setFullYear(expiryDate.getFullYear() + 1);
     }
-    // let discountedPrice = planAmount;
-    // if (durationType === "yearly") {
-    //   discountedPrice = planAmount * 0.8;
-    // }
+
     console.log("discountedPrice", discountedPrice);
     const add = {
       InvoiceNo: `INV-${Date.now()}`,
@@ -457,6 +456,7 @@ export const ConfirmPayment = async (req, res) => {
       plan_start_date: startDate,
       plan_expiry_date: expiryDate,
       Amount: planAmount,
+      duration: durationType,
       TransactionId: razorpayPaymentId,
       status: "success",
     };
@@ -482,11 +482,15 @@ export const InvoiceDetailsById = async (req, res) => {
   const { id } = req.params; //invoice id
   try {
     const getinvoice = await Invoice.findById(id)
-      // .populate("userId", "name ")
-      // .populate("PlanId", "Package ")
+
       .populate("userId", "phone name email")
       .populate("PlanId")
       .sort({ createdAt: -1 });
+    let gstId = getinvoice?.PlanId?.GST;
+    const getgst = await Tax.findById(gstId);
+    if (!getgst) {
+      return res.status(500).json({ message: "GST not found" });
+    }
     if (!getinvoice) {
       return res.status(500).json({ message: "Invoice not found" });
     }
@@ -502,6 +506,7 @@ export const InvoiceDetailsById = async (req, res) => {
       (invoiceData.plan_expiry_date = timeFormat(invoiceData.plan_expiry_date)),
       (invoiceData.createdAt = timeFormat(invoiceData.createdAt)),
       (invoiceData.Amount = invoiceData.Amount.toLocaleString());
+    invoiceData.GST = getgst.Gst;
 
     return res.status(200).json(invoiceData);
   } catch (error) {
