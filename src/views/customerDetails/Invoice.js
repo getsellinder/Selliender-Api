@@ -5,35 +5,19 @@ import { isAutheticated } from "src/auth";
 import toast from "react-hot-toast";
 import { CircularProgress } from "@material-ui/core";
 import { Box, Typography, Grid, Paper, Button } from "@mui/material";
+import { useCustomer } from "../CustomerSupport/CustomerContext";
 
 const Invoice = () => {
-  const invoiceData = {
-    companyName: "TravelEase Pvt. Ltd.",
-    companyAddress: "123 MG Road, Hyderabad, India",
-    invoiceNumber: "INV-2025-1010",
-    date: "10 Oct 2025",
-    customer: {
-      name: "Shirisha R",
-      address: "Plot No. 45, Jubilee Hills, Hyderabad",
-      phone: "+91 9876543210",
-      email: "shirisha@example.com",
-    },
-    items: [
-      { description: "Holiday Package - Maldives", qty: 1, price: 55000 },
-    ],
-  };
-
-  const subtotal = invoiceData.items.reduce(
-    (sum, item) => sum + item.qty * item.price,
-    0
-  );
-  const tax = subtotal * 0.18;
+  //  appdetails
 
   const token = isAutheticated();
 
   const { name: username, id } = useParams();
   const [invoice, setInvoice] = useState([]);
   const [invoiceLoading, setInvoiceLoading] = useState(null);
+  const [address, setaddress] = useState();
+  const { appdetails } = useCustomer();
+  console.log("appdetails", appdetails);
 
   const handleInvoice = async () => {
     try {
@@ -59,7 +43,7 @@ const Invoice = () => {
   useEffect(() => {
     handleInvoice(id);
   }, [id]);
-  console.log("invoice", invoice);
+
   return (
     <>
       <Paper
@@ -85,21 +69,78 @@ const Invoice = () => {
               minHeight: 120,
             }}
           >
-            <Typography variant="h5" fontWeight={600} color="#0b63a8">
-              Neonflake Enterprises (OPC) Pvt Ltd
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-              303, 3rd Floor, Meridian Plaza Greenlands, Ameerpet Hyderabad,
-              India 500016
-            </Typography>
+            <div>
+              {appdetails.map((item, index) => {
+                return (
+                  <>
+                    {item.logo.map((val) => (
+                      <img
+                        key={index}
+                        src={val.Footerlogo.url}
+                        style={{ height: "4rem" }}
+                      />
+                    ))}
+                  </>
+                );
+              })}
+            </div>
+
+            {appdetails.map((item, index) => {
+              return (
+                <>
+                  {item.address.map((val, index) => {
+                    return (
+                      <>
+                        <Typography
+                          variant="body1"
+                          fontWeight={600}
+                          color="text.secondary"
+                        >
+                          {val.company}
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{ mt: 1 }}
+                        >
+                          {val.address}
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{ mt: 1 }}
+                        >
+                          {val.city}
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{ mt: 1 }}
+                        >
+                          {val.state} {val.country} {val.pincode}
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{ mt: 1 }}
+                        >
+                          GST Number : {val?.gstNumber}
+                        </Typography>
+                      </>
+                    );
+                  })}
+                </>
+              );
+            })}
           </Grid>
 
-          <Grid color="text.secondary"
+          <Grid
+            color="text.secondary"
             item
             xs={4}
             sx={{
               // backgroundColor: "#1f6fb2",
-                    backgroundColor: "#dbeefb",
+              backgroundColor: "#dbeefb",
               // color: "#fff",
               p: 2,
               textAlign: "right",
@@ -108,7 +149,7 @@ const Invoice = () => {
             <Typography variant="h4" fontWeight={700}>
               Invoice
             </Typography>
-            <Typography variant="body2"  sx={{ mt: 1 }}>
+            <Typography variant="body2" sx={{ mt: 1 }}>
               <div>
                 <strong>Invoice </strong> {invoice?.InvoiceNo}
               </div>
@@ -116,50 +157,39 @@ const Invoice = () => {
                 <strong>Invoice Date</strong> {invoice?.createdAt}
               </div>
               <div>
-                <strong>Plan Taken Date</strong> {/* example */}{" "}
+                <strong>Plan Duration</strong>{" "}
+                {invoice?.duration
+                  ? invoice?.duration.charAt(0).toUpperCase() +
+                    invoice.duration.slice(1)
+                  : "-"}
+              </div>
+              {/* <div>
+                <strong style={{ color: "#222", fontWeight: 600 }}>
+                  Plan Duration
+                </strong>
+                <span>{invoice?.duration || "-"}</span>
+              </div> */}
+              {/* <div>
+                <strong>Plan Taken Date</strong>
                 {invoice.plan_start_date || "-"}
-              </div>
+              </div>invoice?.duration 
               <div>
-                <strong>Plan Expiry Date</strong> {/* example */}{" "}
+                <strong>Plan Expiry Date</strong> 
                 {invoice.plan_expiry_date || "-"}
-              </div>
+              </div> */}
             </Typography>
           </Grid>
         </Grid>
 
         <Box sx={{ p: 3 }}>
-          {/* Bill To / Ship To */}
-          <Grid container spacing={2} sx={{ mb: 2 }}>
-            <Grid item xs={6}>
-              <Typography variant="subtitle1" fontWeight={700}>
-               Invoice To
-              </Typography>
-           <Typography>
-  
-    {invoice?.userId?.name?invoice.userId?.name.charAt(0).toUpperCase()+invoice.userId.name.slice(1):""}
-</Typography>
-              <Typography variant="body2" color="text.secondary">
-                {invoice?.userId?.email}
-              </Typography>
-              <Typography variant="body2">{invoice?.userId?.phone} </Typography>
-            </Grid>
-            <Grid item xs={6}>
-              <Typography variant="subtitle1" fontWeight={700}>
-                Recipient
-              </Typography>
-              {/* Using same customer for demo; replace with ship info if available */}
-              <Typography>
-                Neonflake Enterprises OPC Pvt Ltd 303, 3rd Floor, Meridian Plaza
-                Greenlands, Ameerpet Hyderabad, India 500016
-              </Typography>
+    
 
-              <Typography variant="body2">+91 8977002747</Typography>
-            </Grid>
-          </Grid>
-
-          {/* Description table (two columns) */}
           <Box component={Paper} elevation={0} sx={{ mt: 1, mb: 2 }}>
-            <Grid container sx={{ backgroundColor: "#dbeefb",  }} color="text.secondary">
+            <Grid
+              container
+              sx={{ backgroundColor: "#dbeefb" }}
+              color="text.secondary"
+            >
               <Grid item xs={8} sx={{ p: 1.5 }}>
                 <strong>Plan</strong>
               </Grid>
@@ -190,7 +220,6 @@ const Invoice = () => {
               </Grid>
             </Grid>
 
-            {/* Totals box aligned to right */}
             <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
               <Box sx={{ width: 320 }}>
                 <Grid container sx={{ borderTop: "2px solid #1f6fb2" }}>
@@ -212,18 +241,18 @@ const Invoice = () => {
                       ? invoice?.PlanId?.gstYearlyPrice
                       : invoice?.PlanId?.gstMonthlyPrice}
                   </Grid>
-                  {invoice?.duration == "yearly" && (
+                  {/* {invoice?.duration == "yearly" && (
                     <>
                       <Grid item xs={8} sx={{ p: 1 }}>
-                      Standard Price
+                        Standard Price
                       </Grid>
                       <Grid item xs={4} sx={{ p: 1, textAlign: "right" }}>
                         ₹{invoice?.PlanId.Total_Yearly_Price}
                       </Grid>
                     </>
-                  )}
+                  )} */}
 
-                  {invoice?.duration == "yearly" && (
+                  {/* {invoice?.duration == "yearly" && (
                     <>
                       <Grid item xs={8} sx={{ p: 1 }}>
                        Annual Plan Savings @ 20%
@@ -243,7 +272,7 @@ const Invoice = () => {
                         })}
                       </Grid>
                     </>
-                  )}
+                  )} */}
 
                   <Grid item xs={12} sx={{ borderTop: "1px solid #cfd8e3" }} />
                   <Grid item xs={8} sx={{ p: 1, fontWeight: 700 }}>
@@ -263,9 +292,7 @@ const Invoice = () => {
 
           {/* Footer notes */}
           <Box sx={{ mt: 4 }}>
-            {/* <Typography variant="body2" sx={{ mb: 1 }}>
-              Make all checks payable to the Neonflake Enterprises OPC Pvt Ltd.
-            </Typography> */}
+         
             <Typography variant="h6" sx={{ color: "#1976d2", mt: 2 }}>
               Thank you for your business!
             </Typography>

@@ -18,7 +18,7 @@ function Address() {
   const [website, setWebsite] = useState("");
   const [contact, setContact] = useState("");
   const [email, setEmail] = useState("");
-  const [latitude, setLatitude] = useState("");
+  const [gstNumber, setGSTNumber] = useState("");
   const [longitude, setLongitude] = useState("");
 
   useEffect(() => {
@@ -39,7 +39,7 @@ function Address() {
           setWebsite(el.website);
           setContact(el.contact);
           setEmail(el.email);
-          setLatitude(el.latitude);
+          setGSTNumber(el.gstNumber);
           setLongitude(el.longitude);
         });
       });
@@ -65,30 +65,30 @@ function Address() {
       setContact(e.target.value);
     } else if (e.target.name.toLowerCase() === "email") {
       setEmail(e.target.value);
-    } else if (e.target.name.toLowerCase() === "latitude") {
-      setLatitude(e.target.value);
+    } else if (e.target.name === "gstNumber") {
+      setGSTNumber(e.target.value);
     } else if (e.target.name.toLowerCase() === "longitude") {
       setLongitude(e.target.value);
     }
   }
   async function handelSubmit() {
     setLoading(true);
-    if (
-      !company ||
-      !address ||
-      !city ||
-      !state ||
-      !country ||
-      !pincode ||
-      !website ||
-      !contact ||
-      !email ||
-      !longitude ||
-      !latitude
-    ) {
-      setLoading(false);
-      return swal("Fill all the required filed!");
-    }
+    // if (
+    //   !company ||
+    //   !address ||
+    //   !city ||
+    //   !state ||
+    //   !country ||
+    //   !pincode ||
+    //   !website ||
+    //   !contact ||
+    //   !email ||
+    //   !longitude ||
+    //   !gstNumber
+    // ) {
+    //   setLoading(false);
+    //   return swal("Fill all the required filed!");
+    // }
     let data = {
       company,
       address,
@@ -100,7 +100,7 @@ function Address() {
       contact,
       email,
       longitude,
-      latitude,
+      gstNumber,
     };
 
     let res = await axios.post(`/api/config/address`, data, {
@@ -268,12 +268,12 @@ function Address() {
                                     htmlFor="basicpill-phoneno-input"
                                     className="label-100 mt-3"
                                   >
-                                    Latitude
+                                    GST Number
                                   </label>
                                   <input
-                                    value={latitude}
+                                    value={gstNumber}
                                     type="text"
-                                    name="latitude"
+                                    name="gstNumber"
                                     onChange={(e) => handelChange(e)}
                                     className="form-control input-field "
                                     id="basicpill-phoneno-input"

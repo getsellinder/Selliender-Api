@@ -60,7 +60,7 @@ const AppHeader = () => {
               component={NavLink}
               activeclassname="active"
             >
-              <h3>{AppName}</h3>
+              {/* <h3>{AppName}</h3> */}
             </CNavLink>
           </CNavItem>
           {/* <CNavItem>

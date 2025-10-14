@@ -198,16 +198,16 @@ const Leeds = () => {
                               <tr key={i}>
                                 <td className="text-start">{user.name}</td>
 
-                                <td className="text-center">
+                                <td className="text-start">
                                 {user.email}
                                 </td>
                        
                                 <td className="">{user.message}</td>
 
 
-                                <td className="text-center"> {user.status}</td>
+                                <td className="text-start"> {user.status}</td>
 
-                                <td className="text-center">
+                                <td className="text-start">
                                   {user.createdAt}
                                 </td>
                                 {/* 

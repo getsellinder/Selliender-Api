@@ -133,6 +133,7 @@ const AppSidebar = () => {
     getConfiguration();
   }, []);
 
+  console.log("AdminlogoUrl",AdminlogoUrl)
   return (
     <CSidebar
       position="fixed"
@@ -145,7 +146,12 @@ const AppSidebar = () => {
       <CSidebarBrand
         to="/"
       >
-        {AdminlogoUrl ? (
+           <div>
+             {/* <h5 className="sidebar-brand" style={{fontSize:"1.5rem"}}>Sellinder</h5> */}
+             <img src={AdminlogoUrl.url} style={{height:"3.5rem"}}/>
+          </div>
+         
+        {/* {AdminlogoUrl ? (
           <>
             <Link to="/dashboard" className="bg-warning">
               <img src={AdminlogoUrl} alt="" width="100%" />
@@ -153,13 +159,10 @@ const AppSidebar = () => {
             <CCloseButton className="d-lg-none mx-2" white onClick={() => dispatch(toggleChange(false))} />
           </>
         ) : { AppName } ? (
-          <div>
-             <h5 className="sidebar-brand" style={{fontSize:"1.5rem"}}>Sellinder</h5>
-          </div>
-         
+       
         ) : (
           ""
-        )}
+        )} */}
         <CIcon className="sidebar-brand-narrow" icon={sygnet} height={35} />
       </CSidebarBrand>
 

@@ -156,9 +156,9 @@ export default function RegistrationEmail() {
             value={welcomemsg}
             onChange={(e) => setWelcomeMsg(e.target.value)}
           />
-          <h6 style={{ fontWeight: "bold", marginTop: "1rem" }}>
+          {/* <h6 style={{ fontWeight: "bold", marginTop: "1rem" }}>
             App Name :Sellinder
-          </h6>
+          </h6> */}
 
           <label htmlFor="title" className="form-label">
             Subject*

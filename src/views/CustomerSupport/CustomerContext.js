@@ -1,4 +1,5 @@
 import axios from "axios";
+
 import toast from "react-hot-toast";
 import { isAutheticated } from "src/auth";
 import { getUser } from "src/loginUserdetails";
@@ -26,6 +27,31 @@ export const CustomerProvider = ({ children }) => {
 
   // delete state
   const [deleteLoading, setDeleteLoading] = useState(null);
+const [loading, setLoading] = useState(false);
+const [appdetails, setAppDetails] = useState([]);
+
+
+
+
+   const GetAllAPPdetails = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get("/api/config/", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      let resp = res.data.result;
+      if (resp) {
+        setAppDetails(resp);
+      }
+    } catch (error) {
+      let msg = error.response.data.message;
+      toast.error(msg || "Internal Server Error");
+    } finally {
+      setLoading(false);
+    }
+  };
 
 
 
@@ -145,6 +171,9 @@ export const CustomerProvider = ({ children }) => {
     getSupportTicketsData("OPEN");
   }, []);
 
+  useEffect(()=>{
+    GetAllAPPdetails()
+  },[])
   
 
   return (
@@ -168,6 +197,7 @@ export const CustomerProvider = ({ children }) => {
         setChatData,
         setSearchInput,
         searchInput,
+        appdetails,
       }}
     >
       {children}

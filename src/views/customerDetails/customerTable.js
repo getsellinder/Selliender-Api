@@ -93,7 +93,7 @@ const CustomerTable = () => {
     "Plan Amount",
     "Status",
     "Registation",
-    "Action",
+    // "Action",
   ];
   console.log("showData", showData);
   return (
@@ -256,26 +256,20 @@ const CustomerTable = () => {
                                 </td>
 
                                 <td className="text-start">
-                                  {/* <Link to={`/customers-details/${user?._id}`}>
-                                    <button
-                                      type="button"
-                                      className="mt-1 btn btn-info btn-sm  waves-effect waves-light btn-table ml-2"
-                                    >
-                                      View
-                                    </button>
-                                  </Link> */}
+                           
                                   <Link
                                     to={`/${user.userId.name}/invoice/${user?._id}`}
                                   >
                                     <button
                                       style={{ background: "orange" }}
                                       type="button"
-                                      className="mt-1 btn btn-info btn-sm  waves-effect waves-light btn-table ml-2"
+                                      className=" btn btn-info btn-sm  waves-effect waves-light btn-table"
                                     >
                                       Invoice
                                     </button>
                                   </Link>
                                 </td>
+                                
                               </tr>
                             );
                           })
