@@ -21,31 +21,14 @@ const SupportRequest = () => {
     deleteLoading,
     closeRequestTicketId,
     setSearchInput,
-    searchInput
+    searchInput,
   } = useCustomer();
-
-
+  console.log("SupportRequestsData", SupportRequestsData);
   const [status, setStatus] = useState("OPEN");
   const [showData, setShowData] = useState(SupportRequestsData);
   const [searchTerm, setSearchTerm] = useState("");
   const [paginationLoading, setPaginationLoading] = useState(false);
-  const [searchLoading,setSearchLoading]=useState(false)
-
-  
-  useEffect(() => {
-    setTimeout(() => {
-      if (searchTerm !== "") {
-        let searchedResult = [];
-        searchedResult = SupportRequestsData.filter((item) =>
-          item.ticketId.toString().includes(searchTerm)
-        );
-
-        setShowData(searchedResult);
-      } else {
-        getSupportTicketsData();
-      }
-    }, 100);
-  }, [searchTerm]);
+  const [searchLoading, setSearchLoading] = useState(false);
 
   const handleShowEntries = (e) => {
     try {
@@ -60,16 +43,7 @@ const SupportRequest = () => {
       setPaginationLoading(false);
     }
   };
-  const tableHeading = [
-    "Ticket ID",
-    "Subject",
-    "Description",
-
-    "Name",
-    "Email",
-    "Created",
-    "Status",
-  ];
+  const tableHeading = ["Name", "Email", "message", "Status", "Created"];
   const paginationNumber = [10, 0, 30, 40];
 
   const hadleSeriesChange = (page = 1, newPage) => {
@@ -103,19 +77,19 @@ const SupportRequest = () => {
     backgroundColor: "#f44336", // Red
     "&:hover": { backgroundColor: "#d32f2f" },
   };
-  const handleSearch=async(searchInput)=>{
-  try {
-    setSearchLoading(true)
-      const page = 1
-    const limit=4
-  await  getSupportTicketsData(status, page,limit,searchInput)
-    setSearchInput("")
-  } catch (error) {
-    console.log("error",error,message)
-  }finally{
-    setSearchLoading(false)
-  }
-  }
+  const handleSearch = async (searchInput) => {
+    try {
+      setSearchLoading(true);
+      const page = 1;
+      const limit = 4;
+      await getSupportTicketsData(status, page, limit, searchInput);
+      setSearchInput("");
+    } catch (error) {
+      console.log("error", error, message);
+    } finally {
+      setSearchLoading(false);
+    }
+  };
 
   return (
     <div className="main-content">
@@ -147,9 +121,9 @@ const SupportRequest = () => {
                   className="card-body 
                   "
                 >
-                  <div className="d-flex align-items-center">
+                  <div className="d-flex justify-content-between">
                     <div className="row ml-0 mr-0 mb-10">
-                      <div className="col-sm-12 col-md-12">
+                      <div className=" d-flex align-items-center">
                         <div className="dataTables_length">
                           <label className="w-auto">
                             Show
@@ -167,71 +141,61 @@ const SupportRequest = () => {
                             entries
                           </label>
                         </div>
+                        <div className="ml-2 mt-2">
+                          <Button
+                            variant="contained"
+                            color={status === "OPEN" ? "primary" : ""}
+                            style={{
+                              fontWeight: "bold",
+                              marginBottom: "1rem",
+                              textTransform: "capitalize",
+                            }}
+                            onClick={() => {
+                              getSupportTicketsData("OPEN");
+                              setStatus("OPEN");
+                            }}
+                          >
+                            Process Requests
+                          </Button>
+
+                          <Button
+                            variant="contained"
+                            color={status === "CLOSED" ? "primary" : ""}
+                            style={{
+                              fontWeight: "bold",
+                              marginBottom: "1rem",
+                              marginLeft: "1rem",
+                              textTransform: "capitalize",
+                            }}
+                            onClick={() => {
+                              setStatus("CLOSED");
+                              getSupportTicketsData("CLOSED");
+                            }}
+                          >
+                            {status === "OPEN"}
+                            Finished Requests
+                          </Button>
+                        </div>
                       </div>
                     </div>
-                    <div className="ml-2 mt-2">
-                      <Button
-                        variant="contained"
-                        color={status === "OPEN" ? "primary" : ""}
-                        style={{
-                          fontWeight: "bold",
-                          marginBottom: "1rem",
-                          textTransform: "capitalize",
-                        }}
-                        onClick={() => {
-                          getSupportTicketsData("OPEN");
-                          setStatus("OPEN");
-                        }}
-                      >
-                        Open Requests
-                      </Button>
-{/* 
-                      <Button
-                        variant="contained"
-                        color={status === "IN_PROGRESS" ? "primary" : ""}
-                        style={{
-                          fontWeight: "bold",
-                          marginBottom: "1rem",
-                          marginLeft: "10px",
-                          marginRight: "10px",
-                          textTransform: "capitalize",
-                        }}
-                        onClick={() => {
-                          setStatus("IN_PROGRESS");
-                          getSupportTicketsData("IN_PROGRESS");
-                        }}
-                      >
-                        In_Progress
-                      </Button> */}
-                      <Button
-                        variant="contained"
-                        color={status === "CLOSED" ? "primary" : ""}
-                        style={{
-                          fontWeight: "bold",
-                          marginBottom: "1rem",
-                          marginLeft:"1rem",
-                          textTransform: "capitalize",
-                        }}
-                        onClick={() => {
-                          setStatus("CLOSED");
-                          getSupportTicketsData("CLOSED");
-                        }}
-                      >
-                        {status==="OPEN"}
-                        Close Requests
-                      </Button>
-                    </div>
 
-                    <div className="ml-5 mt-2">
+                    <div className="ml-5 mt-2 d-flex flex-end">
                       <TextField
                         type="text"
-                        placeholder="Search by Ticket ID"
+                        placeholder="Search by Customer"
                         value={searchInput}
                         onChange={(e) => setSearchInput(e.target.value)}
                       />
-                      {searchLoading?<CircularProgress size={25}/>:    <CIcon icon={cilSearch} size="xl" onClick={()=>handleSearch(searchInput)} 
-                        style={{cursor:"pointer"}}/>}
-                  
+                      {searchLoading ? (
+                        <CircularProgress size={25} />
+                      ) : (
+                        <CIcon
+                          icon={cilSearch}
+                          size="xl"
+                          onClick={() => handleSearch(searchInput)}
+                          style={{ cursor: "pointer" }}
+                        />
+                      )}
                     </div>
                   </div>
 
@@ -258,7 +222,7 @@ const SupportRequest = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {SupportRequestsData.data?.map((item) => {
+                        {SupportRequestsData?.result?.map((item) => {
                           console.log("item.ticketId", item);
                           return (
                             <tr>
@@ -268,7 +232,7 @@ const SupportRequest = () => {
                                   padding: "8px",
                                 }}
                               >
-                                {item.t.ticketId}
+                                {item.name}
                               </td>
                               <td
                                 style={{
@@ -276,7 +240,7 @@ const SupportRequest = () => {
                                   padding: "8px",
                                 }}
                               >
-                                {item.t.subject}
+                                {item.email}
                               </td>
                               <td
                                 style={{
@@ -284,7 +248,7 @@ const SupportRequest = () => {
                                   padding: "8px",
                                 }}
                               >
-                                {item.t.description}
+                                {item.message}
                               </td>
                               <td
                                 style={{
@@ -292,15 +256,7 @@ const SupportRequest = () => {
                                   padding: "8px",
                                 }}
                               >
-                                {item.t.userId?.name}
-                              </td>
-                              <td
-                                style={{
-                                  border: "1px solid #ddd",
-                                  padding: "8px",
-                                }}
-                              >
-                                {item.t.userId?.email}
+                                {item.status}
                               </td>
                               <td
                                 style={{
@@ -310,71 +266,6 @@ const SupportRequest = () => {
                               >
                                 {item.createdAt}
                               </td>
-                              {/* <td>{item.t.status}</td> */}
-                              <td
-                                style={{
-                                  border: "1px solid #ddd",
-                                  padding: "8px",
-                                }}
-                              >
-                                {item.t.status}
-                              </td>
-                              <td>
-                                <Button
-                                  style={{ ...chatBtn }}
-                                  onClick={async () => {
-                                    await getMessagesChat(item.t._id);
-                                    navigate(
-                                      `/chat/${item.t.userId?.name}/${item.t._id}`
-                                    );
-                                  }}
-                                >
-                                  {chatLoading === item.t._id ? (
-                                    <CircularProgress size={25} />
-                                  ) : (
-                                    "Chat"
-                                  )}
-                                </Button>
-                              </td>
-                              {/* <td>
-                                <Button
-                                  variant="contained"
-                                  style={{ ...processBtn }}
-                                >
-                                  Process
-                                </Button>
-                              </td> */}
-                              <td>
-                                {status==="OPEN"&& <Button
-                                  variant="contained"
-                                  style={{ ...closeBtn }}
-                                  onClick={() =>
-                                    CloseRequest(item.t._id, status)
-                                  }
-                                >
-                                  {closeRequestTicketId ? (
-                                    <CircularProgress size={25} />
-                                  ) : (
-                                    "   Close"
-                                  )}
-                                </Button>}
-                               
-                              </td>
-                              <td>
-                                <Button
-                                  variant="contained"
-                                  style={{ ...deleteBtn }}
-                                  onClick={() =>
-                                    DeleteRequest(item.t._id, status)
-                                  }
-                                >
-                                  {deleteLoading === item.t._id ? (
-                                    <CircularProgress size={25} />
-                                  ) : (
-                                    "Delete"
-                                  )}
-                                </Button>
-                              </td>
                             </tr>
                           );
                         })}
@@ -382,7 +273,7 @@ const SupportRequest = () => {
                     </table>
                     <Pagination
                       color="primary"
-                      count={SupportRequestsData.totalPage}
+                      count={SupportRequestsData.totalPages}
                       page={SupportRequestsData.currentPage}
                       onChange={(e, value) => hadleSeriesChange(value)}
                     />

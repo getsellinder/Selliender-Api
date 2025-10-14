@@ -14,7 +14,7 @@ export const CustomerProvider = ({ children }) => {
   const user = getUser();
   const userId = user?.id;
   console.log("userId",userId)
-
+  const [totalPage, setTotalPages] = useState();
   const [SupportRequestsData, setSupportRequestsData] = useState([]);
   const [SupportRequestsDataError, setSupportRequestsDataError] = useState("");
   const [closeRequestTicketId, setCloseRequestTicketId] = useState(null);
@@ -28,6 +28,7 @@ export const CustomerProvider = ({ children }) => {
   // delete state
   const [deleteLoading, setDeleteLoading] = useState(null);
 const [loading, setLoading] = useState(false);
+const [cloading, setCLoading] = useState(false);
 const [appdetails, setAppDetails] = useState([]);
 
 
@@ -53,14 +54,44 @@ const [appdetails, setAppDetails] = useState([]);
     }
   };
 
-
+// get contact us customers
+  const getcontacts = async (
+    searchName = name,
+    page = currentPage,
+    limit = itemPerPage
+  ) => {
+    axios
+      .get(`/api/contact/request/getAll/`, {
+        params: {
+          limit: limit,
+          page: page,
+          name: searchName,
+        },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        setSupportRequestsData(res?.data);
+        setTotalPages(res.data.total_pages);
+        setCLoading(false);
+      })
+      .catch((error) => {
+        swal({
+          title: error,
+          text: "please login to access the resource or refresh the page  ",
+          icon: "error",
+          button: "Retry",
+          dangerMode: true,
+        });
+        setCLoading(false);
+      });
+  };
 
   // chat finish
   const getSupportTicketsData = async (status, page = 1,limit,searchInput = "") => {
     try {
-      // const url = status
-      //   ? `/api/support/getAll/?page=${page}&limit=${limit}&status=${status}`
-      //   : `/api/support/getAll/?page${page}&limit=${limit}`;
+    
 
        let url = `/api/support/getAll/?page=${page}&limit=${limit}`;
        if(status){
@@ -173,6 +204,8 @@ const [appdetails, setAppDetails] = useState([]);
 
   useEffect(()=>{
     GetAllAPPdetails()
+let currentPage=1
+    getcontacts("",currentPage,"")
   },[])
   
 

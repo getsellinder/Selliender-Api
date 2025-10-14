@@ -156,13 +156,7 @@ const Invoice = () => {
               <div>
                 <strong>Invoice Date</strong> {invoice?.createdAt}
               </div>
-              <div>
-                <strong>Plan Duration</strong>{" "}
-                {invoice?.duration
-                  ? invoice?.duration.charAt(0).toUpperCase() +
-                    invoice.duration.slice(1)
-                  : "-"}
-              </div>
+
               {/* <div>
                 <strong style={{ color: "#222", fontWeight: 600 }}>
                   Plan Duration
@@ -182,8 +176,6 @@ const Invoice = () => {
         </Grid>
 
         <Box sx={{ p: 3 }}>
-    
-
           <Box component={Paper} elevation={0} sx={{ mt: 1, mb: 2 }}>
             <Grid
               container
@@ -193,6 +185,7 @@ const Invoice = () => {
               <Grid item xs={8} sx={{ p: 1.5 }}>
                 <strong>Plan</strong>
               </Grid>
+
               <Grid item xs={4} sx={{ p: 1.5, textAlign: "right" }}>
                 <strong>Amount</strong>
               </Grid>
@@ -210,6 +203,7 @@ const Invoice = () => {
                   {invoice ? invoice?.PlanId?.Package : "\u00A0"}
                 </Typography>
               </Grid>
+
               <Grid item xs={4} sx={{ p: 1.25, textAlign: "right" }}>
                 <Typography>
                   ₹
@@ -220,7 +214,99 @@ const Invoice = () => {
               </Grid>
             </Grid>
 
-            <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
+            <Box
+              sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}
+            >
+              <Grid sx={{ display: "flex", flexDirection: "column" }}>
+                <Box>
+                  <Grid
+                    item
+                    xs={3}
+                    sx={{
+                      p: 1.25,
+                      display: "flex",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <Typography color="text.secondary" sx={{ fontWeight: 600 }}>
+                      {invoice ? invoice?.plan_start_date : "\u00A0"} To{" "}
+                      {invoice ? invoice?.plan_expiry_date : "\u00A0"}
+                    </Typography>
+                  </Grid>
+                </Box>
+                <Box sx={{ width: 320, p: 2, borderRadius: 2 }}>
+                  <Typography
+                    color="text.secondary"
+                    sx={{ fontWeight: 600, mb: 1 }}
+                  >
+                    Plan Features
+                  </Typography>
+
+                <Grid container sx={{ borderTop: "2px solid #1f6fb2", pt: 1 }}>
+  {/* ✅ Bullet + Search Limit */}
+  <Grid
+    item
+    xs={12}
+    sx={{
+      display: "flex",
+      alignItems: "flex-start",
+      mb: 1,
+    }}
+  >
+    <Typography
+      sx={{
+        fontWeight: 600,
+        mr: 1,
+        color: "#1f6fb2",
+        minWidth: "20px",
+      }}
+    >
+      •
+    </Typography>
+
+    <Typography sx={{ fontSize: "14px", color: "#333" }}>
+      {invoice?.duration === "monthly"
+        ? `${invoice?.PlanId?.SearchLimitMonthly} Profile / Monthly`
+        : `${invoice?.PlanId?.SearchLimitYearly} Profile / Monthly`}
+    </Typography>
+  </Grid>
+
+  {/* ✅ Bullet + Only the 2nd Feature */}
+  {(
+    invoice?.duration === "monthly"
+      ? invoice?.PlanId?.Monthly_features
+      : invoice?.PlanId?.Yearly_features
+  )?.slice(1, 2).map((item, index) => (
+    <Grid
+      item
+      xs={12}
+      key={index}
+      sx={{
+        display: "flex",
+        alignItems: "flex-start",
+        mb: 1,
+      }}
+    >
+      <Typography
+        sx={{
+          fontWeight: 600,
+          mr: 1,
+          color: "#1f6fb2",
+          minWidth: "20px",
+        }}
+      >
+        •
+      </Typography>
+
+      <Typography sx={{ fontSize: "14px", color: "#333" }}>
+        {item}
+      </Typography>
+    </Grid>
+  ))}
+</Grid>
+
+                </Box>
+              </Grid>
               <Box sx={{ width: 320 }}>
                 <Grid container sx={{ borderTop: "2px solid #1f6fb2" }}>
                   <Grid item xs={8} sx={{ p: 1 }}>
@@ -292,7 +378,6 @@ const Invoice = () => {
 
           {/* Footer notes */}
           <Box sx={{ mt: 4 }}>
-         
             <Typography variant="h6" sx={{ color: "#1976d2", mt: 2 }}>
               Thank you for your business!
             </Typography>
