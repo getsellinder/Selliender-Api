@@ -265,7 +265,7 @@ const CustomerTable = () => {
                                       type="button"
                                       className=" btn btn-info btn-sm  waves-effect waves-light btn-table"
                                     >
-                                      Invoice
+                                      Invoices
                                     </button>
                                   </Link>
                                 </td>

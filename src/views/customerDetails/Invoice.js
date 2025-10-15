@@ -235,14 +235,14 @@ const Invoice = () => {
                   </Grid>
                 </Box>
                 <Box sx={{ width: 320, p: 2, borderRadius: 2 }}>
-                  <Typography
+                  {/* <Typography
                     color="text.secondary"
                     sx={{ fontWeight: 600, mb: 1 }}
                   >
                     Plan Features
-                  </Typography>
+                  </Typography> */}
 
-                <Grid container sx={{ borderTop: "2px solid #1f6fb2", pt: 1 }}>
+                <Grid container sx={{pt: 1 }}>
   {/* ✅ Bullet + Search Limit */}
   <Grid
     item
@@ -266,8 +266,8 @@ const Invoice = () => {
 
     <Typography sx={{ fontSize: "14px", color: "#333" }}>
       {invoice?.duration === "monthly"
-        ? `${invoice?.PlanId?.SearchLimitMonthly} Profile / Monthly`
-        : `${invoice?.PlanId?.SearchLimitYearly} Profile / Monthly`}
+        ? `${invoice?.PlanId?.SearchLimitMonthly} Profile Monthly`
+        : `${invoice?.PlanId?.SearchLimitYearly} Profile Monthly`}
     </Typography>
   </Grid>
 

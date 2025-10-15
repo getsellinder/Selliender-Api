@@ -92,11 +92,19 @@ const _nav = [
     to: "/customers-details",
     group: "Customers",
   },
+  
+     {
+    component: CNavItem,
+    name: "Billing",
+    icon: <CIcon icon={cilMoney } customClassName="nav-icon" />,
+    to: "/Billing",
+    group: "Customers",
+  },
 
   {
     component: CNavItem,
     name: "Pricing Plans",
-    icon: <CIcon icon={cilMoney} customClassName="nav-icon" />,
+    icon: <CIcon icon={cilFeaturedPlaylist} customClassName="nav-icon" />,
     to: "/Pricing-Plans",
     group: "Plans",
   },

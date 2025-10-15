@@ -153,6 +153,7 @@ import Linkedin from "./views/Linkiedin/Linkedin";
 import LinkedinView from "./views/Linkiedin/LinkedinView";
 import Leeds from "./views/Leeds/Leeds";
 import Invoice from "./views/customerDetails/Invoice";
+import Billing from "./views/billing/Billing";
 
 
 
@@ -698,6 +699,12 @@ const routes = [
     path: "/:name/invoice/:id",
     name: "Invoice",
     element: Invoice,
+    navName: "Website Related",
+  },
+      {
+    path: "/Billing",
+    name: "Billing",
+    element: Billing,
     navName: "Website Related",
   },
   // {
