@@ -154,6 +154,8 @@ import LinkedinView from "./views/Linkiedin/LinkedinView";
 import Leeds from "./views/Leeds/Leeds";
 import Invoice from "./views/customerDetails/Invoice";
 import Billing from "./views/billing/Billing";
+import Orders from "./views/order/Order";
+import Order from "./views/order/Order";
 
 
 
@@ -707,12 +709,12 @@ const routes = [
     element: Billing,
     navName: "Website Related",
   },
-  // {
-  //   path: "/home/panel-4",
-  //   name: "EditPanel4",
-  //   element: Editpanel4,
-  //   navName: "Website Related",
-  // },
+    {
+    path: "/Orders",
+    name: "Orders",
+    element: Order,
+    navName: "Website Related",
+  },
   {
     path: "/reviewsStatus",
     name: "Reviews Status",

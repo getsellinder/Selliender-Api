@@ -248,7 +248,7 @@ const CustomerTable = () => {
                                   {user.PlanId.Package}
                                 </td>
                                 <td className="text-start">
-                                  {user.Amount === "0" ? 0 : `₹${user.Amount}`}
+                                  {user.Amount === "0" ? 0 : `₹ ${user.Amount}`}
                                 </td>
                                 <td className="text-start">{user.status}</td>
                                 <td className="text-start">

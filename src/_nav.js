@@ -100,6 +100,13 @@ const _nav = [
     to: "/Billing",
     group: "Customers",
   },
+    {
+    component: CNavItem,
+    name: "Orders",
+    icon: <CIcon icon={cilClipboard } customClassName="nav-icon" />,
+    to: "/Orders",
+    group: "Customers",
+  },
 
   {
     component: CNavItem,
