@@ -17,7 +17,7 @@ const Invoice = () => {
   const [invoiceLoading, setInvoiceLoading] = useState(null);
   const [address, setaddress] = useState();
   const { appdetails } = useCustomer();
-  console.log("appdetails", appdetails);
+
 
   const handleInvoice = async () => {
     try {
@@ -43,10 +43,13 @@ const Invoice = () => {
   useEffect(() => {
     handleInvoice(id);
   }, [id]);
+  console.log("invoice",invoice)
 
   return (
     <>
-      <Paper
+    {invoice.map((val,index)=>{
+      return(
+    <Paper key={index}
         elevation={4}
         sx={{
           p: 0,
@@ -151,10 +154,10 @@ const Invoice = () => {
             </Typography>
             <Typography variant="body2" sx={{ mt: 1 }}>
               <div>
-                <strong>Invoice </strong> {invoice?.InvoiceNo}
+                <strong>Invoice </strong> {val?.InvoiceNo}
               </div>
               <div>
-                <strong>Invoice Date</strong> {invoice?.createdAt}
+                <strong>Invoice Date</strong> {val?.createdAt}
               </div>
 
               {/* <div>
@@ -200,16 +203,16 @@ const Invoice = () => {
             >
               <Grid item xs={8} sx={{ p: 1.25 }}>
                 <Typography>
-                  {invoice ? invoice?.PlanId?.Package : "\u00A0"}
+                  {val ? val?.PlanId?.Package : "\u00A0"}
                 </Typography>
               </Grid>
 
               <Grid item xs={4} sx={{ p: 1.25, textAlign: "right" }}>
                 <Typography>
                   ₹
-                  {invoice?.duration == "yearly"
-                    ? invoice?.PlanId?.Yearly_Price
-                    : invoice?.PlanId?.Monthly_Price}
+                  {val?.duration == "yearly"
+                    ? val?.PlanId?.Yearly_Price
+                    : val?.PlanId?.Monthly_Price}
                 </Typography>
               </Grid>
             </Grid>
@@ -229,8 +232,8 @@ const Invoice = () => {
                     }}
                   >
                     <Typography color="text.secondary" sx={{ fontWeight: 600 }}>
-                      {invoice ? invoice?.plan_start_date : "\u00A0"} To{" "}
-                      {invoice ? invoice?.plan_expiry_date : "\u00A0"}
+                      {val ? val?.plan_start_date : "\u00A0"} To{" "}
+                      {val ? val?.plan_expiry_date : "\u00A0"}
                     </Typography>
                   </Grid>
                 </Box>
@@ -265,17 +268,17 @@ const Invoice = () => {
     </Typography>
 
     <Typography sx={{ fontSize: "14px", color: "#333" }}>
-      {invoice?.duration === "monthly"
-        ? `${invoice?.PlanId?.SearchLimitMonthly} Profile Monthly`
-        : `${invoice?.PlanId?.SearchLimitYearly} Profile Monthly`}
+      {val?.duration === "monthly"
+        ? `${val?.PlanId?.SearchLimitMonthly} Profile Monthly`
+        : `${val?.PlanId?.SearchLimitYearly} Profile Monthly`}
     </Typography>
   </Grid>
 
   {/* ✅ Bullet + Only the 2nd Feature */}
   {(
-    invoice?.duration === "monthly"
-      ? invoice?.PlanId?.Monthly_features
-      : invoice?.PlanId?.Yearly_features
+    val?.duration === "monthly"
+      ? val?.PlanId?.Monthly_features
+      : val?.PlanId?.Yearly_features
   )?.slice(1, 2).map((item, index) => (
     <Grid
       item
@@ -314,18 +317,18 @@ const Invoice = () => {
                   </Grid>
                   <Grid item xs={4} sx={{ p: 1, textAlign: "right" }}>
                     ₹
-                    {invoice?.duration == "yearly"
-                      ? invoice?.PlanId?.Yearly_Price
-                      : invoice?.PlanId?.Monthly_Price}
+                    {val?.duration == "yearly"
+                      ? val?.PlanId?.Yearly_Price
+                      : val?.PlanId?.Monthly_Price}
                   </Grid>
                   <Grid item xs={8} sx={{ p: 1 }}>
-                    GST @ ₹{invoice?.GST}%
+                    GST @ ₹{val?.GST}%
                   </Grid>
                   <Grid item xs={4} sx={{ p: 1, textAlign: "right" }}>
                     ₹
-                    {invoice?.duration == "yearly"
-                      ? invoice?.PlanId?.gstYearlyPrice
-                      : invoice?.PlanId?.gstMonthlyPrice}
+                    {val?.duration == "yearly"
+                      ? val?.PlanId?.gstYearlyPrice
+                      : val?.PlanId?.gstMonthlyPrice}
                   </Grid>
                   {/* {invoice?.duration == "yearly" && (
                     <>
@@ -369,7 +372,7 @@ const Invoice = () => {
                     xs={4}
                     sx={{ p: 1, textAlign: "right", fontWeight: 700 }}
                   >
-                    ₹{invoice?.Amount}
+                    ₹{val?.Amount}
                   </Grid>
                 </Grid>
               </Box>
@@ -384,6 +387,9 @@ const Invoice = () => {
           </Box>
         </Box>
       </Paper>
+      )
+    })}
+  
     </>
   );
 };

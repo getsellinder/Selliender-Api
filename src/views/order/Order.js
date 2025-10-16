@@ -6,102 +6,11 @@ import { isAutheticated } from "src/auth";
 import axios from "axios";
 import { CircularProgress } from "@material-ui/core";
 
-const orders = [
-  {
-    user: "Mehak kumar",
-    amount: "₹4990",
-    start: "Sep 16, 2025",
-    expiry: "Sep 16, 2026",
-    plan: "Professional",
-    type: "annually",
-    status: "paid",
-  },
-  {
-    user: "Mehak kumar",
-    amount: "₹199",
-    start: "Sep 16, 2025",
-    expiry: "Oct 16, 2025",
-    plan: "Starter",
-    type: "monthly",
-    status: "paid",
-  },
-  {
-    user: "Mehak kumar",
-    amount: "₹199",
-    start: "Sep 16, 2025",
-    expiry: "Oct 16, 2025",
-    plan: "Starter",
-    type: "monthly",
-    status: "paid",
-  },
-  {
-    user: "Mehak kumar",
-    amount: "₹499",
-    start: "Sep 16, 2025",
-    expiry: "Oct 16, 2025",
-    plan: "Professional",
-    type: "monthly",
-    status: "paid",
-  },
-  {
-    user: "Mehak kumar",
-    amount: "₹299",
-    start: "Sep 16, 2025",
-    expiry: "Oct 16, 2025",
-    plan: "Growth",
-    type: "monthly",
-    status: "paid",
-  },
-  {
-    user: "Mehak kumar",
-    amount: "₹499",
-    start: "Sep 16, 2025",
-    expiry: "Oct 16, 2025",
-    plan: "Professional",
-    type: "monthly",
-    status: "paid",
-  },
-  {
-    user: "Mehak kumar",
-    amount: "₹499",
-    start: "Sep 15, 2025",
-    expiry: "Oct 15, 2025",
-    plan: "Professional",
-    type: "monthly",
-    status: "paid",
-  },
-  {
-    user: "Mehak kumar",
-    amount: "₹499",
-    start: "Sep 12, 2025",
-    expiry: "Oct 12, 2025",
-    plan: "Professional",
-    type: "monthly",
-    status: "paid",
-  },
-  {
-    user: "Mehak kumar",
-    amount: "₹299",
-    start: "Sep 11, 2025",
-    expiry: "Oct 11, 2025",
-    plan: "Growth",
-    type: "monthly",
-    status: "paid",
-  },
-  {
-    user: "Mehak kumar",
-    amount: "₹499",
-    start: "Sep 11, 2025",
-    expiry: "Oct 11, 2025",
-    plan: "Professional",
-    type: "monthly",
-    status: "paid",
-  },
-];
+
 
 const Order = () => {
   const token = isAutheticated();
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState();
   const { appdetails } = useCustomer();
 
   const [totalpages, setTotalPages] = useState();
@@ -126,45 +35,6 @@ const Order = () => {
     "STATUS",
     "INVOICE",
   ];
-
-  // const getOrders = async (
-  //   searchName = search,
-  //   page = 1,
-  //   limit = itemPerPage
-  // ) => {
-  //      setLoading(true);
-  //   axios
-  //     .get(`/api/order/getAll`, {
-  //       params: {
-  //         limit: limit,
-  //         page: page,
-  //         name: searchName,
-  //       },
-  //       headers: {
-  //         Authorization: `Bearer ${token}`,
-  //       },
-  //     })
-  //     .then((res) => {
-  //       console.log("res?.data",res?.data)
-  //       setOrder(res?.data);
-  //       setTotalPages(res.data.totalPages);
-  //       setCurrentPage(res.data.currentPage)
-  //       setItemPerPage(res.data.totalItems)
-  //           setLoading(false);
-
-  //     })
-  //     .catch((error) => {
-  //       swal({
-  //         title: error,
-  //         text: "please login to access the resource or refresh the page  ",
-  //         icon: "error",
-  //         button: "Retry",
-  //         dangerMode: true,
-  //       });
-  //       setLoading(false);
-  //     })
-  // };
-
   const getOrders = async (
     searchName = search,
     page = 1,
@@ -172,9 +42,13 @@ const Order = () => {
   ) => {
     try {
       setLoading(true);
+      const params={limit,page}
+      if(searchName&&searchName.trim()!==""){
+        params.name=searchName.trim()
+      }
 
       const res = await axios.get("/api/order/getAll", {
-        params: { limit, page, name: searchName },
+        params,
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -182,6 +56,7 @@ const Order = () => {
       setTotalPages(res.data.totalPages);
       setCurrentPage(res.data.currentPage);
       setItemPerPage(res.data.totalItems);
+
     } catch (error) {
       const msg = error.response?.data?.message || "Internal Server Error";
       setErrorMessage(msg);
@@ -192,7 +67,8 @@ const Order = () => {
 
   useEffect(() => {
     getOrders(search, currentPage, itemPerPage);
-  }, [currentPage, search]);
+
+  }, [search]);
   let fetchOrders = order?.data;
 
   const handlePrev = () => {
@@ -210,7 +86,7 @@ const Order = () => {
           type="text"
           placeholder="Search"
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) =>setSearch(e.target.value)}
         />
         {/* <div className="orders-profile">
                     <span className="orders-profile-icon">&#128100;</span>
@@ -264,8 +140,8 @@ const Order = () => {
                     </span>
                   </td>
                   <td>
-                    <button className="orders-view-btn">
-                      <span className="orders-view-icon">📄</span> View
+                    <button className="orders-view-btn" onClick={()=>navigate(`/${o.userId.name}/invoice/${o.userId._id}`)}>
+                      <span className="orders-view-icon" >📄</span> View
                     </button>
                   </td>
                 </tr>
