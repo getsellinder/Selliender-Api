@@ -1,0 +1,192 @@
+{
+  "about": "About section not found",
+  "accomplishments": [],
+  "activityLevel": "Low",
+  "awards": [],
+  "certifications": [],
+  "company": "Company not found",
+  "connectionCount": 0,
+  "connections": "",
+  "contactInfo": {},
+  "courses": [],
+  "dataSource": "Sellinder Auto-Scraper",
+  "education": [],
+  "experience": [],
+  "extractedAt": "2025-09-25T11:01:01.744Z",
+  "extractionMethod": "Enhanced Profile Scraper v3.0 - Comprehensive Extraction",
+  "followerCount": 0,
+  "languages": [],
+  "location": "Location not found",
+  "name": "Name not found",
+  "patents": [],
+  "posts": [
+    {
+      "content": "Premier League and Microsoft join forces to create fan-friendly digital platforms - Source EMEA",
+      "extractedAt": "2025-09-25T11:01:01.726Z",
+      "timestamp": "Recently"
+    },
+    {
+      "content": "KPMG launches Workbench, a multi-agent AI platform, across the global organization",
+      "extractedAt": "2025-09-25T11:01:01.726Z",
+      "timestamp": "Recently"
+    },
+    {
+      "content": "Starbucks to roll out Microsoft Azure OpenAI assistant for baristas",
+      "extractedAt": "2025-09-25T11:01:01.726Z",
+      "timestamp": "Recently"
+    },
+    {
+      "content": "Microsoft partners are shaping the future of healthcare with Microsoft Dragon Copilot - Microsoft Industry Blogs",
+      "extractedAt": "2025-09-25T11:01:01.726Z",
+      "timestamp": "Recently"
+    },
+    {
+      "content": "WSP and Microsoft partner to drive digital transformation in the AEC industry",
+      "extractedAt": "2025-09-25T11:01:01.726Z",
+      "timestamp": "Recently"
+    },
+    {
+      "content": "Microsoft unveils updated Copilot for enterprise customers",
+      "extractedAt": "2025-09-25T11:01:01.726Z",
+      "timestamp": "Recently"
+    },
+    {
+      "content": "‘Innovation happens here’: A novel program helps Microsoft customers create solutions they once thought unreachable   - Source",
+      "extractedAt": "2025-09-25T11:01:01.727Z",
+      "timestamp": "Recently"
+    },
+    {
+      "content": "Protecting the data of our commercial and public sector customers in the AI era - Microsoft On the Issues",
+      "extractedAt": "2025-09-25T11:01:01.727Z",
+      "timestamp": "Recently"
+    },
+    {
+      "content": "Introducing a new Copilot key to kick off the year of AI-powered Windows PCs",
+      "extractedAt": "2025-09-25T11:01:01.727Z",
+      "timestamp": "Recently"
+    },
+    {
+      "content": "Microsoft expands partnership with Oracle to bring customers’ mission-critical database workloads to Azure - The Official Microsoft Blog",
+      "extractedAt": "2025-09-25T11:01:01.727Z",
+      "timestamp": "Recently"
+    },
+    {
+      "content": "Fighting Canada’s record wildfires with a combination of AI and intuition",
+      "extractedAt": "2025-09-25T11:01:01.727Z",
+      "timestamp": "Recently"
+    },
+    {
+      "content": "Microsoft expands partnership with Oracle to bring customers’ mission-critical database workloads to Azure - The Official Microsoft Blog",
+      "extractedAt": "2025-09-25T11:01:01.727Z",
+      "timestamp": "Recently"
+    },
+    {
+      "content": "We are so pleased to work alongside The Premier League to transform fan experiences with cutting-edge AI technologies. Our partnership will bring real-time data overlays, post-match analysis, and personalized content to 1.8 billion fans globally. This is just the beginning of a new era in football. For more information about how Microsoft’s AI technology is being used—including Azure AI Foundry Services with Azure OpenAI, Microsoft 365 Copilot, and Dynamics 365—visit: https://lnkd.in/gKih5H-p For more insights on this impactful collaboration, check out the recent conversation between Microsoft UK’s CEO Darren Hardman and The Premier League’s Chief Executive Richard Masters: https://lnkd.in/gP3RK7tK",
+      "extractedAt": "2025-09-25T11:01:01.729Z",
+      "timestamp": "Recently"
+    },
+    {
+      "content": "During my recent trip to Athens, I had the opportunity to meet with leaders across Greece, Cyprus, and Malta. I always appreciate the opportunity to connect in person and sincerely enjoyed our time together. Thank you to Yanna Andronopoulou, Esra Gaon, and the entire team for the warm welcome and meaningful discussion!",
+      "extractedAt": "2025-09-25T11:01:01.729Z",
+      "timestamp": "Recently"
+    },
+    {
+      "content": "Recently, KPMG International announced its open, interoperable AI platform: KPMG Workbench. Built on Azure AI Foundry, it integrates multi-agent intelligence into a centralized platform to help professionals deliver trusted client solutions quickly and securely.  This work represents a transformative step in AI-driven collaboration. You can read more about the news by reading the announcement here: https://lnkd.in/gu7sWSdnThank you for the continued partnership, David Rowlands and Carl Carande!",
+      "extractedAt": "2025-09-25T11:01:01.729Z",
+      "timestamp": "Recently"
+    },
+    {
+      "content": "This CNBC story gives a deeper look at how Starbucks is innovating with Microsoft’s AI solutions. Built using our Azure OpenAI platform, the company plans to roll out a new barista copilot called ‘Green Dot Assist’ to improve the day-to-day experience for its partners and reduce service times per order. Check out the story here: https://lnkd.in/gxgHkriC",
+      "extractedAt": "2025-09-25T11:01:01.729Z",
+      "timestamp": "Recently"
+    },
+    {
+      "content": "Today we announced healthcare’s first unified voice assistant—Microsoft Dragon Copilot—to accelerate AI Transformation across the industry.  Dragon Copilot combines Dragon Medical One’s (DMO) speech capabilities with the ambient AI technology of DAX Copilot. DMO has helped clinicians document billions of patient records while DAX Copilot has assisted over 3 million patient conversations across 600 healthcare organizations in the last month alone. By bringing these tools together we are helping clinicians streamline documentation, surface pertinent information, and automate tasks to boost clinician wellbeing while increasing their focus on patient experiences.  Read the blog below to learn how some of our industry-leading ISV partners—including MEDITECH, ChipSoft Nederland, Dedalus, Canary Speech, and Softway Medical Group—are advancing AI innovation across communities, regions, and specialties with Dragon Copilot.",
+      "extractedAt": "2025-09-25T11:01:01.729Z",
+      "timestamp": "Recently"
+    },
+    {
+      "content": "What an inspiring look at the difference Microsoft’s AI technology is making for customers and industries around the world—from analyzing complex data that enables scientists to study the Amazon rainforest in Columbia and helping sugar cane farmers optimize crops in India, to supporting people who are neurodivergent or living with a disability solve unique challenges at work.Read on to learn how CHI MEI MEDICAL CENTER, Mayo Clinic, Khan Academy, Basisschool De Wereldreiziger, Pearson, Agricultural Development Trust Baramati, and Microsoft Research’s own efforts are driving positive change.",
+      "extractedAt": "2025-09-25T11:01:01.729Z",
+      "timestamp": "Recently"
+    },
+    {
+      "content": "As the backbone of modern connectivity, the telecom industry enables reliable communication that benefits all industries—from finance to healthcare and more. Ahead of Mobile World Congress 2025, I am proud to highlight our recent partnerships aimed at driving innovation and growth built upon Microsoft’s cloud and AI solutions. Spark New Zealand is embarking on the country's largest Microsoft public cloud partnership by migrating a portion of its workloads to Microsoft Azure and rolling out one of the largest Microsoft 365 Copilot deployments to accelerate its AI services. We are extending our strategic collaboration with Telefónica to offer innovative digital services based on the Telefónica Kernel platform to operators, developers, and other telecom companies. Additionally, we are helping telecoms such as Verizon unlock new revenue streams with 5G-enabled Surface for Business devices and Microsoft 365 Copilot availability within all Verizon Business channels. To learn more about how M",
+      "extractedAt": "2025-09-25T11:01:01.729Z",
+      "timestamp": "Recently"
+    },
+    {
+      "content": "Our commitment to progressing global sustainability is unwavering. As we seek to help our customers and partners accelerate AI Transformation, I am inspired by the ways we are innovating together for a better tomorrow. Check out our latest blog to learn more about our groundbreaking initiatives and partnerships with Terradot, Utilidata, Stegra, and G42 to transform industries and bring positive change.",
+      "extractedAt": "2025-09-25T11:01:01.730Z",
+      "timestamp": "Recently"
+    },
+    {
+      "content": "Partnering with industry leaders to drive innovation is fundamental to Microsoft’s mission of empowering every person and every organization on the planet to achieve more. I am thrilled to announce our partnership with WSP to bring together their engineering expertise with Microsoft’s leading cloud and AI technologies. Our digital and AI-powered tools are accelerating WSP’s AI Transformation efforts; and their strategic advisory, engineering, and design services will support our efforts to build datacenters efficiently and sustainably. Learn more about our partnership in the announcement below.",
+      "extractedAt": "2025-09-25T11:01:01.730Z",
+      "timestamp": "Recently"
+    },
+    {
+      "content": "I am so pleased to see how Microsoft 365 Copilot Chat is already making an impact for educators. For example, Florida State University students and faculty are already using it—with use cases ranging from providing course information and homework to helping make data science more approachable and increasing analysis efficiency for researchers. Our partner Clever Inc. also created an agent that helps educators generate customized lesson plans to enable educators and students to interact more.Read below to learn more about how we are delivering greater impact for the education industry with Copilot and the power of agents.",
+      "extractedAt": "2025-09-25T11:01:01.730Z",
+      "timestamp": "Recently"
+    },
+    {
+      "content": "Last week we announced Microsoft 365 Copilot Chat—a free, secure, AI chat powered by GPT-4o. With pay-as-you-go agents and IT controls for security, privacy, and compliance; enterprise customers can accelerate their AI Transformation at scale.Check out Jared Spataro’s interview with Yahoo Finance to learn more.",
+      "extractedAt": "2025-09-25T11:01:01.730Z",
+      "timestamp": "Recently"
+    },
+    {
+      "content": "I recently had the chance to meet with teams across China, Hong Kong, and Taiwan to recognize their incredible efforts from FY24 and highlight the significant potential we have in the region to help our customers accelerate AI Transformation. Thank you Rodrigo Kede Lima, Yang Hou, Janet Chen, and the entire team for the engaging discussion and time together!",
+      "extractedAt": "2025-09-25T11:01:01.730Z",
+      "timestamp": "Recently"
+    },
+    {
+      "content": "Microsoft recently released its 2024 Digital Defense Report sharing insight into key cybersecurity trends affecting everyone—from individuals to nations. Check out the report to learn more about Microsoft's approach to protecting our customers, and how we are putting security above all else.",
+      "extractedAt": "2025-09-25T11:01:01.730Z",
+      "timestamp": "Recently"
+    },
+    {
+      "content": "What a great story from CBS News about the work we are doing with Belgium-based BEEODIVERSITY to help farmers around the world gain valuable insights about their farmland—by gathering data from millions of bees! Check out the inspirational story below.",
+      "extractedAt": "2025-09-25T11:01:01.730Z",
+      "timestamp": "Recently"
+    },
+    {
+      "content": "I am pleased to share a glimpse into the value that Microsoft's CEO Co-Innovation (COIN) program has brought to our work with customers. This unique program is designed to spur deep collaboration and innovation between Microsoft and our customers by identifying specific business challenges and aspirations—ultimately helping envision and implement solutions tailored to them.  I have been fortunate enough to participate in this program and witness the meaningful results we have driven together, including with Grupo Bimbo, Amadeus, and Equinor. Read on to learn more.",
+      "extractedAt": "2025-09-25T11:01:01.730Z",
+      "timestamp": "Recently"
+    },
+    {
+      "content": "As organizations continue to adopt Microsoft Azure OpenAI Service and our Copilot capabilities, we remain committed to protecting their data. Through robust privacy protections and data governance practices, customers across industries can be confident their data is safeguarded within the most trusted cloud in the industry. Read on to learn more about our approach to Responsible AI, and how we are supporting our customers on their AI Transformation journey.",
+      "extractedAt": "2025-09-25T11:01:01.730Z",
+      "timestamp": "Recently"
+    },
+    {
+      "content": "To drive pragmatic AI innovation, a strong data foundation is key. With Cosmos DB, organizations across industries can leverage a fully autonomous and flexible database at any scale. By capturing dynamic user context and serving data instantly with low latency, app development can be done rapidly while providing real-time experiences globally. Customers such as Starbucks, Mercedes, Otis, AT&T, Walmart, Fidelity, and JetBlue are already using Cosmos DB to build intelligent apps that are secure and personalized to meet their ever-changing business needs with 99.999 SLA. Check out the video to learn more.",
+      "extractedAt": "2025-09-25T11:01:01.730Z",
+      "timestamp": "Recently"
+    },
+    {
+      "content": "Last week, Takeshi Numoto shared that we are introducing the Copilot key on Windows 11 PCs to “help empower users to innovate and seamlessly engage with AI.” Read on to learn more about the news, and how it helps usher in “the year of the AI PC.”",
+      "extractedAt": "2025-09-25T11:01:01.730Z",
+      "timestamp": "Recently"
+    }
+  ],
+  "profilePicture": "",
+  "profileUrl": "https://www.linkedin.com/in/judsonalthoff/recent-activity/all/",
+  "projects": [],
+  "publications": [],
+  "recommendations": [],
+  "skills": [],
+  "title": "Title not found",
+  "volunteering": [],
+  "postsCount": 30,
+  "mergedAt": "2025-09-25T11:01:01.737Z",
+  "extractionComplete": true,
+  "dataFolder": {
+    "profileFile": "data/profile.json",
+    "postsFile": "data/posts.json",
+    "mergedFile": "data/merged.json"
+  },
+  "isAutoScraped": true,
+  "buyerIntelligenceReady": true
+}
