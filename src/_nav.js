@@ -64,7 +64,7 @@ import {
   cilActionUndo,
   cilObjectUngroup,
   cibLibreoffice,
-   
+
 
 } from "@coreui/icons";
 import {
@@ -84,7 +84,7 @@ const _nav = [
     icon: <CIcon icon={cilSpeedometer} customClassName="nav-icon" />,
     group: "",
   },
- 
+
   {
     component: CNavItem,
     name: "Customers",
@@ -92,18 +92,18 @@ const _nav = [
     to: "/customers-details",
     group: "Customers",
   },
-  
-     {
+
+  {
     component: CNavItem,
     name: "Billing",
-    icon: <CIcon icon={cilMoney } customClassName="nav-icon" />,
+    icon: <CIcon icon={cilMoney} customClassName="nav-icon" />,
     to: "/Billing",
     group: "Customers",
   },
-    {
+  {
     component: CNavItem,
     name: "Orders",
-    icon: <CIcon icon={cilClipboard } customClassName="nav-icon" />,
+    icon: <CIcon icon={cilClipboard} customClassName="nav-icon" />,
     to: "/Orders",
     group: "Customers",
   },
@@ -116,14 +116,14 @@ const _nav = [
     group: "Plans",
   },
 
-  
- 
-      
-     
-      
-      
-     
-     
+
+
+
+
+
+
+
+
   {
 
     component: CNavGroup,
@@ -139,28 +139,28 @@ const _nav = [
         to: "/support/request",
         group: "Customer Service",
       },
-       
-     
+
+
     ],
   },
 
-    {
-        component: CNavItem,
-        name: "Usage",
-        icon: <CIcon icon={cibLinkedin} customClassName="nav-icon"  />,
-        to: "/Usage",
-        group: "Customer Service",
-      },
+  {
+    component: CNavItem,
+    name: "Usage",
+    icon: <CIcon icon={cibLinkedin} customClassName="nav-icon" />,
+    to: "/Usage",
+    group: "Customer Service",
+  },
 
-       {
-        component: CNavItem, 
-        name: "Leeds",
-        icon: <CIcon icon={cilBriefcase} customClassName="nav-icon"  />,
-        to: "/leeds",
-        group: "Customer Service",
-      },
- 
-    
+  {
+    component: CNavItem,
+    name: "Leeds",
+    icon: <CIcon icon={cilBriefcase} customClassName="nav-icon" />,
+    to: "/leeds",
+    group: "Customer Service",
+  },
+
+
   {
     component: CNavItem,
     name: "Employees & Access",
@@ -168,7 +168,7 @@ const _nav = [
     to: "/employee",
     group: "Employees & Access",
   },
- 
+
   {
     component: CNavGroup,
     name: "Settings",
@@ -183,7 +183,7 @@ const _nav = [
         to: "/banner",
         group: "Settings",
       },
-     
+
       {
         component: CNavItem,
         name: "Content ",
@@ -191,7 +191,7 @@ const _nav = [
         to: "/content",
         group: "Settings",
       },
-            {
+      {
         component: CNavItem,
         name: "GST",
         icon: <CIcon icon={cilTablet} customClassName="nav-icon" />,
@@ -205,7 +205,7 @@ const _nav = [
         to: "/socialmedia",
         group: "Settings",
       },
-    
+
       {
         component: CNavItem,
         name: "Application Name",
@@ -235,7 +235,7 @@ const _nav = [
         to: "/copyright/message",
         group: "Settings",
       },
-    
+
     ],
   },
 ];

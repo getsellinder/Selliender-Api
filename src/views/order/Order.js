@@ -42,9 +42,9 @@ const Order = () => {
   ) => {
     try {
       setLoading(true);
-      const params={limit,page}
-      if(searchName&&searchName.trim()!==""){
-        params.name=searchName.trim()
+      const params = { limit, page }
+      if (searchName && searchName.trim() !== "") {
+        params.name = searchName.trim()
       }
 
       const res = await axios.get("/api/order/getAll", {
@@ -54,8 +54,8 @@ const Order = () => {
 
       setOrder(res?.data);
       setTotalPages(res.data.totalPages);
-      setCurrentPage(res.data.currentPage);
-      setItemPerPage(res.data.totalItems);
+      // setCurrentPage(res.data.currentPage);
+      setItemPerPage(limit);
 
     } catch (error) {
       const msg = error.response?.data?.message || "Internal Server Error";
@@ -67,8 +67,7 @@ const Order = () => {
 
   useEffect(() => {
     getOrders(search, currentPage, itemPerPage);
-
-  }, [search]);
+  }, [search, currentPage, itemPerPage]); // ✅ add dependencies
   let fetchOrders = order?.data;
 
   const handlePrev = () => {
@@ -77,7 +76,7 @@ const Order = () => {
   const handleNext = () => {
     if (currentPage < totalpages) setCurrentPage((prev) => prev + 1);
   };
-  console.log("Current Page", currentPage);
+
   return (
     <div className="orders-page">
       <div className="orders-header-bar">
@@ -86,7 +85,7 @@ const Order = () => {
           type="text"
           placeholder="Search"
           value={search}
-          onChange={(e) =>setSearch(e.target.value)}
+          onChange={(e) => setSearch(e.target.value)}
         />
         {/* <div className="orders-profile">
                     <span className="orders-profile-icon">&#128100;</span>
@@ -135,12 +134,13 @@ const Order = () => {
                     </span>
                   </td>
                   <td>
-                    <span className={`orders-pill orders-pill-status`}>
+                    <span className={`orders-pill  ${o.status === "failed" ? "orders-pill-status-fail " : "orders-pill-status-success"}`}>
+
                       {o.status}
                     </span>
                   </td>
                   <td>
-                    <button className="orders-view-btn" onClick={()=>navigate(`/${o.userId.name}/invoice/${o.userId._id}`)}>
+                    <button className="orders-view-btn" onClick={() => navigate(`/${o.userId.name}/invoice/${o.userId._id}`)}>
                       <span className="orders-view-icon" >📄</span> View
                     </button>
                   </td>
@@ -161,16 +161,18 @@ const Order = () => {
           {/* {Array.from({length:totalpages},(_,i)=>(
 <span  key={i+1}   className={`orders-page-btn  orders-page-num ${currentPage === i + 1 ? "bg-blue-500 text-white" : ""}`}      onClick={() => setCurrentPage(i + 1)}>{i+1}</span>
           ))} */}
-          {Array.from({ length: totalpages }, (_, i) => (
-            <button
-              key={i + 1}
-              className={`orders-page-num ${currentPage === i + 1 ? "bg-blue-500 text-white" : ""
-                }`}
-              onClick={() => setCurrentPage(i + 1)}
-            >
-              {i + 1}
-            </button>
-          ))}
+          {Array.from({ length: totalpages }, (_, i) => {
+            const isActive = currentPage === i + 1
+            return (
+              <button
+                key={i + 1}
+                className={isActive ? "orders-page-num-active" : "orders-page-num-inactive"}
+                onClick={() => setCurrentPage(i + 1)}
+              >
+                {i + 1}
+              </button>
+            )
+          })}
 
           <button
             className="orders-page-btn"
