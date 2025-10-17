@@ -77,3 +77,67 @@
   .billing-page{ flex-direction:column; }
   .billing-sidebar{ width:100%; display:flex; justify-content:center; }
 }
+
+.biling-view-btn {
+  background: #232a3d;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 1px 18px;
+  font-size: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.billing-search {
+  /* width: 320px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1px solid #dbe2ea;
+  font-size: 16px;
+  background: #fff; */
+    background:#fff;
+  border: 1px solid #dbe2ea;
+  outline: none;
+  padding:10px 14px;
+  border-radius:4px;
+  width: 320px;
+}
+
+.date-range-picker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.date-label {
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.date-input {
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  width: 120px;
+  font-size: 0.95rem;
+  outline: none;
+}
+
+.filter-btn {
+  padding: 6px 14px;
+  background-color: #3399cc;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-btn:hover {
+  background-color: #287aa5;
+}

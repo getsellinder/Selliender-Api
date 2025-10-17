@@ -1,11 +1,10 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "./Billing.css";
+import { useCustomer } from "../CustomerSupport/CustomerContext";
+import { isAutheticated } from "src/auth";
+import axios from "axios";
+import { CircularProgress } from "@material-ui/core";
 
-const summaryData = [
-    { title: "Total Sales", value: "Rs. 22700.00", color: "#27ae60" },
-    // { title: "Total Due Amount", value: "Rs. 8300.00", color: "#e74c3c" },
-    { title: "Total Received Amount", value: "Rs. 14400.00", color: "#111" },
-];
 
 const rows = new Array(8).fill(0).map((_, i) => ({
     date: "23 April, 2023 6:00 PM",
@@ -26,15 +25,77 @@ const rows = new Array(8).fill(0).map((_, i) => ({
 }));
 const tableheadings = [
     "Date & Time",
-    "Sale Number",
+    "Invoice Number",
     "Customer Name",
     "Total Amount",
-    "Due Amount",
+    // "Due Amount",
     "Status",
     "Action",
 ];
 
 const Billing = () => {
+    const token = isAutheticated();
+    const [search, setSearch] = useState();
+    const [searchByDate, setSearchByDate] = useState();
+    const { appdetails } = useCustomer();
+
+    const [totalpages, setTotalPages] = useState();
+    const [itemPerPage, setItemPerPage] = useState(10);
+
+    const [currentPage, setCurrentPage] = useState();
+    const [errormsge, setErrorMessage] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [biling, setBiling] = useState([]);
+
+    const getBiling = async (
+        searchName = search,
+        page = 1,
+        limit = itemPerPage,
+        date = searchByDate
+    ) => {
+        try {
+            setLoading(true);
+            const params = { limit, page };
+            if (searchName && searchName.trim() !== "") {
+                params.name = searchName.trim();
+            }
+            if (searchByDate && searchByDate.trim() !== "") {
+                params.date = searchByDate.trim();
+            }
+
+            const res = await axios.get("/api/billing/get", {
+                params,
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            setBiling(res?.data);
+            setTotalPages(res.data.totalPages);
+            // setCurrentPage(res.data.currentPage);
+            setItemPerPage(limit);
+        } catch (error) {
+            const msg = error.response?.data?.message || "Internal Server Error";
+            setErrorMessage(msg);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        getBiling(search, currentPage, itemPerPage, searchByDate);
+    }, [search, currentPage, itemPerPage, searchByDate]);
+    console.log("biling", biling)
+    const summaryData = [
+        { title: "Total Sales", value: `${biling?.totalsales}`, color: "#27ae60" },
+        // { title: "Total Due Amount", value: "Rs. 8300.00", color: "#e74c3c" },
+        { title: "Total Received Amount", value: `${biling?.totalAmount}`, color: "#111" },
+    ];
+
+    const handlePrev = () => {
+        if (currentPage > 1) setCurrentPage((prev) => prev - 1)
+    }
+    const handleNext = () => {
+        if (currentPage < totalpages) setCurrentPage((prev) => prev - 1)
+    }
     return (
         <>
             <div>
@@ -43,8 +104,38 @@ const Billing = () => {
             <div className="billing-page">
                 <main className="billing-main">
                     <header className="billing-header">
-                        <div className="date-range">
+                        {/* <div className="date-range">
                             Last 7 Days - 15 July 2023 to 21 July 2023
+                        </div> */}
+                        <div className="date-range-picker">
+                            <label htmlFor="filterDate" className="date-label">
+                                Select Date:
+                            </label>
+                            <input
+                                type="text"
+                                id="filterDate"
+                                placeholder="dd/mm/yyyy"
+                                value={searchByDate}
+                                onChange={(e) => setSearchByDate(e.target.value)}
+                                className="date-input"
+                            />
+                            <button
+                                className="orders-view-btn p-2"
+                                onClick={() => setSearchByDate(selectedDate)}
+                            >
+                                Filter
+                            </button>
+                        </div>
+
+                        <div className="">
+                            <input
+                                className="billing-search "
+                                type="text"
+                                placeholder="Search By Invoice Number"
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                            />
+
                         </div>
                     </header>
 
@@ -53,7 +144,8 @@ const Billing = () => {
                             <div className="card" key={s.title}>
                                 <div className="card-title">{s.title}</div>
                                 <div className="card-value" style={{ color: s.color }}>
-                                    {s.value}
+                                    {loading ? <CircularProgress size={25} /> : s.value}
+
                                 </div>
                             </div>
                         ))}
@@ -64,27 +156,96 @@ const Billing = () => {
                             <thead>
                                 <tr>
                                     {tableheadings.map((val) => (
-                                        <th>{val}</th>
+                                        <th >{val}</th>
                                     ))}
                                 </tr>
                             </thead>
                             <tbody>
-                                {rows.map((r, i) => (
+                                {loading ? <tr>
+                                    <td colSpan="9" className="text-center py-10">
+                                        <div className="flex justify-center items-center">
+                                            <CircularProgress size={50}
+                                                thickness={5}
+                                                style={{ color: "#1976d2" }} />
+                                        </div>
+                                    </td>
+                                </tr> : biling?.getresult?.map((r, i) => (
                                     <tr key={i} className={i % 2 === 0 ? "odd" : "even"}>
-                                        <td>{r.date}</td>
-                                        <td>{r.saleNo}</td>
-                                        <td>{r.customer}</td>
-                                        <td>₹{r.total}</td>
-                                        <td>{r.due}</td>
+                                        <td>{r.createdAt}</td>
+                                        <td>{r.InvoiceNo}</td>
+                                        <td>{r.userId.name}</td>
+                                        <td>₹{r.Amount}</td>
+                                        {/* <td>{r.due}</td> */}
                                         <td>{r.status}</td>
-                                        <td>{r.status}</td>
+                                        <td>
+                                            <div style={{ display: "flex", gap: "10px" }}>
+                                                <button className="orders-view-btn p-2" onClick={() => navigate(`/${o.userId.name}/invoice/${o.userId._id}`)}>
+                                                    View
+                                                </button>
+                                                <div>
+                                                    <button className="orders-view-btn p-2" onClick={() => navigate(`/${o.userId.name}/invoice/${o.userId._id}`)}>
+                                                        Invoice
+                                                    </button>
+                                                </div>
+                                                <div>
+
+                                                </div>
+                                            </div>
+                                        </td>
                                     </tr>
                                 ))}
+
                             </tbody>
                         </table>
+
+                        <div className="orders-pagination">
+                            <button
+                                className="orders-page-btn"
+                                onClick={handlePrev}
+                                disabled={currentPage === 1}
+                            >
+                                ‹
+                            </button>
+
+                            {Array.from({ length: totalpages }, (_, i) => {
+                                const isActive = currentPage === i + 1
+                                return (
+                                    <button
+                                        key={i + 1}
+                                        className={isActive ? "orders-page-num-active" : "orders-page-num-inactive"}
+                                        onClick={() => setCurrentPage(i + 1)}
+                                    >
+                                        {i + 1}
+                                    </button>
+                                )
+                            })}
+
+                            <button
+                                className="orders-page-btn"
+                                onClick={handleNext}
+                                disabled={currentPage === totalpages}
+                            >
+                                ›
+                            </button>
+                        </div>
                     </section>
                 </main>
+
             </div>
+            <footer className="orders-footer">
+                {appdetails.map((val, index) => {
+                    return (
+                        <a
+                            href="https://neonflake.com"
+                            target="_blank"
+                            rel="noreferrer"
+                            key={index}
+                        >
+                            {val.copyrightMessage}
+                        </a>
+                    );
+                })}
+            </footer>
         </>
     );
 };

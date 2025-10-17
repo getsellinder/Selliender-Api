@@ -87,10 +87,7 @@ const Order = () => {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        {/* <div className="orders-profile">
-                    <span className="orders-profile-icon">&#128100;</span>
-                    <span className="orders-profile-name">Ayyappa nagubandi</span>
-                </div> */}
+
       </div>
 
       <div className="orders-table-card">
@@ -158,9 +155,7 @@ const Order = () => {
           >
             ‹
           </button>
-          {/* {Array.from({length:totalpages},(_,i)=>(
-<span  key={i+1}   className={`orders-page-btn  orders-page-num ${currentPage === i + 1 ? "bg-blue-500 text-white" : ""}`}      onClick={() => setCurrentPage(i + 1)}>{i+1}</span>
-          ))} */}
+
           {Array.from({ length: totalpages }, (_, i) => {
             const isActive = currentPage === i + 1
             return (
