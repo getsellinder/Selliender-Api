@@ -4,28 +4,14 @@ import { useCustomer } from "../CustomerSupport/CustomerContext";
 import { isAutheticated } from "src/auth";
 import axios from "axios";
 import { CircularProgress } from "@material-ui/core";
+import { useNavigate } from "react-router-dom";
 
 
-const rows = new Array(8).fill(0).map((_, i) => ({
-    date: "23 April, 2023 6:00 PM",
-    saleNo: `Sale S0${10 - i}`,
-    customer: [
-        "Saket",
-        "Karan",
-        "Aman Kumar Singh",
-        "Manish",
-        "Karan Godhwani",
-        "Aman Kumar Singh",
-        "Abhishek Verma",
-        "Nitin Chandel",
-    ][i % 8],
-    total: "2500.00",
-    due: i % 3 === 0 ? "1000.00" : "0.00",
-    status: ["Partial", "Paid", "Unpaid", "Partially Paid"][i % 4],
-}));
+
 const tableheadings = [
     "Date & Time",
     "Invoice Number",
+    "TransactionId",
     "Customer Name",
     "Total Amount",
     // "Due Amount",
@@ -46,6 +32,7 @@ const Billing = () => {
     const [errormsge, setErrorMessage] = useState("");
     const [loading, setLoading] = useState(false);
     const [biling, setBiling] = useState([]);
+    const navigate = useNavigate()
 
     const getBiling = async (
         searchName = search,
@@ -173,17 +160,19 @@ const Billing = () => {
                                     <tr key={i} className={i % 2 === 0 ? "odd" : "even"}>
                                         <td>{r.createdAt}</td>
                                         <td>{r.InvoiceNo}</td>
-                                        <td>{r.userId.name}</td>
-                                        <td>₹{r.Amount}</td>
+                                        <td>{r.TransactionId === null ? "Null" : r.TransactionId}</td>
+                                        <td className="text-center">{r.userId.name}</td>
+                                        <td className="text-center">{r.Amount === "0" ? r.Amount : `₹${r.Amount}`}</td>
+
                                         {/* <td>{r.due}</td> */}
                                         <td>{r.status}</td>
                                         <td>
                                             <div style={{ display: "flex", gap: "10px" }}>
-                                                <button className="orders-view-btn p-2" onClick={() => navigate(`/${o.userId.name}/invoice/${o.userId._id}`)}>
+                                                <button className="orders-view-btn p-2" onClick={() => navigate(`/Billing/view/${r.userId._id}`)}>
                                                     View
                                                 </button>
                                                 <div>
-                                                    <button className="orders-view-btn p-2" onClick={() => navigate(`/${o.userId.name}/invoice/${o.userId._id}`)}>
+                                                    <button className="orders-view-btn p-2" onClick={() => navigate(`/Billing/invoice/${r.userId._id}`)}>
                                                         Invoice
                                                     </button>
                                                 </div>

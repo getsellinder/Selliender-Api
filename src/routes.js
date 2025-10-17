@@ -156,6 +156,8 @@ import Invoice from "./views/customerDetails/Invoice";
 import Billing from "./views/billing/Billing";
 import Orders from "./views/order/Order";
 import Order from "./views/order/Order";
+import ViewBiling from "./views/billing/BilingView";
+import BilingInvoice from "./views/billing/BilingInvoice";
 
 
 
@@ -697,19 +699,31 @@ const routes = [
     navName: "Website Related",
   },
 
-    {
+  {
     path: "/:name/invoice/:id",
     name: "Invoice",
     element: Invoice,
     navName: "Website Related",
   },
-      {
+  {
     path: "/Billing",
     name: "Billing",
     element: Billing,
     navName: "Website Related",
   },
-    {
+  {
+    path: "/Billing/view/:id",
+    name: "Billing",
+    element: ViewBiling,
+    navName: "Website Related",
+  },
+  {
+    path: "/Billing/invoice/:id",
+    name: "Billing",
+    element: BilingInvoice,
+    navName: "Website Related",
+  },
+  {
     path: "/Orders",
     name: "Orders",
     element: Order,

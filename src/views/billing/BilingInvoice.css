@@ -1,0 +1,100 @@
+/* Styles for Billing Invoice UI */
+.invoice-page {
+  font-family: Inter, Arial, Helvetica, sans-serif;
+  background: #f6f8fa;
+  min-height: 100vh;
+  color: #23303b;
+}
+.invoice-header {
+  background: #292c3a;
+  color: #fff;
+  padding: 22px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.invoice-left {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+.invoice-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 22px;
+  background: #fff;
+  color: #292c3a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+.invoice-title {
+  font-size: 20px;
+  font-weight: 600;
+}
+.invoice-num {
+  margin-left: 8px;
+  font-weight: 700;
+}
+.invoice-customer {
+  margin-top: 6px;
+  color: #cfd8df;
+}
+.invoice-badge {
+  background: #f1f3f6;
+  color: #292c3a;
+  padding: 6px 12px;
+  border-radius: 18px;
+  font-weight: 600;
+  text-transform: lowercase;
+}
+.invoice-content {
+  max-width: 1100px;
+  margin: 26px auto 80px auto;
+  padding: 0 20px;
+}
+.card {
+  background: #fff;
+  padding: 18px 22px 26px 22px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 0 rgba(16,24,32,0.04);
+}
+.card-title {
+  font-size: 18px;
+  margin: 6px 0 16px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.card-icon {
+  font-size: 18px;
+  color: #2b8f6a;
+}
+.info-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.info-table td {
+  padding: 18px 16px;
+  border: 1px solid #eef2f5;
+  vertical-align: middle;
+}
+.info-table td:first-child {
+  width: 28%;
+  color: #43515a;
+  font-weight: 500;
+  background: #fff;
+}
+.info-table td.long {
+  word-break: break-all;
+}
+.additional {
+  padding: 14px 6px;
+  color: #556b73;
+}
+@media (max-width: 768px) {
+  .invoice-content { padding: 0 12px; }
+  .info-table td { padding: 12px 10px; }
+}
