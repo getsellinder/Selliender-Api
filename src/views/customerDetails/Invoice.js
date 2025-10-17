@@ -47,7 +47,14 @@ const Invoice = () => {
 
   return (
     <>
-      {invoice.map((val, index) => {
+      {invoiceLoading ? <div style={{
+        margin: "auto", display: "flex",
+        justifyContent: "center", alignItems: "center", height: "50vh"
+      }}>
+        <CircularProgress size={50}
+          thickness={5}
+          style={{ color: "#1976d2" }} />
+      </div> : invoice.map((val, index) => {
         return (
           <Paper key={index}
             elevation={4}
@@ -389,6 +396,7 @@ const Invoice = () => {
           </Paper>
         )
       })}
+
 
     </>
   );
