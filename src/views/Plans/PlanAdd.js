@@ -39,7 +39,7 @@ const PlanAdd = () => {
     Monthly_Price: "",
     Total_Monthly_Price: "",
     Total_Yearly_Price: "",
-     name: "",
+    name: "",
     Monthly_features: [""],
     Yearly_features: [""],
   });
@@ -84,7 +84,7 @@ const PlanAdd = () => {
         const monthlyPrice = parseFloat(prevPlan.Monthly_Price) || 0;
         const yearlyPrice = parseFloat(prevPlan.Yearly_Price) || 0;
 
-        plan.gstMonthlyPrice =( (monthlyPrice * gstPercent) / 100).toFixed(2)
+        plan.gstMonthlyPrice = ((monthlyPrice * gstPercent) / 100).toFixed(2)
 
         plan.gstYearlyPrice = ((yearlyPrice * gstPercent) / 100).toFixed(2)
 
