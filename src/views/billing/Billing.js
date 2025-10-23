@@ -6,8 +6,6 @@ import axios from "axios";
 import { CircularProgress } from "@material-ui/core";
 import { useNavigate } from "react-router-dom";
 
-
-
 const tableheadings = [
     "Date & Time",
     "Invoice Number",
@@ -32,7 +30,7 @@ const Billing = () => {
     const [errormsge, setErrorMessage] = useState("");
     const [loading, setLoading] = useState(false);
     const [biling, setBiling] = useState([]);
-    const navigate = useNavigate()
+    const navigate = useNavigate();
 
     const getBiling = async (
         searchName = search,
@@ -70,19 +68,23 @@ const Billing = () => {
     useEffect(() => {
         getBiling(search, currentPage, itemPerPage, searchByDate);
     }, [search, currentPage, itemPerPage, searchByDate]);
-    console.log("biling", biling)
+    console.log("biling", biling);
     const summaryData = [
         { title: "Total Sales", value: `${biling?.totalsales}`, color: "#27ae60" },
         // { title: "Total Due Amount", value: "Rs. 8300.00", color: "#e74c3c" },
-        { title: "Total Received Amount", value: `${biling?.totalAmount}`, color: "#111" },
+        {
+            title: "Total Received Amount",
+            value: `₹${biling?.totalAmount}`,
+            color: "#111",
+        },
     ];
 
     const handlePrev = () => {
-        if (currentPage > 1) setCurrentPage((prev) => prev - 1)
-    }
+        if (currentPage > 1) setCurrentPage((prev) => prev - 1);
+    };
     const handleNext = () => {
-        if (currentPage < totalpages) setCurrentPage((prev) => prev - 1)
-    }
+        if (currentPage < totalpages) setCurrentPage((prev) => prev - 1);
+    };
     return (
         <>
             <div>
@@ -122,7 +124,6 @@ const Billing = () => {
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                             />
-
                         </div>
                     </header>
 
@@ -132,7 +133,6 @@ const Billing = () => {
                                 <div className="card-title">{s.title}</div>
                                 <div className="card-value" style={{ color: s.color }}>
                                     {loading ? <CircularProgress size={25} /> : s.value}
-
                                 </div>
                             </div>
                         ))}
@@ -143,47 +143,64 @@ const Billing = () => {
                             <thead>
                                 <tr>
                                     {tableheadings.map((val) => (
-                                        <th >{val}</th>
+                                        <th>{val}</th>
                                     ))}
                                 </tr>
                             </thead>
                             <tbody>
-                                {loading ? <tr>
-                                    <td colSpan="9" className="text-center py-10">
-                                        <div className="flex justify-center items-center">
-                                            <CircularProgress size={50}
-                                                thickness={5}
-                                                style={{ color: "#1976d2" }} />
-                                        </div>
-                                    </td>
-                                </tr> : biling?.getresult?.map((r, i) => (
-                                    <tr key={i} className={i % 2 === 0 ? "odd" : "even"}>
-                                        <td>{r.createdAt}</td>
-                                        <td>{r.InvoiceNo}</td>
-                                        <td>{r.TransactionId === null ? "Null" : r.TransactionId}</td>
-                                        <td className="text-center">{r.userId.name}</td>
-                                        <td className="text-center">{r.Amount === "0" ? r.Amount : `₹${r.Amount}`}</td>
-
-                                        {/* <td>{r.due}</td> */}
-                                        <td>{r.status}</td>
-                                        <td>
-                                            <div style={{ display: "flex", gap: "10px" }}>
-                                                <button className="orders-view-btn p-2" onClick={() => navigate(`/Billing/view/${r.userId._id}`)}>
-                                                    View
-                                                </button>
-                                                <div>
-                                                    <button className="orders-view-btn p-2" onClick={() => navigate(`/Billing/invoice/${r.userId._id}`)}>
-                                                        Invoice
-                                                    </button>
-                                                </div>
-                                                <div>
-
-                                                </div>
+                                {loading ? (
+                                    <tr>
+                                        <td colSpan="9" className="text-center py-10">
+                                            <div className="flex justify-center items-center">
+                                                <CircularProgress
+                                                    size={50}
+                                                    thickness={5}
+                                                    style={{ color: "#1976d2" }}
+                                                />
                                             </div>
                                         </td>
                                     </tr>
-                                ))}
+                                ) : (
+                                    biling?.getresult?.map((r, i) => (
+                                        <tr key={i} className={i % 2 === 0 ? "odd" : "even"}>
+                                            <td>{r.createdAt}</td>
+                                            <td>{r.InvoiceNo}</td>
+                                            <td>
+                                                {r.TransactionId === null ? "Null" : r.TransactionId}
+                                            </td>
+                                            <td className="text-center">{r.userId.name}</td>
+                                            <td className="text-center">
+                                                {r.Amount === "0" ? r.Amount : `₹${r.Amount}`}
+                                            </td>
 
+                                            {/* <td>{r.due}</td> */}
+                                            <td>{r.status}</td>
+                                            <td>
+                                                <div style={{ display: "flex", gap: "10px" }}>
+                                                    <button
+                                                        className="orders-view-btn p-2"
+                                                        onClick={() =>
+                                                            navigate(`/Billing/view/${r.userId._id}`)
+                                                        }
+                                                    >
+                                                        View
+                                                    </button>
+                                                    <div>
+                                                        <button
+                                                            className="orders-view-btn p-2"
+                                                            onClick={() =>
+                                                                navigate(`/Billing/invoice/${r.userId._id}`)
+                                                            }
+                                                        >
+                                                            Invoice
+                                                        </button>
+                                                    </div>
+                                                    <div></div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
                             </tbody>
                         </table>
 
@@ -197,16 +214,20 @@ const Billing = () => {
                             </button>
 
                             {Array.from({ length: totalpages }, (_, i) => {
-                                const isActive = currentPage === i + 1
+                                const isActive = currentPage === i + 1;
                                 return (
                                     <button
                                         key={i + 1}
-                                        className={isActive ? "orders-page-num-active" : "orders-page-num-inactive"}
+                                        className={
+                                            isActive
+                                                ? "orders-page-num-active"
+                                                : "orders-page-num-inactive"
+                                        }
                                         onClick={() => setCurrentPage(i + 1)}
                                     >
                                         {i + 1}
                                     </button>
-                                )
+                                );
                             })}
 
                             <button
@@ -219,7 +240,6 @@ const Billing = () => {
                         </div>
                     </section>
                 </main>
-
             </div>
             <footer className="orders-footer">
                 {appdetails.map((val, index) => {
