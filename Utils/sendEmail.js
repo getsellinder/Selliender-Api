@@ -55,29 +55,29 @@ export default sendEmail;
 // export default sendEmail
 
 // from message bird  SMS send------------------------------------
-import { initClient } from "messagebird";
-const messagebird = initClient("p2YaqxU9uYx2F3d3dV8ywAFtk");
+// import { initClient } from "messagebird";
+// const messagebird = initClient("p2YaqxU9uYx2F3d3dV8ywAFtk");
 
-export const sendOtp = async (recipient, message) => {
-  if (!recipient || !message) {
-    return;
-  }
-  const params = {
-    originator: "+447418314922",
-    recipients: [recipient],
-    body: message,
-  };
+// export const sendOtp = async (recipient, message) => {
+//   if (!recipient || !message) {
+//     return;
+//   }
+//   const params = {
+//     originator: "+447418314922",
+//     recipients: [recipient],
+//     body: message,
+//   };
 
 
-  messagebird.messages.create(params, (err, response) => {
-    if (err) {
-      console.error("Error sending message-------:", err);
-      return;
-    }
-    // console.log("Message sent successfully:", response);
-    // console.log("Message details:", response, response?.recipients?.items);
-  });
-};
+//   messagebird.messages.create(params, (err, response) => {
+//     if (err) {
+//       console.error("Error sending message-------:", err);
+//       return;
+//     }
+//     // console.log("Message sent successfully:", response);
+//     // console.log("Message details:", response, response?.recipients?.items);
+//   });
+// };
 
 
 
