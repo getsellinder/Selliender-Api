@@ -10,20 +10,14 @@ import { Tax } from "../Tax/tax_model.js";
 import UserModel from "../user/userModel.js";
 import Invoice from "./Invoice.js";
 import packageModel from "./Package.model.js";
-import juice from "juice";
 
-import crypto from "crypto";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
-const logoPath = path.join(__dirname, "logo-dark-bg.png");
 
-const logoData = fs.readFileSync(logoPath);
-const logoBase64 = `data:image/png;base64,${logoData.toString("base64")}`;
+
+
+
+
 
 export const PackageCreate = async (req, res) => {
   try {
@@ -472,80 +466,7 @@ export const ConfirmPayment = async (req, res) => {
       { new: true }
     );
 
-    //     await sendBrevoEmail({
-    //       to: findUser.email,
-    //       fromEmail: address,
-    //       fromName: appName,
-    //       subject: `${appName} Invoice Plan Details`,
-    //       html: `
-    //   <div style="font-family: Arial, sans-serif; max-width: 700px; margin: auto; border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">
-    //     <!-- Header -->
-    //     <div style="background: linear-gradient(135deg, #0a2c60, #143d80); color: white; padding: 25px;">
-    //        <div style="text-align:center; margin-bottom:20px;">
-    //  <img src=${logo} alt="Sellinder Logo" width="120" />
-    //     <h2 style="margin-top:10px;">Invoice</h2>
-    //   </div>
-    //     </div>
-
-    //     <!-- Invoice Info -->
-    //     <div style="padding: 25px;">
-    //       <h3 style="margin: 0 0 10px;">INVOICE</h3>
-    //       <p style="margin: 0;">Invoice Number: <strong>${invoice.InvoiceNo
-    //         }</strong></p>
-    //       <p style="margin: 0;">Date: <strong>${shordataformate(
-    //           invoice.createdAt
-    //         )}</strong></p>
-    //     </div>
-
-    //     <!-- Billing & Payment Info -->
-
-    //     <!-- Table -->
-    //     <table style="width: 100%; border-collapse: collapse;">
-    //       <thead>
-    //         <tr style="background-color: #143d80; color: white;">
-    //           <th style="padding: 10px; text-align: left;">#</th>
-    //           <th style="padding: 10px; text-align: left;">Plan</th>
-
-    //           <th style="padding: 10px; text-align: right;">Amount</th>
-    //         </tr>
-    //       </thead>
-    //       <tbody>
-    //         <tr style="border-bottom: 1px solid #eee;">
-    //           <td style="padding: 10px;">1</td>
-    //           <td style="padding: 10px;">${findPlan.Package}</td>
-
-    //           <td style="padding: 10px; text-align: right;">₹${planOriginalAmount}</td>
-    //         </tr>
-
-    //       </tbody>
-    //     </table>
-    //     <div >
-    //      <div>
-
-    //          <p style="margin: 0;">Plan Start: <strong>${shordataformate(
-    //           invoice.plan_start_date
-    //         )}->${shordataformate(invoice.plan_expiry_date)}</strong></p>
-
-    //       </div>
-
-    //     <!-- Totals -->
-    //     <div style="padding: 25px; text-align: right;">
-    //       <p style="margin: 0;">Sub Total: <strong>₹${planOriginalAmount.toFixed(
-    //           2
-    //         )}</strong></p>
-
-    //         <p style="margin: 0;">GST ${gstnumber}%: <strong>₹${gstcalculate}</strong></p>
-
-    //       <h3 style="margin: 10px 0 0;">Total: ₹${invoice.Amount.toFixed(2)}</h3>
-    //     </div>
-    // </div>
-    //     <!-- Footer -->
-    //     <div style="background: linear-gradient(135deg, #143d80, #0a2c60); color: white; text-align: center; padding: 15px; font-size: 14px;">
-    //       <strong>${copyright}</strong>
-    //     </div>
-    //   </div>
-    //   `,
-    //     });
+ 
 
     await sendBrevoEmail({
       to: findUser.email,
@@ -559,7 +480,7 @@ export const ConfirmPayment = async (req, res) => {
     <div style="background: linear-gradient(135deg, #0a2c60, #143d80); color: white; padding: 25px;">
       <div style="text-align:center; margin-bottom:20px;">
         <img src="${logo}" alt="Sellinder Logo" width="120" />
-        <h2 style="margin-top:10px;">Invoice</h2>
+   
       </div>
     </div>
 
@@ -589,6 +510,24 @@ export const ConfirmPayment = async (req, res) => {
           <td style="padding: 10px;">${findPlan.Package}</td>
           <td style="padding: 10px; text-align: right;">₹${planOriginalAmount}</td>
         </tr>
+        <tr style="border-bottom: 1px solid #eee;">
+          <td style="padding: 10px;"></td>
+          <td style="padding: 10px;">${shordataformate(invoice.plan_start_date)}-${shordataformate(
+          invoice.plan_expiry_date
+        )}</td>
+          <td style="padding: 10px; text-align: right;"></td>
+        </tr>
+          <tr style="border-bottom: 1px solid #eee;">
+          <td style="padding: 10px;"></td>
+          <td style="padding: 10px;">${searchLimit} Profile Monthly </td>
+          <td style="padding: 10px; text-align: right;"></td>
+        </tr>
+         </tr>
+          <tr style="border-bottom: 1px solid #eee;">
+          <td style="padding: 10px;"></td>
+          <td style="padding: 10px;">    Up to ${userLimit} users </td>
+          <td style="padding: 10px; text-align: right;"></td>
+        </tr>
       </tbody>
     </table>
 
@@ -605,34 +544,14 @@ export const ConfirmPayment = async (req, res) => {
       "
     >
       <!-- Left side: Plan Details -->
-      <div style="width: 50%; padding-right: 20px;">
-        <h4 style="margin: 0 0 10px; color: #143d80;">Plan Details</h4>
-        <p   style="
-            margin: 0 0 10px;
-            font-size: 14px;
-            padding-bottom: 5px;
-            border-bottom: 1px solid #ccc;
-          ">
-        <strong>${shordataformate(invoice.plan_start_date)}-${shordataformate(
-          invoice.plan_expiry_date
-        )}</strong>
-        </p>
-        <p style="margin: 0; font-size: 14px;   padding-bottom: 10px;">
-        
-${searchLimit} Profile Monthly 
-        </p>
-          <p style="margin: 0; font-size: 14px;">
-      Up to ${userLimit} users 
-        </p>
-      
-      </div>
+ 
 
       <!-- Divider -->
-      <div style="width: 1px; background-color: #ccc; height: auto; margin: 0 20px;"></div>
+  
 
       <!-- Right side: Totals -->
-      <div style="width: 50%; text-align: right;">
-        <h4 style="margin: 0 0 10px; color: #143d80;">Billing Summary</h4>
+      <div style="width: 100%; text-align: right;">
+ 
         <p style="margin: 0; font-size: 14px;">
           Sub Total: <strong>₹${planOriginalAmount.toFixed(2)}</strong>
         </p>
