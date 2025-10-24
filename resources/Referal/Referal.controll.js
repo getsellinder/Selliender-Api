@@ -4,7 +4,7 @@ import UserModel from "../user/userModel.js";
 import Referal from "./Referal.model.js";
 
 export const ReferralPlan = async (req, res) => {
-  const { referralemail } = req.body;
+  const {referralemail } = req.body;
   const userId = req.user._id;
   try {
     const findUser = await UserModel.findById(userId);
@@ -53,7 +53,6 @@ export const ReferralPlan = async (req, res) => {
   }
 };
 
-
 export const countSearchlimit = async (req, res) => {
   const { id } = req.params; // User id
 
@@ -98,12 +97,7 @@ export const countSearchlimit = async (req, res) => {
       searchCount: updatedUser.SearchLimit,
       // remaining: limit - updatedUser.SearchLimit,
     });
-  }
-
-
-
-
-  catch (error) {
+  } catch (error) {
     console.log("countSearchlimit.error", error);
     return res
       .status(500)

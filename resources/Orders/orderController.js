@@ -176,33 +176,9 @@ export const getOrders = async (req, res) => {
   }
 };
 
-// export const getOrders = async (req, res) => {
-//   try {
-//     const order = await Order.find({
-//       // payment_status: "success",
-//     })
-//       .populate({
-//         path: "user",
-//         select: "name -_id",
-//       })
-//       .populate({
-//         path: "shippingInfo.addressId",
-//       })
-//       .sort({ updatedAt: -1 });
-//     if (order) {
-//       res.status(201).json({
-//         success: true,
-//         order,
-//         message: "All Order Fetched",
-//       });
-//     }
-//   } catch (error) {
-//     res.status(500).json({
-//       success: false,
-//       message: error.message ? error.message : "Something went Wrong",
-//     });
-//   }
-// };
+
+
+
 export const getSingleOrder = async (req, res) => {
   try {
     if (!req.params.id)
