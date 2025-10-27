@@ -27,7 +27,7 @@ export function shordataformate(data) {
     month: "short",
     day: "2-digit",
     year: "numeric"
-  });
+  }).replace(/,/g,"");
 }
 export function datewithMonth(val) {
   const date = new Date(val);

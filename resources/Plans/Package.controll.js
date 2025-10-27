@@ -11,14 +11,6 @@ import UserModel from "../user/userModel.js";
 import Invoice from "./Invoice.js";
 import packageModel from "./Package.model.js";
 
-
-
-
-
-
-
-
-
 export const PackageCreate = async (req, res) => {
   try {
     const {
@@ -466,8 +458,6 @@ export const ConfirmPayment = async (req, res) => {
       { new: true }
     );
 
- 
-
     await sendBrevoEmail({
       to: findUser.email,
       fromEmail: address,
@@ -508,13 +498,13 @@ export const ConfirmPayment = async (req, res) => {
         <tr style="border-bottom: 1px solid #eee;">
           <td style="padding: 10px;">1</td>
           <td style="padding: 10px;">${findPlan.Package}</td>
-          <td style="padding: 10px; text-align: right;">₹${planOriginalAmount}</td>
+          <td style="padding: 10px; text-align: right;">₹${Number(planOriginalAmount.toFixed(2)).toLocaleString()}</td>
         </tr>
         <tr style="border-bottom: 1px solid #eee;">
           <td style="padding: 10px;"></td>
-          <td style="padding: 10px;">${shordataformate(invoice.plan_start_date)}-${shordataformate(
-          invoice.plan_expiry_date
-        )}</td>
+          <td style="padding: 10px;">${shordataformate(
+          invoice.plan_start_date
+        )}-${shordataformate(invoice.plan_expiry_date)}</td>
           <td style="padding: 10px; text-align: right;"></td>
         </tr>
           <tr style="border-bottom: 1px solid #eee;">
@@ -525,7 +515,7 @@ export const ConfirmPayment = async (req, res) => {
          </tr>
           <tr style="border-bottom: 1px solid #eee;">
           <td style="padding: 10px;"></td>
-          <td style="padding: 10px;">    Up to ${userLimit} users </td>
+          <td style="padding: 10px;">    Up to ${userLimit} user</td>
           <td style="padding: 10px; text-align: right;"></td>
         </tr>
       </tbody>
@@ -553,13 +543,14 @@ export const ConfirmPayment = async (req, res) => {
       <div style="width: 100%; text-align: right;">
  
         <p style="margin: 0; font-size: 14px;">
-          Sub Total: <strong>₹${planOriginalAmount.toFixed(2)}</strong>
+          Sub Total: <strong>₹${Number(planOriginalAmount.toFixed(2)).toLocaleString()}</strong>
         </p>
         <p style="margin: 0; font-size: 14px;">
-          GST ${gstnumber}%: <strong>₹${gstcalculate}</strong>
+          GST ${gstnumber}%: <strong>₹${Number(gstcalculate).toLocaleString()}</strong>
         </p>
         <h3 style="margin: 10px 0 0; color: #000;">
-          Total: ₹${invoice.Amount.toFixed(2)}
+          Total: ₹${Number(invoice.Amount.toFixed(2)).toLocaleString()}
+
         </h3>
       </div>
     </div>
