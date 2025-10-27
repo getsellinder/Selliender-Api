@@ -22,7 +22,7 @@ export function timeFormat(val) {
 }
 
 export function shordataformate(data) {
-  const date = new Date(data); // convert input to Date
+  const date = new Date(data); 
   return date.toLocaleDateString("en-US", {
     month: "short",
     day: "2-digit",
