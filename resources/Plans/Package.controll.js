@@ -454,7 +454,8 @@ export const ConfirmPayment = async (req, res) => {
     let invoice = await Invoice.create(add);
     await UserModel.findByIdAndUpdate(
       userId,
-      { PlanId: findPlan._id ,
+      { PlanId: findPlan._id,
+        searchLimit,
         status:"Active"
       },
       { new: true }

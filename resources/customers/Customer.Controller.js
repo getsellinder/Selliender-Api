@@ -66,10 +66,15 @@ export const getAllCustomer = async (req, res) => {
     let totalUsers = users.length;
     let activeUsers = users.filter((u) => u.status === "Active").length;
     let InactiveUsers = users.filter((u) => u.status === "Inactive").length;
+
+    let result=users.map((user)=>({
+      ...user.toObject(),
+    createdAt:timeFormat(user.createdAt)
+    }))
     return res
       .status(200)
       .json({
-        users, totalUsers, activeUsers,
+        result, totalUsers, activeUsers,
         InactiveUsers,
         totalPages: Math.ceil(total / limit),
         totalItems: total,
