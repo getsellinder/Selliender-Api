@@ -1,5 +1,5 @@
 import catchAsyncErrors from "../../middlewares/catchAsyncErrors.js";
-import { timeFormat } from "../../Utils/formatDateToIST .js";
+import { shordataformate, timeFormat } from "../../Utils/formatDateToIST .js";
 import { sendBrevoEmail } from "../../Utils/sendEmail.js";
 import Invoice from "../Plans/Invoice.js";
 import packageModel from "../Plans/Package.model.js";
@@ -69,7 +69,7 @@ export const getAllCustomer = async (req, res) => {
 
     let result=users.map((user)=>({
       ...user.toObject(),
-    createdAt:timeFormat(user.createdAt)
+    createdAt:shordataformate(user.createdAt)
     }))
     return res
       .status(200)
