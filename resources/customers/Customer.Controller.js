@@ -46,19 +46,22 @@ export const AddCusstomer = async (req, res) => {
   }
 };
 
-
 export const getAllCustomer = async (req, res) => {
   try {
-    let limit = parseInt(req.query?.limit) || 4;
+    let limit = parseInt(req.query?.limit) || 10;
     let page = parseInt(req.query?.page) || 1;
-    let skip = (page - 1) * limit
+    let skip = (page - 1) * limit;
     let search = req.query?.name || "";
 
     const searchRegex = new RegExp(search, "i");
-    let total = await UserModel.countDocuments(searchRegex)
-    const users = await UserModel.find({
-      name: { $regex: searchRegex },
-    }).populate("PlanId", "Package _id");
+    const query = { name: { $regex: searchRegex } };
+    let total = await UserModel.countDocuments(query);
+
+    const users = await UserModel.find(query)
+      .populate("PlanId", "Package _id")
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 });
 
     if (!users) {
       return res.status(404).json({ message: "User not found" });
@@ -67,19 +70,19 @@ export const getAllCustomer = async (req, res) => {
     let activeUsers = users.filter((u) => u.status === "Active").length;
     let InactiveUsers = users.filter((u) => u.status === "Inactive").length;
 
-    let result=users.map((user)=>({
+    let result = users.map((user) => ({
       ...user.toObject(),
-    createdAt:shordataformate(user.createdAt)
-    }))
-    return res
-      .status(200)
-      .json({
-        result, totalUsers, activeUsers,
-        InactiveUsers,
-        totalPages: Math.ceil(total / limit),
-        totalItems: total,
-        currentPage: page,
-      });
+      createdAt: shordataformate(user.createdAt),
+    }));
+    return res.status(200).json({
+      result,
+      totalUsers,
+      activeUsers,
+      InactiveUsers,
+      totalPages: Math.ceil(total / limit),
+      totalItems: total,
+      currentPage: page,
+    });
   } catch (error) {
     console.log("getAllCustomer.error", error);
     return res.status(500).json({ message: error.message });
@@ -88,7 +91,6 @@ export const getAllCustomer = async (req, res) => {
 
 export const toggleStatus = async (req, res) => {
   const { id } = req.params;
-
 
   try {
     const findId = await UserModel.findById(id);
