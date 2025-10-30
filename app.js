@@ -44,6 +44,9 @@ app.use(
 app.use(cookieParser());
 // app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/api/design", designRoute);
+app.get("/", (req, res) => {
+  res.send({msg:"Server is running.."});
+});
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 

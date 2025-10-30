@@ -5,6 +5,7 @@ import validator from "validator";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
+import { type } from "os";
 
 const userSchema = new mongoose.Schema(
   {
@@ -53,6 +54,7 @@ const userSchema = new mongoose.Schema(
     },
     SearchLimit: {
       type: Number,
+      default: 0,
     },
     LinkedinPostId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -82,7 +84,12 @@ const userSchema = new mongoose.Schema(
     PlanId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "plan",
-      default: null
+      default: null,
+    },
+    status: {
+      type: String,
+      enum: ["Active", "Inactive"],
+      default:"Inactive",
     },
 
     resetPasswordToken: String,

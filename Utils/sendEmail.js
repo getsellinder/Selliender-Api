@@ -3,6 +3,7 @@ import { createTransport } from "nodemailer";
 import brevo from '@getbrevo/brevo';
 
 let apiInstance = new brevo.TransactionalEmailsApi();
+
 apiInstance.setApiKey(brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BRAVO_APIKEY)
 const transporter = createTransport({
   host: process.env.SMPT_HOST,

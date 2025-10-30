@@ -1,7 +1,9 @@
 import catchAsyncErrors from "../../middlewares/catchAsyncErrors.js";
 import { timeFormat } from "../../Utils/formatDateToIST .js";
+import { sendBrevoEmail } from "../../Utils/sendEmail.js";
 import Invoice from "../Plans/Invoice.js";
 import packageModel from "../Plans/Package.model.js";
+import { Config } from "../setting/Configration/Config_model.js";
 import UserModel from "../user/userModel.js";
 
 import User from "../user/userModel.js";
@@ -44,164 +46,108 @@ export const AddCusstomer = async (req, res) => {
   }
 };
 
-// export const getAllCustomer = catchAsyncErrors(async (req, res) => {
-//   let limit = parseInt(req.query?.limit) || 4;
-//   let page = parseInt(req.query?.page) || 1;
-//   let search = req.query?.name || "";
 
-//   const searchRegex = new RegExp(search, "i");
+export const getAllCustomer = async (req, res) => {
+  try {
+    let limit = parseInt(req.query?.limit) || 4;
+    let page = parseInt(req.query?.page) || 1;
+    let skip = (page - 1) * limit
+    let search = req.query?.name || "";
 
-//   // ✅ 1. Find matching users and plans
-//   const users = await UserModel.find({ name: { $regex: searchRegex } }).select(
-//     "_id"
-//   );
-//   const plans = await packageModel
-//     .find({ Package: { $regex: searchRegex } })
-//     .select("_id");
+    const searchRegex = new RegExp(search, "i");
+    let total = await UserModel.countDocuments(searchRegex)
+    const users = await UserModel.find({
+      name: { $regex: searchRegex },
+    }).populate("PlanId", "Package _id");
 
-//   const userIds = users.map((u) => u._id);
-//   const planIds = plans.map((p) => p._id);
+    if (!users) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    let totalUsers = users.length;
+    let activeUsers = users.filter((u) => u.status === "Active").length;
+    let InactiveUsers = users.filter((u) => u.status === "Inactive").length;
+    return res
+      .status(200)
+      .json({
+        users, totalUsers, activeUsers,
+        InactiveUsers,
+        totalPages: Math.ceil(total / limit),
+        totalItems: total,
+        currentPage: page,
+      });
+  } catch (error) {
+    console.log("getAllCustomer.error", error);
+    return res.status(500).json({ message: error.message });
+  }
+};
 
-//   // ✅ 2. Build the invoice filter (either user name or plan name matches)
-//   const filter = {
-//     status: "success",
-//     $or: [{ userId: { $in: userIds } }, { PlanId: { $in: planIds } }],
-//   };
+export const toggleStatus = async (req, res) => {
+  const { id } = req.params;
 
-//   // ✅ 3. Get invoices with populate
-//   let invoices = await Invoice.find(filter)
-//     .populate({
-//       path: "userId",
-//       select: "name email _id",
-//     })
-//     .populate({
-//       path: "PlanId",
-//       select: "Package _id",
-//     })
-//     .sort({ createdAt: -1 });
 
-//   // ✅ 4. Remove duplicates (one invoice per user)
-//   const seenUserIds = new Set();
-//   const uniqueInvoices = [];
-
-//   for (const inv of invoices) {
-//     if (inv.userId && !seenUserIds.has(inv.userId._id.toString())) {
-//       seenUserIds.add(inv.userId._id.toString());
-//       uniqueInvoices.push(inv);
-//     }
-//   }
-
-//   // ✅ 5. Pagination
-//   const totalItems = uniqueInvoices.length;
-//   const startIndex = (page - 1) * limit;
-//   const paginatedInvoices = uniqueInvoices.slice(
-//     startIndex,
-//     startIndex + limit
-//   );
-
-//   if (paginatedInvoices.length === 0) {
-//     return res.status(200).json({ message: "No Customer Found" });
-//   }
-
-//   // ✅ 6. Format response
-//   const data = paginatedInvoices.map((val) => ({
-//     ...val.toObject(),
-//     createdAt: timeFormat(val.createdAt),
-//     Amount: val.Amount?.toLocaleString(),
-//   }));
-
-//   res.status(200).json({
-//     success: true,
-//     data,
-//     currentPage: page,
-//     totalItems,
-//     totalPages: Math.ceil(totalItems / limit),
-//   });
-// });
-
-export const getAllCustomer = catchAsyncErrors(async (req, res) => {
-  let limit = parseInt(req.query?.limit) || 4;
-  let page = parseInt(req.query?.page) || 1;
-  let search = req.query?.name || "";
-  const searchRegex = new RegExp(search, "i");
-
-  // ✅ Find users
-  const users = await UserModel.find({ name: { $regex: searchRegex } })
-    .select("_id name email createdAt")
-    .sort({ createdAt: -1 });
-
-  const userData = [];
-
-  for (const user of users) {
-    // ✅ Find user's latest invoice (any status)
-    const latestInvoice = await Invoice.findOne({ userId: user._id })
-      .populate("PlanId", "Package price duration plan_expiry_date")
-      .sort({ createdAt: -1 });
-
-    let planStatus = "not_taken";
-    let planDetails = null;
-
-    if (latestInvoice) {
-      const today = new Date();
-      const expiryDate = latestInvoice?.PlanId?.plan_expiry_date
-        ? new Date(latestInvoice.PlanId.plan_expiry_date)
-        : null;
-
-      if (latestInvoice.status === "success") {
-        if (expiryDate && expiryDate < today) {
-          planStatus = "expired";
-        } else {
-          planStatus = "active";
-        }
-        planDetails = latestInvoice.PlanId;
-      } else if (latestInvoice.status === "failed") {
-        planStatus = "failed";
-      }
+  try {
+    const findId = await UserModel.findById(id);
+    const sellinderAddress = await Config.find();
+    if (!findId) {
+      return res.status(400).json({ message: "user not found" });
+    }
+    if (!sellinderAddress) {
+      return res
+        .status(404)
+        .json({ message: "Sellinder Address Details not found" });
     }
 
-    userData.push({
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      createdAt: timeFormat(user.createdAt),
-      planStatus,
-      planDetails,
+    const appName = sellinderAddress[0]?.appName || "Sellinder";
+    const address =
+      sellinderAddress[0]?.address[0]?.email || "support@sellinder.com";
+    const newStatus = findId.status === "Active" ? "Inactive" : "Active";
+    const updatedUser = await UserModel.findByIdAndUpdate(
+      id,
+      { status: newStatus },
+      { new: true }
+    );
+    const subject =
+      newStatus === "Active"
+        ? `✅ Your Account is Activated - ${appName}`
+        : `⚠️ Your Account is Suspended - ${appName}`;
+    const message =
+      newStatus === "Active"
+        ? `
+      <p>Hi ${findId.name || ""},</p>
+
+      <p>Great news! Your account has been successfully <b>activated</b>.</p>
+      <p>You now have full access to the platform.</p>
+
+      <p>If you have any questions, feel free to contact us.</p>
+
+      <br/>
+      <p>Thank you for being with us!</p>
+      <p>Regards,</p>
+      <p><b>Team ${appName}</b></p>
+    `
+        : `
+      <p>Hi ${findId.name || ""},</p>
+
+      <p>Your account has been <b>suspended</b> and access is temporarily disabled.</p>
+      <p>If you believe this was a mistake or need assistance, please contact support.</p>
+
+      <br/>
+      <p>Regards,</p>
+      <p><b>Team ${appName}</b></p>
+    `;
+    // await sendBrevoEmail({
+    //   to: `${findId.email}`, // Change to your recipient
+    //   fromEmail: address,
+    //   fromName: appName, // Change to your verified sender
+    //   subject,
+    //   html: message,
+    // });
+    return res.status(200).json({
+      message: `User status changed to ${newStatus}`,
+      data: updatedUser,
     });
+  } catch (error) {
+    console.log("toggleStatus.error", error.message);
+    return res.status(500).json({ message: error.message });
   }
-
-  // ✅ Pagination
-  const totalItems = userData.length;
-  const startIndex = (page - 1) * limit;
-  const paginatedUsers = userData.slice(startIndex, startIndex + limit);
-
-  // ✅ Count tracking
-  const planTakenCount = userData.filter(
-    (u) => u.planStatus === "active"
-  ).length;
-  const planExpiredCount = userData.filter(
-    (u) => u.planStatus === "expired"
-  ).length;
-  const planFailureCount = userData.filter(
-    (u) => u.planStatus === "failed"
-  ).length;
-  const planNotTakenCount = userData.filter(
-    (u) => u.planStatus === "not_taken"
-  ).length;
-
-  res.status(200).json({
-    success: true,
-    stats: {
-      totalUsers: totalItems,
-      planTakenCount,
-      planExpiredCount,
-      planFailureCount,
-      planNotTakenCount,
-    },
-    data: paginatedUsers,
-    currentPage: page,
-    totalPages: Math.ceil(totalItems / limit),
-  });
-});
-
-
-
+};
