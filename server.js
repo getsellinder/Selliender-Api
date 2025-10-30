@@ -1,10 +1,9 @@
-// import dotenv from "dotenv";
-// dotenv.config();
+
 import app from "./app.js";
 import connectDatabase from "./database/db.js";
 import cloudinary from "cloudinary";
 import http from "http";
-import { Server } from "socket.io";
+
 import { initSocket } from "./Utils/Socket.js";
 
 // Connecting to database
