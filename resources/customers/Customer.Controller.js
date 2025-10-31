@@ -52,12 +52,17 @@ export const getAllCustomer = async (req, res) => {
     let page = parseInt(req.query?.page) || 1;
     let skip = (page - 1) * limit;
     let search = req.query?.name || "";
+    let status = req.query?.status || "";
+    let filter={}
 
-    const searchRegex = new RegExp(search, "i");
-    const query = { name: { $regex: searchRegex } };
-    let total = await UserModel.countDocuments(query);
-
-    const users = await UserModel.find(query)
+    if (status) {
+      filter.status = status;
+    }
+    if (search) {
+      filter.name = { $regex: new RegExp(search, "i") };
+    }
+    let total = await UserModel.countDocuments(filter);
+    const users = await UserModel.find(filter)
       .populate("PlanId", "Package _id")
       .skip(skip)
       .limit(limit)

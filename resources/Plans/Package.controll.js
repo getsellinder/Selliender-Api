@@ -224,83 +224,9 @@ export const PackageUpdate = async (req, res) => {
   }
 };
 
-// User purcheing the Plan APIS
-
-// export const PlanPurchese = async (req, res) => {
-//   try {
-//     const { id } = req.params
-//     const userId = req.user._id
-
-//     const { durationType } = req.body;
-
-//     const findPlan = await packageModel.findById(id)
-
-//     const finduser = await UserModel.findById(userId)
-//     if (!findPlan) {
-//       return res.status(505).json({ message: "Plan not found" })
-//     }
-//     if (!finduser) {
-//       return res.status(506).json({ message: "User not found" })
-//     }
-//     let planAmount = 0
-//     if (durationType === "monthly") {
-//       planAmount = findPlan?.Total_Monthly_Price ?? 0
-//     } else if (durationType === "yearly") {
-//       planAmount = findPlan?.Total_Monthly_Price ?? 0
-//     }
-//     else {
-//       return res.status(400).json({ message: "Invalid duration type" });
-//     }
-//     const options = {
-//       amount: planAmount * 100,
-//       currency: "INR",
-//       receipt: `receipt_${Date.now()}`,
-
-//     }
-//     const order = await razorpayInstance.orders.create(options)
-//     // let startDate = new Date()
-//     // let expiryDate = new Date(startDate)
-
-//     // if (durationType === "monthly") {
-//     //   expiryDate.setMonth(expiryDate.getMonth() + 1)
-//     // } else if (durationType === "yearly") {
-//     //   expiryDate.setFullYear(expiryDate.getFullYear() + 1)
-//     // }
-//     // const add = {
-//     //   InvoiceNo: `INV-${Date.now()}`,
-//     //   userId,
-//     //   PlanId: findPlan._id,
-//     //   plan_start_date: startDate,
-//     //   plan_expiry_date: expiryDate,
-//     //   Amount: planAmount,
-//     //   TransactionId: order.id,
-//     //   status: "success"
-
-//     // }
-//     // let invoiceId = await Invoice.create(add)
-//     // await UserModel.findByIdAndUpdate(userId,
-//     //   { InvoiceId: invoiceId._id, PlanId: id, }, { new: true })
-
-//     res.status(200).json({
-//       success: true,
-
-//       key_id: process.env.RAZORPAY_KEY_ID,
-//       order_id: order.id,
-//       amount: planAmount || 0,
-//       currency: "INR",
-//       message: "Order created successfully",
-//     });
-
-//   } catch (error) {
-//     console.error("❌ PlanPurchese Error:", error);
-//     return res.status(500).json({ message: error });
-//   }
-// }
-
 export const PlanPurchese = async (req, res) => {
   try {
     const { id } = req.params;
-    // const userId = req.user._id;
 
     const { durationType, userId } = req.body;
 
@@ -390,7 +316,7 @@ export const PlanPurchese = async (req, res) => {
 export const ConfirmPayment = async (req, res) => {
   try {
     const { id } = req.params;
-const {
+    const {
       durationType,
       razorpayPaymentId,
       planAmount,
@@ -450,12 +376,15 @@ const {
       TransactionId: razorpayPaymentId,
       status: paymentStatus,
     };
+
     let invoice = await Invoice.create(add);
+
     await UserModel.findByIdAndUpdate(
       userId,
-      { PlanId: findPlan._id,
-        searchLimit,
-        status:"Active"
+      {
+        PlanId: findPlan._id,
+        SearchLimit: paymentStatus === "failed" ? 0 : searchLimit,
+        status: paymentStatus === "failed" ? "Inactive" : "Active",
       },
       { new: true }
     );
@@ -479,12 +408,13 @@ const {
     <!-- Invoice Info -->
     <div style="padding: 25px;">
       <h3 style="margin: 0 0 10px;">INVOICE</h3>
-      <p style="margin: 0;">Invoice Number: <strong>${invoice.InvoiceNo
-        }</strong></p>
+      <p style="margin: 0;">Invoice Number: <strong>${
+        invoice.InvoiceNo
+      }</strong></p>
      
       <p style="margin: 0;">Date: <strong>${shordataformate(
-          invoice.createdAt
-        )}</strong></p>
+        invoice.createdAt
+      )}</strong></p>
     </div>
 
     <!-- Table -->
@@ -500,13 +430,15 @@ const {
         <tr style="border-bottom: 1px solid #eee;">
           <td style="padding: 10px;">1</td>
           <td style="padding: 10px;">${findPlan.Package}</td>
-          <td style="padding: 10px; text-align: right;">₹${Number(planOriginalAmount.toFixed(2)).toLocaleString()}</td>
+          <td style="padding: 10px; text-align: right;">₹${Number(
+            planOriginalAmount.toFixed(2)
+          ).toLocaleString()}</td>
         </tr>
         <tr style="border-bottom: 1px solid #eee;">
           <td style="padding: 10px;"></td>
           <td style="padding: 10px;">${shordataformate(
-          invoice.plan_start_date
-        )}-${shordataformate(invoice.plan_expiry_date)}</td>
+            invoice.plan_start_date
+          )}-${shordataformate(invoice.plan_expiry_date)}</td>
           <td style="padding: 10px; text-align: right;"></td>
         </tr>
           <tr style="border-bottom: 1px solid #eee;">
@@ -545,10 +477,14 @@ const {
       <div style="width: 100%; text-align: right;">
  
         <p style="margin: 0; font-size: 14px;">
-          Sub Total: <strong>₹${Number(planOriginalAmount.toFixed(2)).toLocaleString()}</strong>
+          Sub Total: <strong>₹${Number(
+            planOriginalAmount.toFixed(2)
+          ).toLocaleString()}</strong>
         </p>
         <p style="margin: 0; font-size: 14px;">
-          GST ${gstnumber}%: <strong>₹${Number(gstcalculate).toLocaleString()}</strong>
+          GST ${gstnumber}%: <strong>₹${Number(
+        gstcalculate
+      ).toLocaleString()}</strong>
         </p>
         <h3 style="margin: 10px 0 0; color: #000;">
           Total: ₹${Number(invoice.Amount.toFixed(2)).toLocaleString()}
@@ -588,37 +524,33 @@ export const InvoiceDetailsById = async (req, res) => {
       return res.status(404).json({ message: "No invoices found" });
     }
 
-     const invoice=getinvoice.toObject()
-  
-        // const invoiceData = invoice.toObject();
-        let gstId = invoice?.PlanId?.GST;
-        let getgst = gstId ? await Tax.findById(gstId) : null;
-        invoice.plan_start_date = shordataformate(
-          invoice.plan_start_date
-        );
-        invoice.plan_expiry_date = shordataformate(
-          invoice.plan_expiry_date
-        );
-        invoice.createdAt = shordataformate(invoice.createdAt);
-        if (invoice.Amount) {
-          invoice.Amount = invoice.Amount.toLocaleString();
-        }
-        if (invoice.PlanId) {
-          invoice.PlanId.Monthly_Price =
-            invoice.PlanId.Monthly_Price?.toLocaleString();
-          invoice.PlanId.Yearly_Price =
-            invoice.PlanId.Yearly_Price?.toLocaleString();
-          invoice.PlanId.Total_Yearly_Price =
-            invoice.PlanId.Total_Yearly_Price?.toLocaleString();
-          invoice.PlanId.Total_Monthly_Price =
-            invoice.PlanId.Total_Monthly_Price?.toLocaleString();
-          invoice.PlanId.gstMonthlyPrice =
-            invoice.PlanId.gstMonthlyPrice?.toLocaleString();
-          invoice.PlanId.gstYearlyPrice =
-            invoice.PlanId.gstYearlyPrice?.toLocaleString();
-        }
-        invoice.GST = getgst ? getgst.Gst : null;
-     
+    const invoice = getinvoice.toObject();
+
+    // const invoiceData = invoice.toObject();
+    let gstId = invoice?.PlanId?.GST;
+    let getgst = gstId ? await Tax.findById(gstId) : null;
+    invoice.plan_start_date = shordataformate(invoice.plan_start_date);
+    invoice.plan_expiry_date = shordataformate(invoice.plan_expiry_date);
+    invoice.createdAt = shordataformate(invoice.createdAt);
+    if (invoice.Amount) {
+      invoice.Amount = invoice.Amount.toLocaleString();
+    }
+    if (invoice.PlanId) {
+      invoice.PlanId.Monthly_Price =
+        invoice.PlanId.Monthly_Price?.toLocaleString();
+      invoice.PlanId.Yearly_Price =
+        invoice.PlanId.Yearly_Price?.toLocaleString();
+      invoice.PlanId.Total_Yearly_Price =
+        invoice.PlanId.Total_Yearly_Price?.toLocaleString();
+      invoice.PlanId.Total_Monthly_Price =
+        invoice.PlanId.Total_Monthly_Price?.toLocaleString();
+      invoice.PlanId.gstMonthlyPrice =
+        invoice.PlanId.gstMonthlyPrice?.toLocaleString();
+      invoice.PlanId.gstYearlyPrice =
+        invoice.PlanId.gstYearlyPrice?.toLocaleString();
+    }
+    invoice.GST = getgst ? getgst.Gst : null;
+
     return res.status(200).json(invoice);
   } catch (error) {
     console.log("error in InvoiceDetailsById", error);
@@ -626,9 +558,7 @@ export const InvoiceDetailsById = async (req, res) => {
   }
 };
 
-
 // findAllInvoiceByUser
-
 
 export const AllInvoiceDetailsById = async (req, res) => {
   const { id } = req.params; //userId id
