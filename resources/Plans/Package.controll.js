@@ -250,15 +250,19 @@ export const PlanPurchese = async (req, res) => {
     } else {
       return res.status(400).json({ message: "Invalid duration type" });
     }
-
+    let SearchLimit;
     if (planAmount === 0) {
       const startDate = new Date();
       const expiryDate = new Date(startDate);
 
       if (durationType === "monthly") {
         expiryDate.setMonth(expiryDate.getMonth() + 1);
+
+        SearchLimit = findPlan?.SearchLimitMonthly ?? 0;
       } else {
         expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+
+        SearchLimit = findPlan?.SearchLimitYearly ?? 0;
       }
 
       // Create free invoice record
@@ -278,7 +282,7 @@ export const PlanPurchese = async (req, res) => {
 
       await UserModel.findByIdAndUpdate(
         userId,
-        { PlanId: findPlan._id },
+        { PlanId: findPlan._id, SearchLimit },
         { new: true }
       );
 
@@ -313,6 +317,35 @@ export const PlanPurchese = async (req, res) => {
   }
 };
 
+const getPreviousUserSubscription = async (userId) => {
+  // Get most recent invoice for that user
+  const lastInvoice = await Invoice.findOne({ userId })
+    .populate("PlanId", "Plan SearchLimitMonthly SearchLimitYearly")
+    .sort({ createdAt: -1 });
+
+  // if no previous plan found
+  if (!lastInvoice) return 0;
+
+  const expiryDate = lastInvoice.plan_expiry_date;
+  const today = new Date();
+
+  let searchLimitToRestore = 0;
+
+  // If plan still active
+  if (expiryDate > today) {
+    // User still has old plan valid, restore previous plan limits
+    if (lastInvoice.duration === "monthly") {
+      searchLimitToRestore = lastInvoice.PlanId.SearchLimitMonthly;
+    } else {
+      searchLimitToRestore = lastInvoice.PlanId.SearchLimitYearly;
+    }
+    return searchLimitToRestore;
+  }
+
+  // If plan expired → return 0
+  return 0;
+};
+
 export const ConfirmPayment = async (req, res) => {
   try {
     const { id } = req.params;
@@ -328,6 +361,7 @@ export const ConfirmPayment = async (req, res) => {
     const findPlan = await packageModel.findById(id);
     const findUser = await UserModel.findById(userId);
     const findTax = await Tax.findById(findPlan.GST);
+
     const sellinderAddress = await Config.find();
     if (!findPlan) {
       return res.status(404).json({ message: "Plan not found" });
@@ -347,7 +381,7 @@ export const ConfirmPayment = async (req, res) => {
     let planOriginalAmount;
 
     let gstnumber = findTax.Gst;
-    let searchLimit;
+    let searchLimit=0;
     let userLimit;
 
     if (durationType === "monthly") {
@@ -378,12 +412,16 @@ export const ConfirmPayment = async (req, res) => {
     };
 
     let invoice = await Invoice.create(add);
+    let upgrade = findUser.SearchLimit + searchLimit;
+ 
 
     await UserModel.findByIdAndUpdate(
       userId,
       {
         PlanId: findPlan._id,
-        SearchLimit: paymentStatus === "failed" ? 0 : searchLimit,
+        // SearchLimit: paymentStatus === "failed" ? 0 : searchLimit,
+        SearchLimit:
+          paymentStatus === "failed" ? findUser.SearchLimit : upgrade,
         status: paymentStatus === "failed" ? "Inactive" : "Active",
       },
       { new: true }
