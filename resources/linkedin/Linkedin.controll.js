@@ -6,6 +6,102 @@ import DISCProfile from "../DISCProfile/DISCProfileModel.js";
 import { analyzeLinkedInProfile } from "../DISCProfile/analysisEngineV2.js";
 
 
+function normalizeLinkedInPosts(rawPosts, maxCount = 30) {
+    if (!Array.isArray(rawPosts)) return [];
+
+    const normalized = [];
+    const seen = new Set();
+
+    const buildNormalizedPost = (candidate, base) => {
+        if (!candidate) return null;
+
+        const textValue = candidate.content || candidate.text || "";
+        if (!String(textValue).trim()) return null;
+
+        const normalizedPost = { ...candidate };
+        normalizedPost.content = candidate.content || candidate.text || "";
+        normalizedPost.text = candidate.text || candidate.content || "";
+
+        const baseDate = base?.date || base?.timestamp || base?.createdAt || null;
+        const dateValue = candidate.date || candidate.timestamp || candidate.createdAt || baseDate;
+        if (dateValue instanceof Date) normalizedPost.date = dateValue.toISOString();
+        else normalizedPost.date = dateValue || null;
+
+        const likesValue = candidate.likes ?? candidate.likeCount ?? candidate.reactionCount ?? base?.likes ?? base?.likeCount ?? base?.reactionCount ?? 0;
+        const commentsValue = candidate.comments ?? candidate.commentCount ?? candidate.commentsCount ?? base?.comments ?? base?.commentCount ?? base?.commentsCount ?? 0;
+        normalizedPost.likes = Number.isFinite(likesValue) ? likesValue : 0;
+        normalizedPost.comments = Number.isFinite(commentsValue) ? commentsValue : 0;
+
+        normalizedPost.parentId = normalizedPost.parentId || base?._id || base?.id || null;
+        normalizedPost.profileId = normalizedPost.profileId || base?.profileId || base?._id || base?.id || null;
+
+        if (normalizedPost.date && typeof normalizedPost.date === "string") {
+            const parsedDate = new Date(normalizedPost.date);
+            if (!Number.isNaN(parsedDate.getTime())) normalizedPost.date = parsedDate.toISOString();
+        }
+
+        delete normalizedPost.posts;
+
+        const keyParts = [
+            normalizedPost.postId,
+            normalizedPost.id,
+            normalizedPost.urn,
+            normalizedPost.permalink,
+            normalizedPost.url,
+            normalizedPost.link,
+            normalizedPost.profileId ? String(normalizedPost.profileId) : null,
+            normalizedPost.date ? String(normalizedPost.date) : null,
+            normalizedPost.content ? normalizedPost.content.slice(0, 140).toLowerCase() : null
+        ].filter(Boolean);
+
+        if (keyParts.length === 0) keyParts.push(`fallback-${normalized.length}`);
+
+        const key = keyParts.join("::");
+        if (seen.has(key)) return null;
+        seen.add(key);
+
+        return normalizedPost;
+    };
+
+    rawPosts.forEach((entry) => {
+        const base = entry && typeof entry.toObject === "function" ? entry.toObject() : entry;
+        if (!base) return;
+
+        const parentId = base._id || base.id || base.parentId || null;
+        const baseProfileId = base.profileId || parentId;
+
+        if (Array.isArray(base.posts) && base.posts.length > 0) {
+            const toNumeric = (value) => {
+                if (value === null || value === undefined || value === '') return null;
+                const numeric = typeof value === 'number' ? value : Number(String(value).replace(/[^0-9.-]/g, ''));
+                return Number.isFinite(numeric) ? numeric : null;
+            };
+
+            const collected = base.posts.map((post) => buildNormalizedPost({ ...post, parentId, profileId: baseProfileId }, base)).filter(Boolean);
+
+            const expectedCount = toNumeric(base.postsCount) ?? toNumeric(base.postCount) ?? toNumeric(base.totalPosts) ?? toNumeric(base.posts?.length);
+
+            const limit = expectedCount !== null ? Math.min(expectedCount, collected.length) : collected.length;
+            for (let i = 0; i < limit; i++) normalized.push(collected[i]);
+            return;
+        }
+
+        const single = buildNormalizedPost({ ...base, parentId, profileId: baseProfileId }, base);
+        if (single) normalized.push(single);
+    });
+
+    if (normalized.length > maxCount) return normalized.slice(0, maxCount);
+    return normalized;
+}
+
+function parseSearchLimit(value) {
+    if (value === undefined || value === null || value === '') return null;
+    if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+    const numeric = Number(String(value).replace(/[^0-9.-]/g, ''));
+    return Number.isFinite(numeric) ? numeric : null;
+}
+
+
 export const LinkedinUploadFile = async (req, res) => {
     const { id } = req.params
     const { LinkedinURL, content, posts } = req.body;
@@ -125,31 +221,68 @@ export const analyzeDISCProfile = async (req, res) => {
             return res.status(404).json({ message: "User not found" });
         }
 
-        if (!user.pendingProductDescription) {
-            return res.status(400).json({ message: "No product description found. Please save it first." });
+        const parsedSearchLimit = parseSearchLimit(user.SearchLimit);
+        if (parsedSearchLimit !== null && parsedSearchLimit <= 0) {
+            return res.status(403).json({
+                message: "Search limit reached. Please upgrade your plan to continue.",
+                redirectToPricing: true,
+                remainingSearchLimit: 0
+            });
+        }
+
+        // Allow product description and price to be provided in the request body
+        const { productDescription: bodyProductDescription, productPrice: bodyProductPrice } = req.body || {};
+
+        // Prefer body-provided description, otherwise fall back to pending saved on user
+        const productDescriptionToUse = bodyProductDescription || user.pendingProductDescription;
+        // Normalize price if provided in body otherwise fall back to pending
+        let productPriceToUse = null;
+        if (bodyProductPrice !== undefined && bodyProductPrice !== null && bodyProductPrice !== '') {
+            const parsed = typeof bodyProductPrice === 'number' ? bodyProductPrice : parseFloat(String(bodyProductPrice).replace(/[^0-9.\-]/g, ''));
+            productPriceToUse = Number.isFinite(parsed) ? parsed : null;
+        } else if (user.pendingProductPrice !== undefined && user.pendingProductPrice !== null) {
+            productPriceToUse = user.pendingProductPrice;
+        }
+
+        if (!productDescriptionToUse) {
+            return res.status(400).json({ message: "No product description found. Please save it first or include it in the request body." });
         }
 
         if (!user.LinkedinContentId) {
             return res.status(400).json({ message: "No LinkedIn profile data found. Please upload profile first." });
         }
 
-        console.log("🔄 Starting DISC analysis...");
+    console.log("🔄 Starting DISC analysis...");
 
         const profileData = user.LinkedinContentId.toObject ? user.LinkedinContentId.toObject() : user.LinkedinContentId;
 
-        const allPosts = await LinkedinPost.find({ 
+        const rawPosts = await LinkedinPost.find({ 
             profileId: user.LinkedinContentId._id 
         }).sort({ createdAt: -1 }).limit(30);
 
-        const postsData = allPosts.map(p => p.toObject ? p.toObject() : p);
+        const embeddedPosts = Array.isArray(profileData.posts) ? profileData.posts : [];
 
-        console.log(`📊 Analyzing profile: ${profileData.name} with ${postsData.length} posts`);
+        const combinedPostSources = [
+            ...rawPosts,
+            ...(embeddedPosts.length > 0
+                ? [{
+                    _id: user.LinkedinContentId._id,
+                    profileId: user.LinkedinContentId._id,
+                    posts: embeddedPosts,
+                    postsCount: profileData.postsCount ?? profileData.postCount ?? embeddedPosts.length
+                }]
+                : [])
+        ];
+
+        const postsData = normalizeLinkedInPosts(combinedPostSources, 30);
+
+        console.log(`📊 Analyzing profile: ${profileData.name} with ${postsData.length} posts (rawDocs=${rawPosts.length}, embedded=${embeddedPosts.length})`);
 
         const analysisResult = await analyzeLinkedInProfile(
             profileData,
             postsData,
-            user.pendingProductDescription,
-            user.pendingProductPrice
+            productDescriptionToUse,
+            productPriceToUse
         );
 
         console.log("✅ Analysis engine completed");
@@ -159,15 +292,15 @@ export const analyzeDISCProfile = async (req, res) => {
 
         const dataSources = [];
         if (user.LinkedinContentId._id) dataSources.push(`profile_${user.LinkedinContentId._id}`);
-        if (postsData.length > 0) dataSources.push(`posts_${postsData.length}_items`);
+    if (postsData.length > 0) dataSources.push(`posts_${postsData.length}_items`);
         dataSources.push('about_section', 'experience_section', 'skills_section');
 
         const discProfileDoc = new DISCProfile({
             userId: userId,
             linkedinContentId: user.LinkedinContentId._id,
             linkedinPostId: user.LinkedinPostId?._id || null,
-            productDescription: user.pendingProductDescription,
-            productPrice: user.pendingProductPrice || null,
+            productDescription: productDescriptionToUse,
+            productPrice: productPriceToUse || null,
             executive: analysisResult.executive,
             starting: analysisResult.starting,
             personality: analysisResult.personality,
@@ -183,16 +316,40 @@ export const analyzeDISCProfile = async (req, res) => {
 
         await discProfileDoc.save();
 
-        await UserModel.findByIdAndUpdate(userId, {
-            $unset: { pendingLinkedInURL: "", pendingProductDescription: "", pendingProductPrice: "" }
-        });
+        // If we consumed the user's pending values (i.e. body did not provide a description), clear them.
+        if (!bodyProductDescription) {
+            await UserModel.findByIdAndUpdate(userId, {
+                $unset: { pendingLinkedInURL: "", pendingProductDescription: "", pendingProductPrice: "" }
+            });
+        }
+
+        let remainingSearchLimit = parsedSearchLimit;
+        try {
+            const updatedUser = await UserModel.findOneAndUpdate(
+                { _id: userId, SearchLimit: { $gte: 1 } },
+                { $inc: { SearchLimit: -1 } },
+                { new: true, projection: { SearchLimit: 1 } }
+            );
+
+            if (updatedUser) {
+                remainingSearchLimit = parseSearchLimit(updatedUser.SearchLimit);
+                console.log(`🔻 SearchLimit decremented. Remaining: ${remainingSearchLimit}`);
+            } else if (parsedSearchLimit !== null) {
+                remainingSearchLimit = Math.max(parsedSearchLimit - 1, 0);
+                console.warn('⚠️ SearchLimit update failed; falling back to virtual decrement.');
+            }
+        } catch (err) {
+            console.error('❌ Failed to decrement SearchLimit:', err.message);
+            if (parsedSearchLimit !== null) remainingSearchLimit = Math.max(parsedSearchLimit - 1, 0);
+        }
 
         console.log("✅ DISC analysis completed successfully");
 
         res.status(200).json({
             message: "DISC analysis completed successfully",
             analysisId: discProfileDoc._id,
-            analysis: discProfileDoc
+            analysis: discProfileDoc,
+            remainingSearchLimit: remainingSearchLimit === null ? null : Math.max(remainingSearchLimit, 0)
         });
 
     } catch (error) {
@@ -465,7 +622,7 @@ export const getDISCAnalysisById = async (req, res) => {
             .populate('linkedinPostId');
 
         if (!analysis) {
-            return res.status(404).json({ message: "Analysis not found" });
+            return res.status(404).json({ success: false, message: "No analysis history found for this user." });
         }
 
         return res.status(200).json({
@@ -491,36 +648,62 @@ export const getAllDISCAnalysesByUser = async (req, res) => {
             return res.status(404).json({ message: "User not found" });
         }
 
+        // return full analysis documents (populated) so clients can render the complete report
         const analyses = await DISCProfile.find({ userId })
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
-            .populate('linkedinContentId', 'name title company LinkedinURL')
+            .populate('linkedinContentId')
             .populate('linkedinPostId');
 
         const total = await DISCProfile.countDocuments({ userId });
 
+        // Build a response where each history item includes the full analysis document
+        // and a compact `summary` used by the UI (keeps backward compatibility)
+        const responseAnalyses = analyses.map(analysis => {
+            const doc = analysis.toObject ? analysis.toObject() : analysis;
+
+            const summary = {
+                _id: doc._id,
+                profile: {
+                    name: doc.linkedinContentId?.name || 'Unknown',
+                    title: doc.linkedinContentId?.title || 'N/A',
+                    company: doc.linkedinContentId?.company || 'N/A',
+                    location: doc.linkedinContentId?.location || 'N/A',
+                    profilePicture: doc.linkedinContentId?.profilePicture || '',
+                    linkedinURL: doc.linkedinContentId?.LinkedinURL || ''
+                },
+                productDescription: doc.productDescription,
+                executive: doc.executive,
+                personality: {
+                    disc: doc.personality?.disc,
+                    bullets: doc.personality?.bullets,
+                    primaryType: doc.personality?.primaryType,
+                    secondaryType: doc.personality?.secondaryType
+                },
+                talkingPoints: (doc.talkingPoints || []).slice(0, 5),
+                openingScripts: doc.openingScripts,
+                objectionHandling: (doc.objectionHandling || []).slice(0, 5),
+                personalizationCues: (doc.personalizationCues || []).slice(0, 5),
+                nextActions: doc.nextActions,
+                confidence: doc.confidence,
+                analysisMetadata: doc.analysisMetadata,
+                createdAt: doc.createdAt
+            };
+
+            return {
+                analysis: doc,
+                summary
+            };
+        });
+
         return res.status(200).json({
             success: true,
-            count: analyses.length,
+            count: responseAnalyses.length,
             total: total,
             currentPage: page,
             totalPages: Math.ceil(total / limit),
-            analyses: analyses.map(analysis => ({
-                _id: analysis._id,
-                profileName: analysis.linkedinContentId?.name || 'Unknown',
-                profileTitle: analysis.linkedinContentId?.title || 'N/A',
-                profileCompany: analysis.linkedinContentId?.company || 'N/A',
-                linkedinURL: analysis.linkedinContentId?.LinkedinURL || '',
-                productDescription: analysis.productDescription,
-                primaryType: analysis.personality?.primaryType || 'N/A',
-                confidenceScore: analysis.confidence?.score || 0,
-                createdAt: analysis.createdAt,
-                analysisPreview: {
-                    executive: analysis.executive,
-                    disc: analysis.personality?.disc
-                }
-            }))
+            analyses: responseAnalyses
         });
 
     } catch (error) {
@@ -575,6 +758,165 @@ export const getDISCAnalysisSummary = async (req, res) => {
 
     } catch (error) {
         console.error("Error fetching DISC analysis summary:", error);
+        return res.status(500).json({ message: error.message });
+    }
+};
+
+export const analyzeDISCProfileCompact = async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const user = await UserModel.findById(userId)
+            .populate('LinkedinContentId')
+            .populate('LinkedinPostId');
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const parsedSearchLimit = parseSearchLimit(user.SearchLimit);
+        if (parsedSearchLimit !== null && parsedSearchLimit <= 0) {
+            return res.status(403).json({
+                message: "Search limit reached. Please upgrade your plan to continue.",
+                redirectToPricing: true,
+                remainingSearchLimit: 0
+            });
+        }
+
+        const { productDescription: bodyProductDescription, productPrice: bodyProductPrice } = req.body || {};
+
+        const productDescriptionToUse = bodyProductDescription || user.pendingProductDescription;
+
+        let productPriceToUse = null;
+        if (bodyProductPrice !== undefined && bodyProductPrice !== null && bodyProductPrice !== '') {
+            const parsed = typeof bodyProductPrice === 'number' ? bodyProductPrice : parseFloat(String(bodyProductPrice).replace(/[^0-9.\-]/g, ''));
+            productPriceToUse = Number.isFinite(parsed) ? parsed : null;
+        } else if (user.pendingProductPrice !== undefined && user.pendingProductPrice !== null) {
+            productPriceToUse = user.pendingProductPrice;
+        }
+
+        if (!productDescriptionToUse) {
+            return res.status(400).json({ message: "No product description found. Please save it first or include it in the request body." });
+        }
+
+        if (!user.LinkedinContentId) {
+            return res.status(400).json({ message: "No LinkedIn profile data found. Please upload profile first." });
+        }
+
+        console.log("🔄 Starting compact DISC analysis...");
+
+        const profileData = user.LinkedinContentId.toObject ? user.LinkedinContentId.toObject() : user.LinkedinContentId;
+
+        const rawPosts = await LinkedinPost.find({
+            profileId: user.LinkedinContentId._id
+        }).sort({ createdAt: -1 }).limit(30);
+
+        const embeddedPosts = Array.isArray(profileData.posts) ? profileData.posts : [];
+
+        const combinedPostSources = [
+            ...rawPosts,
+            ...(embeddedPosts.length > 0
+                ? [{
+                    _id: user.LinkedinContentId._id,
+                    profileId: user.LinkedinContentId._id,
+                    posts: embeddedPosts,
+                    postsCount: profileData.postsCount ?? profileData.postCount ?? embeddedPosts.length
+                }]
+                : [])
+        ];
+
+        const postsData = normalizeLinkedInPosts(combinedPostSources, 30);
+
+        console.log(`📊 (compact) Analyzing profile: ${profileData.name} with ${postsData.length} posts (rawDocs=${rawPosts.length}, embedded=${embeddedPosts.length})`);
+
+        const analysisResult = await analyzeLinkedInProfile(
+            profileData,
+            postsData,
+            productDescriptionToUse,
+            productPriceToUse
+        );
+
+        const profileDISC = analysisResult.personality.disc;
+        const confidenceResult = analysisResult.confidence;
+
+        const dataSources = [];
+        if (user.LinkedinContentId._id) dataSources.push(`profile_${user.LinkedinContentId._id}`);
+        if (postsData.length > 0) dataSources.push(`posts_${postsData.length}_items`);
+        dataSources.push('about_section', 'experience_section', 'skills_section');
+
+        const discProfileDoc = new DISCProfile({
+            userId: userId,
+            linkedinContentId: user.LinkedinContentId._id,
+            linkedinPostId: user.LinkedinPostId?._id || null,
+            productDescription: productDescriptionToUse,
+            productPrice: productPriceToUse || null,
+            executive: analysisResult.executive,
+            starting: analysisResult.starting,
+            personality: analysisResult.personality,
+            talkingPoints: analysisResult.talkingPoints,
+            openingScripts: analysisResult.openingScripts,
+            objectionHandling: analysisResult.objectionHandling,
+            personalizationCues: analysisResult.personalizationCues,
+            nextActions: analysisResult.nextActions,
+            confidence: confidenceResult,
+            dataSources,
+            analysisMetadata: analysisResult.analysisMetadata
+        });
+
+        await discProfileDoc.save();
+
+        if (!bodyProductDescription) {
+            await UserModel.findByIdAndUpdate(userId, {
+                $unset: { pendingLinkedInURL: "", pendingProductDescription: "", pendingProductPrice: "" }
+            });
+        }
+
+        let remainingSearchLimit = parsedSearchLimit;
+        try {
+            const updatedUser = await UserModel.findOneAndUpdate(
+                { _id: userId, SearchLimit: { $gte: 1 } },
+                { $inc: { SearchLimit: -1 } },
+                { new: true, projection: { SearchLimit: 1 } }
+            );
+
+            if (updatedUser) {
+                remainingSearchLimit = parseSearchLimit(updatedUser.SearchLimit);
+                console.log(`🔻 SearchLimit decremented (compact). Remaining: ${remainingSearchLimit}`);
+            } else if (parsedSearchLimit !== null) {
+                remainingSearchLimit = Math.max(parsedSearchLimit - 1, 0);
+                console.warn('⚠️ SearchLimit update failed (compact); falling back to virtual decrement.');
+            }
+        } catch (err) {
+            console.error('❌ Failed to decrement SearchLimit (compact):', err.message);
+            if (parsedSearchLimit !== null) remainingSearchLimit = Math.max(parsedSearchLimit - 1, 0);
+        }
+
+        console.log("✅ Compact DISC analysis completed successfully");
+
+        // Set CORS response header to reflect the incoming origin for chrome-extension compatibility
+        try {
+            const origin = req.headers.origin || '*';
+            res.setHeader('Access-Control-Allow-Origin', origin);
+            res.setHeader('Access-Control-Allow-Credentials', 'false');
+        } catch (e) {
+            // ignore header set errors
+        }
+
+        const compact = {
+            personality: discProfileDoc.personality,
+            talkingPoints: discProfileDoc.talkingPoints,
+            approachGuidance: discProfileDoc.personality?.approachGuidance || discProfileDoc.personality?.approach || null,
+            analysisId: discProfileDoc._id
+        };
+
+        return res.status(200).json({
+            message: "DISC compact analysis completed",
+            compact,
+            remainingSearchLimit: remainingSearchLimit === null ? null : Math.max(remainingSearchLimit, 0)
+        });
+
+    } catch (error) {
+        console.error("❌ Compact DISC analysis failed:", error);
         return res.status(500).json({ message: error.message });
     }
 };

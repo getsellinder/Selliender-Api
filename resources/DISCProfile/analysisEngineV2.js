@@ -482,7 +482,7 @@ export async function analyzeLinkedInProfile(
       );
     }
 
-        return buildAnalysisResponse({ parsed, metrics, posts, profile, productPrice });
+    return buildAnalysisResponse({ parsed, metrics, posts, profile, productPrice, productDescription });
 
     } catch (error) {
         if (error.status !== 429) {
@@ -491,85 +491,219 @@ export async function analyzeLinkedInProfile(
         // Return fallback on error
         const metrics = computeConfidenceMetrics(profile, posts);
         const fallback = generateFallbackAnalysis(profile, posts, productDescription, productPrice, metrics);
-        return buildAnalysisResponse({ parsed: fallback, metrics, posts, profile, productPrice });
+    return buildAnalysisResponse({ parsed: fallback, metrics, posts, profile, productPrice, productDescription });
     }
 }
 
-function buildAnalysisResponse({ parsed, metrics, posts, profile, productPrice }) {
-    const defaultDisc = { D: 25, I: 25, S: 25, C: 25 };
-    const disc = parsed.discPercentages ? { ...defaultDisc, ...parsed.discPercentages } : defaultDisc;
-    const sorted = Object.entries(disc)
-        .map(([key, value]) => [key, Number.isFinite(value) ? value : 0])
-        .sort((a, b) => b[1] - a[1]);
+function buildAnalysisResponse({ parsed, metrics, posts, profile, productPrice, productDescription }) {
+  const defaultDisc = { D: 25, I: 25, S: 25, C: 25 };
+  const discPercentages = parsed.discPercentages ? { ...defaultDisc, ...parsed.discPercentages } : defaultDisc;
+  const sorted = Object.entries(discPercentages)
+    .map(([key, value]) => [key, Number.isFinite(value) ? value : 0])
+    .sort((a, b) => b[1] - a[1]);
 
-    const [primaryType, primaryPercentage] = sorted[0] || ['D', 25];
-    const [secondaryType, secondaryPercentage] = sorted[1] || sorted[0] || ['I', 25];
+  const [primaryAbbr, primaryPercentage] = sorted[0] || ['D', 25];
+  const [secondaryAbbr, secondaryPercentage] = sorted[1] || sorted[0] || ['I', 25];
 
   const confidenceScore = calculateConfidenceScore(metrics, posts.length);
 
-    const personalizationSource = parsed.personalizationCues;
-    let personalizationCues;
-    if (Array.isArray(personalizationSource)) {
-        personalizationCues = personalizationSource.length > 0 ? personalizationSource : ["Focus on direct, results-oriented messaging."];
-    } else {
-        personalizationCues = [personalizationSource || "Focus on direct, results-oriented messaging."];
+  const personalizationSource = parsed.personalizationCues;
+  let personalizationCues;
+  if (Array.isArray(personalizationSource)) {
+    personalizationCues = personalizationSource.length > 0 ? personalizationSource : generateFallbackPersonalizationCues({ profile, productDescription: profile.productDescription || profile.product || productDescription, productPrice: productPrice || profile.productPrice || profile.productCost || null });
+  } else if (typeof personalizationSource === "string" && personalizationSource.trim()) {
+    const segments = personalizationSource.split(/\n+/).map((item) => item.trim()).filter(Boolean);
+    personalizationCues = segments.length > 0 ? segments : generateFallbackPersonalizationCues({ profile, productDescription: profile.productDescription || profile.product || productDescription, productPrice: productPrice || profile.productPrice || profile.productCost || null });
+  } else {
+    personalizationCues = generateFallbackPersonalizationCues({ profile, productDescription: profile.productDescription || profile.product || productDescription, productPrice: productPrice || profile.productPrice || profile.productCost || null });
+  }
+  if (personalizationCues.length < 4) {
+    const fallbackCues = generateFallbackPersonalizationCues({ profile, productDescription: profile.productDescription || profile.product || productDescription, productPrice: productPrice || profile.productPrice || profile.productCost || null });
+    personalizationCues = [...personalizationCues, ...fallbackCues].slice(0, 8);
+  }
+
+  // Convert abbreviated DISC (D/I/S/C) to full-name display
+  const discDisplay = convertDiscToDisplay(discPercentages);
+
+  // Build discBreakdown array
+  const discBreakdown = sorted.map(([abbr, perc]) => ({ abbreviation: abbr, name: getDISCTypeName(abbr), percentage: perc }));
+
+  // Normalize key trait and style fields from parsed result (support multiple possible keys)
+  const keyTraits = Array.isArray(parsed.personalityBullets) ? parsed.personalityBullets : (Array.isArray(parsed.keyTraits) ? parsed.keyTraits : []);
+  const primaryStyle = parsed.primaryStyle || parsed.primarySecondaryElab || fallbackPrimaryStyle(primaryAbbr, profile.productDescription || profile.product || undefined);
+  const secondaryStyle = parsed.secondaryStyle || fallbackSecondaryStyle(secondaryAbbr);
+  const approachGuidance = parsed.approachGuidance || parsed.approach || fallbackApproachGuidance(primaryAbbr, secondaryAbbr, profile.productDescription || profile.product || '', profile.productPrice || profile.productCost || null);
+
+  // Ensure talkingPoints contains 4-6 items: prefer parsed, then fill with generated fallbacks
+  const parsedTalking = Array.isArray(parsed.talkingPoints) ? parsed.talkingPoints : [];
+  const fallbackTalking = generateFallbackTalkingPoints({ profile, productDescription, productPrice: productPrice || profile.productPrice || profile.productCost || null });
+  const normalizedTalking = parsedTalking.slice(0, 8);
+  for (let i = 0; normalizedTalking.length < 6 && i < fallbackTalking.length; i++) normalizedTalking.push(fallbackTalking[i]);
+  const finalTalkingPoints = normalizedTalking.slice(0, 8);
+
+  const finalTalkingPointsExpanded = ensureExpandedTalkingPoints(finalTalkingPoints, { profile, productDescription, productPrice });
+
+  return {
+    executive: parsed.executiveSummary || `Approach ${profile.name || 'the prospect'} with focus on results and efficiency.`,
+    starting: parsed.starting || {},
+    linkedinPostsAnalyzed: posts.length,
+    analysisGeneratedAt: new Date().toISOString(),
+    analysisVersion: "v2",
+    personality: {
+      disc: discDisplay,
+      discBreakdown,
+      discDefinitions: buildDiscDefinitions(parsed.discDefinitions || parsed.discDefinitions || {}),
+      bullets: keyTraits,
+      keyTraits,
+      primaryType: getDISCTypeName(primaryAbbr),
+      secondaryType: getDISCTypeName(secondaryAbbr),
+      primary: {
+        type: getDISCTypeName(primaryAbbr),
+        name: getDISCTypeName(primaryAbbr),
+        abbreviation: primaryAbbr,
+        percentage: primaryPercentage,
+        description: getDISCTypeDescription(primaryAbbr, primaryPercentage)
+      },
+      secondary: {
+        type: getDISCTypeName(secondaryAbbr),
+        name: getDISCTypeName(secondaryAbbr),
+        abbreviation: secondaryAbbr,
+        percentage: secondaryPercentage,
+        description: getDISCTypeDescription(secondaryAbbr, secondaryPercentage)
+      },
+      primaryStyle,
+      secondaryStyle,
+      approachGuidance
+    },
+  talkingPoints: finalTalkingPointsExpanded,
+  personalizationCues,
+  openingScripts: parsed.openingScripts || { linkedin_dm: [], email: [], phone: [], whatsapp: [] },
+  objectionHandling: ensureObjectionResponsesLength(normalizeObjectionHandling({ existing: parsed.objectionHandling, profile, productDescription, productPrice: productPrice || profile.productPrice || profile.productCost || null }), { profile, productDescription, productPrice: productPrice || profile.productPrice || profile.productCost || null }),
+    nextActions: Array.isArray(parsed.nextActions) ? parsed.nextActions : [],
+    confidence: {
+      score: confidenceScore,
+      breakdown: {
+        completeness: safePercentage(metrics.completeness),
+        sampleQuality: safePercentage(metrics.sampleQuality),
+        recency: safePercentage(metrics.recency),
+        agreement: safePercentage(metrics.agreement),
+        signalStrength: safePercentage(metrics.signalStrength)
+      },
+      explanation: parsed.confidence?.explanation || `Confidence score of ${confidenceScore}% based on ${posts.length} posts analyzed.`,
+      warnings: parsed.confidence?.warnings || []
+    },
+    dataSources: [
+      `profile_${profile._id || 'manual'}`,
+      `posts_${posts.length}_items`,
+      profile.about ? 'about_section' : null,
+      profile.experience ? 'experience_section' : null,
+      profile.skills ? 'skills_section' : null
+    ].filter(Boolean),
+    productSummary: {
+      description: productDescription || profile.productDescription || profile.product || null,
+      price: formatProductPrice(productPrice || profile.productPrice || profile.productCost || null)
+    },
+    topKeywords: extractTopKeywords(posts, 8),
+    sentiment: { score: computeSentiment(posts), label: sentimentLabel(computeSentiment(posts)) },
+    postEvidence: mapTalkingPointsToEvidence(finalTalkingPoints, posts),
+    analysisMetadata: {
+      profileFieldsUsed: countProfileFields(profile),
+      postsAnalyzed: posts.length,
+      avgPostEngagement: calculateAvgEngagement(posts),
+      dominantTopics: (Array.isArray(parsed.talkingPoints) ? parsed.talkingPoints : []).slice(0, 5).map(t => t.topic),
+      writingTone: determineWritingTone(posts),
+      rawRationale: parsed.rawRationale || "Analysis based on available profile and post data."
+    }
+  };
+}
+
+function extractTopKeywords(posts, limit = 6) {
+  if (!Array.isArray(posts) || posts.length === 0) return [];
+  const stop = new Set(["the","and","for","with","that","this","you","are","our","your","from","have","has","was","were","will","they","their","but","not","its","it's","what","which","who"]);
+  const freq = Object.create(null);
+  posts.forEach(p => {
+    const text = (p.content || p.text || '').toLowerCase().replace(/[^a-z0-9\s]/g,' ');
+    text.split(/\s+/).forEach(w => {
+      if (!w || w.length < 3) return;
+      if (stop.has(w)) return;
+      freq[w] = (freq[w] || 0) + 1;
+    });
+  });
+  return Object.entries(freq).sort((a,b) => b[1]-a[1]).slice(0, limit).map(e => e[0]);
+}
+
+function computeSentiment(posts) {
+  if (!Array.isArray(posts) || posts.length === 0) return 0;
+  const positive = ['good','great','success','win','improve','growth','gain','love','excellent','happy'];
+  const negative = ['fail','problem','risk','issue','concern','delay','drop','loss','challenge','struggle'];
+  let score = 0;
+  posts.forEach(p => {
+    const t = (p.content || p.text || '').toLowerCase();
+    positive.forEach(word => { if (t.includes(word)) score += 1; });
+    negative.forEach(word => { if (t.includes(word)) score -= 1; });
+  });
+  const norm = Math.max(-1, Math.min(1, score / Math.max(1, posts.length * 2)));
+  return Math.round(norm * 100);
+}
+
+function sentimentLabel(score) {
+  if (score >= 40) return 'positive';
+  if (score <= -40) return 'negative';
+  return 'neutral';
+}
+
+function mapTalkingPointsToEvidence(talkingPoints, posts) {
+  if (!Array.isArray(talkingPoints) || talkingPoints.length === 0) return [];
+  const results = talkingPoints.map(tp => ({ topic: tp.topic || tp.title || 'topic', evidence: 'Profile-based' }));
+  talkingPoints.forEach((tp, idx) => {
+    const key = (tp.topic || tp.why || tp.whatToSay || '').toLowerCase().split(/\s+/).slice(0,5).join(' ');
+    for (let p of posts) {
+      const text = (p.content || p.text || '').toLowerCase();
+      if (!text) continue;
+      if (key && text.includes(key)) {
+        results[idx].evidence = `${(p.date || p.createdAt || 'no-date')}: ${(p.content || p.text || '').slice(0,120)}`;
+        break;
+      }
+    }
+  });
+  return results;
+}
+
+function ensureExpandedTalkingPoints(talkingPoints, { profile, productDescription, productPrice }) {
+  if (!Array.isArray(talkingPoints) || talkingPoints.length === 0) return talkingPoints;
+  const MIN_CHARS = 220;
+  return talkingPoints.map((tp) => {
+    const item = Object.assign({}, tp);
+    const existing = (item.whatToSay || item.description || '') .trim();
+    const hasParagraphs = existing.includes('\n\n') || (existing.split(/\.|\!|\?/).filter(Boolean).length >= 3);
+    if (existing.length >= MIN_CHARS || hasParagraphs) {
+      item.whatToSay = existing;
+      if (!item.why || item.why.length < 60) {
+        item.why = item.why && item.why.length > 20 ? item.why : `This topic matters because it impacts measurable outcomes for the prospect's role.`;
+      }
+      return item;
     }
 
-    return {
-        executive: parsed.executiveSummary || `Approach ${profile.name || 'the prospect'} with focus on results and efficiency.`,
-        personality: {
-            disc,
-            bullets: parsed.personalityBullets || [],
-            primaryType,
-            secondaryType,
-            primary: {
-                type: primaryType,
-                name: getDISCTypeName(primaryType),
-                percentage: primaryPercentage,
-                description: getDISCTypeDescription(primaryType, primaryPercentage)
-            },
-            secondary: {
-                type: secondaryType,
-                name: getDISCTypeName(secondaryType),
-                percentage: secondaryPercentage,
-                description: getDISCTypeDescription(secondaryType, secondaryPercentage)
-            },
-            discDefinitions: parsed.discDefinitions || {},
-            primarySecondaryElab: parsed.primarySecondaryElab || ""
-        },
-        talkingPoints: Array.isArray(parsed.talkingPoints) ? parsed.talkingPoints : [],
-        personalizationCues,
-        openingScripts: parsed.openingScripts || { linkedin_dm: [], email: [], phone: [], whatsapp: [] },
-        objectionHandling: Array.isArray(parsed.objectionHandling) ? parsed.objectionHandling : [],
-        nextActions: Array.isArray(parsed.nextActions) ? parsed.nextActions : [],
-        confidence: {
-            score: confidenceScore,
-            breakdown: {
-                completeness: Math.round(metrics.completeness * 100),
-                sampleQuality: Math.round(metrics.sampleQuality * 100),
-                recency: Math.round(metrics.recency * 100),
-                agreement: Math.round(metrics.agreement * 100),
-                signalStrength: Math.round(metrics.signalStrength * 100)
-            },
-            explanation: parsed.confidence?.explanation || `Confidence score of ${confidenceScore}% based on ${posts.length} posts analyzed.`,
-            warnings: parsed.confidence?.warnings || []
-        },
-        dataSources: [
-            `profile_${profile._id || 'manual'}`,
-            `posts_${posts.length}_items`,
-            profile.about ? 'about_section' : null,
-            profile.experience ? 'experience_section' : null,
-            profile.skills ? 'skills_section' : null
-        ].filter(Boolean),
-        analysisMetadata: {
-            profileFieldsUsed: countProfileFields(profile),
-            postsAnalyzed: posts.length,
-            avgPostEngagement: calculateAvgEngagement(posts),
-            dominantTopics: (Array.isArray(parsed.talkingPoints) ? parsed.talkingPoints : []).slice(0, 5).map(t => t.topic),
-            writingTone: determineWritingTone(posts),
-            rawRationale: parsed.rawRationale || "Analysis based on available profile and post data."
-        }
-    };
+    const product = productDescription || profile?.productDescription || profile?.product || 'the solution';
+    const price = productPrice ? formatProductPrice(productPrice) : null;
+    const topic = item.topic || item.title || 'this topic';
+
+    const para1 = existing || `Focus on ${topic} by leading with the core benefit: how ${product}${price ? ` at ${price}` : ''} directly reduces friction or improves a key metric for their role. Cite a measurable outcome (time saved, % improvement, or a concrete business result) and tie it to the prospect's likely priorities.`;
+
+    const para2 = `Then provide an explicit next-step script: briefly state what you'll deliver in a short call, propose timing, and offer to share a one-page ROI brief. Example: "I can share a 10-min summary showing expected lift and the implementation steps — are you available for a 20-minute working session next week?"`;
+
+    item.whatToSay = `${para1}\n\n${para2}`;
+    if (!item.why || item.why.length < 60) {
+      item.why = item.why && item.why.length > 20 ? item.why : `This topic matters because it addresses ${topic} which impacts measurable outcomes for the prospect's role.`;
+    }
+    return item;
+  }).slice(0, 8);
+}
+
+function safePercentage(value) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return 0;
+  return Math.max(0, Math.min(100, Math.round(numeric * 100)));
 }
 
 // Helper functions
@@ -631,19 +765,35 @@ function buildDiscDefinitions(source) {
 }
 
 function formatProductPrice(productPrice) {
-    if (productPrice === null || productPrice === undefined) return "Not specified";
+  if (productPrice === null || productPrice === undefined) return "Not specified";
 
-    const numericPrice = typeof productPrice === 'number' ? productPrice : Number(productPrice);
-    if (!Number.isFinite(numericPrice)) return String(productPrice);
+  const numericPrice = typeof productPrice === 'number' ? productPrice : Number(productPrice);
+  if (!Number.isFinite(numericPrice)) return String(productPrice);
 
-    const formatter = new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-        maximumFractionDigits: numericPrice % 1 === 0 ? 0 : 2,
-        minimumFractionDigits: numericPrice % 1 === 0 ? 0 : 2
-    });
+  const formatter = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: numericPrice % 1 === 0 ? 0 : 2,
+    minimumFractionDigits: numericPrice % 1 === 0 ? 0 : 2
+  });
 
-    return formatter.format(numericPrice);
+  return formatter.format(numericPrice);
+}
+
+function generateFallbackPersonalizationCues({ profile, productDescription, productPrice }) {
+  const contactName = profile?.name || 'the prospect';
+  const company = profile?.company || 'their organization';
+  const role = profile?.title || 'their role';
+  const product = productDescription || profile?.productDescription || profile?.product || 'our solution';
+  const price = productPrice ? formatProductPrice(productPrice) : null;
+  return [
+    `Open with a tailored compliment about ${company} and segue into how ${product} maps to the initiatives ${role} is likely steering.`,
+    `Quantify a metric that ${contactName} can influence directly and connect it to the speed of implementing ${product}${price ? ` at ${price}` : ''}.`,
+    `Reference a recent post or announcement, cite the exact date, and position ${product} as the lever to amplify that momentum.`,
+    `Share a short social proof line featuring a peer-title, summarize the before-and-after metric, and outline the onboarding cadence in under three bullets.`,
+    `Invite ${contactName} to a co-created working session and promise a recap template they can forward internally within minutes.`,
+    `Flag one risk they repeatedly mention online and show how ${product}${price ? ` at ${price}` : ''} offsets it with measurable guardrails.`
+  ];
 }
 
 function fallbackPrimaryStyle(primaryType, productDescription) {
@@ -746,4 +896,136 @@ function determineWritingTone(posts) {
   if (formalScore > casualScore * 1.5) return "Formal";
   if (casualScore > formalScore * 1.5) return "Casual";
   return "Balanced";
+}
+
+function generateFallbackTalkingPoints({ profile, productDescription, productPrice }) {
+  const company = profile?.company || 'their organization';
+  const role = profile?.title || 'their role';
+  const product = productDescription || profile?.productDescription || profile?.product || 'the solution';
+  const price = productPrice ? formatProductPrice(productPrice) : null;
+  return [
+    {
+      topic: company ? `Strategic outcomes at ${company}` : 'Strategic outcomes',
+      why: `${role} is accountable for protecting headline metrics; anything that compresses time-to-impact is top priority.`,
+      whatToSay: `You own the scoreboard for ${company}. ${product}${price ? ` at ${price}` : ''} cuts the cycle between idea and execution so you can report measurable impact this quarter.`,
+      evidence: 'Profile-based'
+    },
+    {
+      topic: 'Operational efficiency',
+      why: 'Leaders stay alert to process drag and hidden coordination costs.',
+      whatToSay: `${product} removes manual checkpoints, keeps stakeholders aligned, and frees capacity without adding headcount${price ? `, all within a ${price} envelope` : ''}.`,
+      evidence: 'Profile-based'
+    },
+    {
+      topic: 'Cross-functional alignment',
+      why: 'Winning initiatives pair go-to-market velocity with delivery confidence.',
+      whatToSay: `Frame the rollout as a co-owned sprint between GTM and Ops. Offer a shared dashboard template so everyone sees progress in real time.`,
+      evidence: 'Internal alignment playbook'
+    },
+    {
+      topic: 'Proof and comparables',
+      why: 'Champions need peer validation to unlock internal approval.',
+      whatToSay: `Share a quick hit case study with identical KPIs and call out the timeline from kickoff to first ROI signal. Provide references on request.`,
+      evidence: 'Case study reference'
+    },
+    {
+      topic: 'Budget framing',
+      why: 'Stakeholders want to see cost mapped to stack consolidation or revenue lift.',
+      whatToSay: `Position ${product} as a swap, not a net-new line item. Outline which spend it replaces and the forecasted payback date${price ? ` at ${price}` : ''}.`,
+      evidence: 'Financial model'
+    },
+    {
+      topic: 'Clear next steps',
+      why: 'Momentum stalls without a guided path forward.',
+      whatToSay: `Suggest a 20-minute working session with agenda, owners, and success criteria so we exit with an agreed evaluation plan.`,
+      evidence: 'Process overview'
+    }
+  ];
+}
+
+function normalizeObjectionHandling({ existing, profile, productDescription, productPrice }) {
+  const normalized = Array.isArray(existing) ? existing.filter((item) => item && item.objection && item.response) : [];
+  const unique = new Map();
+  normalized.forEach((item) => {
+    if (!unique.has(item.objection)) unique.set(item.objection, item);
+  });
+  const fallback = generateFallbackObjectionHandling({ profile, productDescription, productPrice });
+  fallback.forEach((item) => {
+    if (!unique.has(item.objection) && unique.size < 6) unique.set(item.objection, item);
+  });
+  if (unique.size < 5) {
+    fallback.forEach((item) => {
+      if (unique.size >= 5) return;
+      unique.set(`${item.objection} (${unique.size})`, item);
+    });
+  }
+  return Array.from(unique.values()).slice(0, 6);
+}
+
+function generateFallbackObjectionHandling({ profile, productDescription, productPrice }) {
+  const role = profile?.title || 'I';
+  const company = profile?.company || 'our team';
+  const product = productDescription || profile?.productDescription || profile?.product || 'the solution';
+  const price = productPrice ? formatProductPrice(productPrice) : null;
+  return [
+    {
+      objection: 'We already have a tool for this',
+      rationale: `${role} likely owns an existing vendor and fears duplicating spend or change fatigue at ${company}.`,
+      response: `Totally fair. Most teams we help started with overlapping tools. We map ${product} against your current stack, show the duplicate workflows we remove, and document the exit plan so your net cost${price ? ` stays near ${price}` : ''} is ROI-positive.`
+    },
+    {
+      objection: 'Timing is tough right now',
+      rationale: `${role} is juggling launches and wants to avoid adding lift mid-quarter.`,
+      response: `Understood. We scope a 14-day pilot, handle 80% of the lift, and pause if the milestones slip. That way you de-risk timing while still proving ${product} with minimal effort.`
+    },
+    {
+      objection: 'Budget is locked',
+      rationale: `${role} needs a crisp business case tied to current budgeting cycles.`,
+      response: `Makes sense. We outline which existing spend ${product} consolidates, surface a cost-neutral option${price ? ` near ${price}` : ''}, and equip you with the quick ROI brief finance expects.`
+    },
+    {
+      objection: 'Need stakeholder buy-in first',
+      rationale: `Cross-functional partners must understand impact before committing resources.`,
+      response: `Let’s co-create a two-slide deck highlighting team-specific wins, include your stakeholders’ names, and offer to join the call to cover the heavy lifting.`
+    },
+    {
+      objection: 'Not convinced on ROI yet',
+      rationale: `${role} wants proof tied to their KPIs before advocating internally.`,
+      response: `We will bring metric-level benchmarks, share a customer intro, and build a forecast with your assumptions so you see exactly when ${product} hits break-even.`
+    }
+  ];
+}
+
+function ensureObjectionResponsesLength(list, { profile, productDescription, productPrice }) {
+  if (!Array.isArray(list)) return [];
+  const desiredSentences = 6;
+  return list.map((item) => {
+    const out = Object.assign({}, item);
+    let resp = (out.response || '').replace(/\n+/g, ' ').trim();
+    // split into sentences
+    const sentences = resp.match(/[^\.\!\?]+[\.\!\?]+/g) || (resp ? [resp] : []);
+    if (sentences.length >= desiredSentences) {
+      out.response = sentences.slice(0, desiredSentences).join(' ').trim();
+      return out;
+    }
+
+    const product = productDescription || profile?.productDescription || profile?.product || 'the solution';
+    const price = productPrice ? formatProductPrice(productPrice) : null;
+    const extras = [
+      `I understand budget and timing are important; we design our approach to deliver clear ROI with minimal disruption.`,
+      `We prioritize fast validation: a short pilot or focused proof-of-concept shows value without requiring full commitment.`,
+      `Our onboarding minimizes internal lift and includes explicit success criteria so stakeholders can measure impact quickly.`,
+      `We can provide concise case studies from similar customers and metric-level benchmarks to support decision-making.`,
+      `If helpful, we scope a 14-day pilot with predetermined outcomes to de-risk the evaluation.`,
+      `Would a 20-minute working session to review a one-page ROI brief be useful for your team?`
+    ];
+
+    const need = desiredSentences - sentences.length;
+    const add = extras.slice(0, need).join(' ');
+    resp = (resp + ' ' + add).trim();
+    // Ensure single paragraph, no newlines
+    resp = resp.replace(/\s*\n+\s*/g, ' ');
+    out.response = resp;
+    return out;
+  }).slice(0, 6);
 }

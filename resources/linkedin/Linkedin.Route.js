@@ -7,6 +7,7 @@ import {
     LinkedinuserDelete,
     saveDISCRequest,
     analyzeDISCProfile,
+    analyzeDISCProfileCompact,
     getLatestDISCAnalysis,
     getDISCAnalysisById,
     getAllDISCAnalysesByUser,
@@ -20,6 +21,7 @@ const upload = multer()
 Router.post("/create/file/:id", LinkedinUploadFile)
 Router.post("/save-disc-request/:userId", saveDISCRequest)
 Router.post("/analyze-disc/:userId", analyzeDISCProfile)
+Router.post("/analyze-disc-compact/:userId", analyzeDISCProfileCompact)
 
 Router.get("/get/:id", getLinkedinUploadFile)
 Router.get("/analysis", getLinkedinAnalysisResult)
@@ -32,6 +34,9 @@ Router.get("/disc/latest/:userId", getLatestDISCAnalysis)
 Router.get("/disc/analysis/:analysisId", getDISCAnalysisById)
 
 Router.get("/disc/summary/:analysisId", getDISCAnalysisSummary)
+
+// Shortcut: allow clients (extensions) to fetch the analysis summary with a shorter path
+Router.get("/disc/:analysisId", getDISCAnalysisSummary)
 
 Router.get("/disc/user/:userId", getAllDISCAnalysesByUser)
 
