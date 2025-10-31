@@ -581,6 +581,59 @@ export const ConfirmPayment = async (req, res) => {
 export const InvoiceDetailsById = async (req, res) => {
   const { id } = req.params; //userId id
   try {
+    const getinvoice = await Invoice.findById(id)
+      .populate("userId", "phone name email")
+      .populate("PlanId")
+      .sort({ createdAt: -1 });
+    if (!getinvoice || getinvoice.length === 0) {
+      return res.status(404).json({ message: "No invoices found" });
+    }
+
+     const invoice=getinvoice.toObject()
+  
+        // const invoiceData = invoice.toObject();
+        let gstId = invoice?.PlanId?.GST;
+        let getgst = gstId ? await Tax.findById(gstId) : null;
+        invoice.plan_start_date = datewithMonth(
+          invoice.plan_start_date
+        );
+        invoice.plan_expiry_date = datewithMonth(
+          invoice.plan_expiry_date
+        );
+        invoice.createdAt = datewithMonth(invoice.createdAt);
+        if (invoice.Amount) {
+          invoice.Amount = invoice.Amount.toLocaleString();
+        }
+        if (invoice.PlanId) {
+          invoice.PlanId.Monthly_Price =
+            invoice.PlanId.Monthly_Price?.toLocaleString();
+          invoice.PlanId.Yearly_Price =
+            invoice.PlanId.Yearly_Price?.toLocaleString();
+          invoice.PlanId.Total_Yearly_Price =
+            invoice.PlanId.Total_Yearly_Price?.toLocaleString();
+          invoice.PlanId.Total_Monthly_Price =
+            invoice.PlanId.Total_Monthly_Price?.toLocaleString();
+          invoice.PlanId.gstMonthlyPrice =
+            invoice.PlanId.gstMonthlyPrice?.toLocaleString();
+          invoice.PlanId.gstYearlyPrice =
+            invoice.PlanId.gstYearlyPrice?.toLocaleString();
+        }
+        invoice.GST = getgst ? getgst.Gst : null;
+     
+    return res.status(200).json(invoice);
+  } catch (error) {
+    console.log("error in InvoiceDetailsById", error);
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+
+// findAllInvoiceByUser
+
+
+export const AllInvoiceDetailsById = async (req, res) => {
+  const { id } = req.params; //userId id
+  try {
     const getinvoice = await Invoice.find({ userId: id })
       .populate("userId", "phone name email")
       .populate("PlanId")

@@ -2,6 +2,7 @@ import express from "express";
 import { authorizeRoles, isAuthenticatedUser } from "../../middlewares/auth.js";
 import { roles, rolesAdmin } from "../../Utils/authorizeRoles.js";
 import {
+  AllInvoiceDetailsById,
   ConfirmPayment,
 
   getAllPackages,
@@ -67,5 +68,14 @@ Router.get(
   authorizeRoles(...roles),
   InvoiceDetailsById
 );
+
+Router.get(
+  "/all/invoice/:id",
+  isAuthenticatedUser,
+  authorizeRoles(...roles),
+  AllInvoiceDetailsById
+);
+
+
 
 export default Router;
