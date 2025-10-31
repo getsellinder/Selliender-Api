@@ -211,7 +211,7 @@ export const viewbilling = async (req, res) => {
     const getinvoice = await Invoice.findOne({
       userId: mongoose.Types.ObjectId(id),
     })
-      .populate("userId", "phone name email SearchLimit status")
+      .populate("userId", "phone name email SearchLimit status createdAt")
       .populate("PlanId")
       .sort({ createdAt: -1 });
     if (!getinvoice || getinvoice.length === 0) {
@@ -225,6 +225,7 @@ export const viewbilling = async (req, res) => {
     }
 
     const invoicesWithGST = getinvoice.toObject();
+    
     invoicesWithGST.plan_start_date = shordataformate(
       invoicesWithGST.plan_start_date
     );
@@ -233,6 +234,8 @@ export const viewbilling = async (req, res) => {
     );
     invoicesWithGST.Amount = invoicesWithGST.Amount.toLocaleString();
     invoicesWithGST.createdAt = shordataformate(invoicesWithGST.createdAt);
+      invoicesWithGST.userId.createdAt = shordataformate(invoicesWithGST.userId.createdAt);
+      console.log("invoicesWithGST",invoicesWithGST)
     return res.status(200).json({ viewReferral, invoicesWithGST });
   } catch (error) {
     console.log("getbillinvoice.error", error);

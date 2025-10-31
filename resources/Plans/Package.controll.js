@@ -390,8 +390,7 @@ export const PlanPurchese = async (req, res) => {
 export const ConfirmPayment = async (req, res) => {
   try {
     const { id } = req.params;
-
-    const {
+const {
       durationType,
       razorpayPaymentId,
       planAmount,
@@ -594,13 +593,13 @@ export const InvoiceDetailsById = async (req, res) => {
         // const invoiceData = invoice.toObject();
         let gstId = invoice?.PlanId?.GST;
         let getgst = gstId ? await Tax.findById(gstId) : null;
-        invoice.plan_start_date = datewithMonth(
+        invoice.plan_start_date = shordataformate(
           invoice.plan_start_date
         );
-        invoice.plan_expiry_date = datewithMonth(
+        invoice.plan_expiry_date = shordataformate(
           invoice.plan_expiry_date
         );
-        invoice.createdAt = datewithMonth(invoice.createdAt);
+        invoice.createdAt = shordataformate(invoice.createdAt);
         if (invoice.Amount) {
           invoice.Amount = invoice.Amount.toLocaleString();
         }
@@ -646,13 +645,13 @@ export const AllInvoiceDetailsById = async (req, res) => {
         const invoiceData = invoice.toObject();
         let gstId = invoiceData?.PlanId?.GST;
         let getgst = gstId ? await Tax.findById(gstId) : null;
-        invoiceData.plan_start_date = datewithMonth(
+        invoiceData.plan_start_date = shordataformate(
           invoiceData.plan_start_date
         );
-        invoiceData.plan_expiry_date = datewithMonth(
+        invoiceData.plan_expiry_date = shordataformate(
           invoiceData.plan_expiry_date
         );
-        invoiceData.createdAt = datewithMonth(invoiceData.createdAt);
+        invoiceData.createdAt = shordataformate(invoiceData.createdAt);
         if (invoiceData.Amount) {
           invoiceData.Amount = invoiceData.Amount.toLocaleString();
         }
