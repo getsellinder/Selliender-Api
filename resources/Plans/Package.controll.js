@@ -1,6 +1,7 @@
 import {
   datewithMonth,
   shordataformate,
+  shortDateWithTime,
   timeFormat,
 } from "../../Utils/formatDateToIST .js";
 import razorpayInstance from "../../Utils/razorpay.js";
@@ -381,7 +382,7 @@ export const ConfirmPayment = async (req, res) => {
     let planOriginalAmount;
 
     let gstnumber = findTax.Gst;
-    let searchLimit=0;
+    let searchLimit = 0;
     let userLimit;
 
     if (durationType === "monthly") {
@@ -409,11 +410,11 @@ export const ConfirmPayment = async (req, res) => {
       duration: durationType,
       TransactionId: razorpayPaymentId,
       status: paymentStatus,
+      razorypayTime: new Date(),
     };
 
     let invoice = await Invoice.create(add);
     let upgrade = findUser.SearchLimit + searchLimit;
- 
 
     await UserModel.findByIdAndUpdate(
       userId,
@@ -570,6 +571,10 @@ export const InvoiceDetailsById = async (req, res) => {
     invoice.plan_start_date = shordataformate(invoice.plan_start_date);
     invoice.plan_expiry_date = shordataformate(invoice.plan_expiry_date);
     invoice.createdAt = shordataformate(invoice.createdAt);
+
+    if (invoice.razorypayTime) {
+      invoice.razorypayTime = shortDateWithTime(invoice.razorypayTime);
+    }
     if (invoice.Amount) {
       invoice.Amount = invoice.Amount.toLocaleString();
     }

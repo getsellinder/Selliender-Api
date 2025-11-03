@@ -143,16 +143,14 @@ app.use(express.static(publicPath));
 import user from "./resources/user/userRoute.js";
 // Product
 import ProductRouter from "./resources/Products/ProductRoute.js";
-// Chapter xx
-import ChapterRouter from "./resources/Chapter/ChapterRoute.js";
+
 
 //Businesses
 // import BusinessRoute from "./resources/Businesses/BusinessRoute.js";
 
 import orderRoute from "./resources/Orders/orderRoute.js";
 import DepartureRouter from "./resources/Departure/DepartureRoute.js";
-import InformationRoute from "./resources/Informations/InformationRoute.js";
-import Testimonial from "./resources/Testimonials/TestimonialRoute.js";
+
 import ContactRequest from "./resources/ContactRequests/ContactRequestRoute.js";
 
 import StateRouter from "./resources/setting/state/state_routes.js";
@@ -164,14 +162,14 @@ import PurposeRoute from "./resources/setting/Purpose/Purpose_routes.js";
 // category Route
 import categoryRoute from "./resources/Category/categoryRoutes.js";
 
-import libraryRoute from "./resources/MyLibrary/MylibraryRoute.js";
+
 
 import CollectionRoute from "./resources/Collections/CollectionRoute.js";
 import ColorRoute from "./resources/color/colorRoutes.js";
-import bannerRoute from "./resources/Banner/BannerRouter.js";
+
 import RegistrationImageRoute from "./resources/RegistrationImage/RegistrationImageRoute.js";
 import loginImageRoute from "./resources/LoginImage/LoginImageRoute.js";
-import shopImageRoute from "./resources/ShopPageImage/ShopPageImageRoute.js";
+
 import ContentRoute from "./resources/Content/ContentRoutes.js";
 import UserAddressRoute from "./resources/userAddress/useAddressRoute.js";
 import CurrencyRoute from "./resources/Currency/CurrencyRoute.js";
@@ -182,8 +180,8 @@ import ConfigRouter from "./resources/setting/Configration/Config_routes.js";
 
 import TaxRouter from "./resources/Tax/tax_routes.js";
 //specialties
-import SpecialtiesRouter from "./resources/Specialties/SpecialtiesRoute.js";
-import ShippingAddressRoute from "./resources/ShippingAddresses/ShippingAddressRoute.js";
+
+
 import stripeRoute from "./resources/StripePayment/stripeRoute.js";
 
 import SeoRoute from "./resources/SEO&Analytics/SEORouter.js";
@@ -254,8 +252,7 @@ app.use("/api/v1/", user);
 app.use("/api/customer/", CustomerRoute);
 //Product
 app.use("/api", ProductRouter);
-// Chapter
-app.use("/api", ChapterRouter);
+
 // Authentication rounter
 app.use("/auth", AuthRouter);
 app.use("/api/disc", DISCProfileRoute);
@@ -273,16 +270,15 @@ app.use("/api/linked", LinkedinRoute);
 
 app.use("/api/collection", CollectionRoute);
 app.use("/api/color", ColorRoute);
-app.use("/api/banner", bannerRoute);
-// registration image
+
 app.use("/api/registerImage", RegistrationImageRoute);
 app.use("/api/loginImage", loginImageRoute);
-app.use("/api/shopImage", shopImageRoute);
+
 // Content
 app.use("/api/content", ContentRoute);
 // User Address
 app.use("/api/user-address", UserAddressRoute);
-app.use("/api/shipping/address", ShippingAddressRoute);
+
 //Patient Routes
 // app.use("/api/patient", PatientRoute);
 
@@ -293,11 +289,11 @@ app.use("/api/order", orderRoute);
 //Departure
 app.use("/api/departure/", DepartureRouter);
 //Information
-app.use("/api/information/", InformationRoute);
+
 //Contact Requests
 app.use("/api/contact/request/", ContactRequest);
 //Complaints
-app.use("/api/testimonial/", Testimonial);
+
 //state
 app.use("/api/state", StateRouter);
 //language
@@ -329,21 +325,9 @@ app.use("/api/panel", PanelRoute);
 
 app.use("/api/v1/reviews", ReviewRoute);
 
-// library;
-app.use("/", libraryRoute);
 
-//config specialty
-// app.use("/api/config/specialty", SpecialtiesRouter);
-//specialties
-// app.use("/api/specialist", SpecialistRouter);
-//appointments
-// app.use("/api/appointment", AppointmentRouter);
-//short urls
-// app.use("/api/shorturl", ShortUrlRouter);
-//Support
 
-// Email CMS
-// app.use("/api", RegisterEmail);
+
 app.use("/api", SupportRouter);
 app.use("/api", MessageRouter);
 app.use("/api/reports", ReportsRoute);

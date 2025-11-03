@@ -52,6 +52,11 @@ const InvoicesSchema = new mongoose.Schema(
       type: String,
       enum: ["success", "failed"],
     },
+    razorypayTime: {
+      type: Date,
+      // default: Date.now,
+      required:false
+    },
     invoice_status: {
       type: String,
       enum: ["Active", "Deactive"],

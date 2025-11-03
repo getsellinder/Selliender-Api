@@ -22,12 +22,24 @@ export function timeFormat(val) {
 }
 
 export function shordataformate(data) {
-  const date = new Date(data); 
+  const date = new Date(data);
   return date.toLocaleDateString("en-US", {
     month: "short",
     day: "2-digit",
     year: "numeric"
-  }).replace(/,/g,"");
+  }).replace(/,/g, "");
+}
+export function shortDateWithTime(data) {
+  const date = new Date()
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+
+  }).replace(/,/g, "");
 }
 export function datewithMonth(val) {
   const date = new Date(val);
