@@ -184,7 +184,7 @@ export const getSingleOrder = async (req, res) => {
     if (!req.params.id)
       return res.status(400).json({ message: "please Provide Order Id" });
 
-    // console.log("dddddddddddddddddddddddd");
+
     const order = await Order.findById(req.params.id)
       .populate({
         path: "user",
