@@ -178,6 +178,48 @@ export const toggleStatus = async (req, res) => {
 //   }
 // };
 
+// export const DashboardUsers = async (req, res) => {
+//   try {
+//     const {month,year }=req.query;
+
+//     const allUsers  = await UserModel.find();
+//     let totalUsers = allUsers .length || 0;
+//     let activeUser = allUsers .filter((val) => val.status === "Active").length || 0;
+//     let inactiveUser =
+//       allUsers .filter((val) => val.status === "Inactive").length || 0;
+
+//       let monthUsers=[];
+//       let monthActive=0;
+//       let monthInactive=0;
+
+//       if(month && year){
+//        const monthIndex = new Date().toLocaleString("en-US", { month: "long" }) === month
+//   ? new Date().getMonth()
+
+//   : new Date(`${month} 1`).getMonth();
+//         console.log("monthIndex",monthIndex)
+//         monthUsers=allUsers.filter(user=>{
+//           const createdmonth=new Date(user.createdAt).getMonth()
+//           return createdmonth===monthIndex
+//         });
+//         monthActive=monthUsers.filter(u=>u.status==="Active").length;
+//         monthInactive =monthUsers.filter(u=>u.status==="Inactive").length
+
+//       }
+//    return res.status(200).json({
+//       totalUsers,
+//       activeUser,
+//       inactiveUser,
+//       monthUsersCount: monthUsers.length || 0,
+//       monthActive,
+//       monthInactive,
+//     });
+//   } catch (error) {
+//     console.log("DashboardUsers.error", error);
+//     return res.status(500).json({ message: "Internal Server Error" });
+//   }
+// };
+
 export const DashboardUsers = async (req, res) => {
   try {
     const { month, year } = req.query;
@@ -189,20 +231,30 @@ export const DashboardUsers = async (req, res) => {
     let inactiveUser =
       allUsers.filter((val) => val.status === "Inactive").length || 0;
 
-    let monthUsers = [];
-    let monthActive = 0;
-    let monthInactive = 0;
+    const registeredMonthly = Array(12).fill(0);
+    const inactiveMonthly = Array(12).fill(0);
+
+    allUsers.forEach((user) => {
+      const createdAt = new Date(user.createdAt);
+      const m = createdAt.getMonth();
+      const y = createdAt.getFullYear();
+      registeredMonthly[m] += 1;
+      if (user.status === "Inactive") inactiveMonthly[m] += 1;
+    });
+
+    let monthUsersCount = 0,
+      monthActive = 0,
+      monthInactive = 0;
 
     if (month && year) {
-      const monthIndex =
-        new Date().toLocaleString("en-US", { month: "long" }) === month
-          ? new Date().getMonth()
-          : new Date(`${month} 1`).getMonth();
-      console.log("monthIndex", monthIndex);
-      monthUsers = allUsers.filter((user) => {
-        const createdmonth = new Date(user.createdAt).getMonth();
-        return createdmonth === monthIndex;
+      const monthIndex = new Date(`${month} 1, ${year}`).getMonth();
+
+      const monthUsers = allUsers.filter((user) => {
+        const d = new Date(user.createdAt);
+        return d.getMonth() === monthIndex && d.getFullYear() == year;
       });
+
+      monthUsersCount = monthUsers.length;
       monthActive = monthUsers.filter((u) => u.status === "Active").length;
       monthInactive = monthUsers.filter((u) => u.status === "Inactive").length;
     }
@@ -210,9 +262,33 @@ export const DashboardUsers = async (req, res) => {
       totalUsers,
       activeUser,
       inactiveUser,
-      monthUsersCount: monthUsers.length || 0,
+      monthUsersCount,
       monthActive,
       monthInactive,
+      chart: {
+        labels: [
+          "Jan",
+          "Feb",
+          "Mar",
+          "Apr",
+          "May",
+          "Jun",
+          "Jul",
+          "Aug",
+          "Sep",
+          "Oct",
+          "Nov",
+          "Dec",
+        ],
+        datasets: [
+          {
+            label: "Registered Users",
+            data: registeredMonthly,
+            borderWidth: 2,
+          },
+          { label: "Inactive Users", data: inactiveMonthly, borderWidth: 2 },
+        ],
+      },
     });
   } catch (error) {
     console.log("DashboardUsers.error", error);
