@@ -12,65 +12,6 @@ import { Tax } from "../Tax/tax_model.js";
 import Referal from "../Referal/Referal.model.js";
 import { UserRefreshClient } from "google-auth-library";
 
-// export const getBills = async (req, res) => {
-//   const limit = parseInt(req.query?.limit) || 7;
-//   let page = parseInt(req.query?.page) || 1;
-//   let search = req.query?.name || "";
-//   let date = req.query?.date || "";
-
-//   try {
-
-//     const amount = await Invoice.find({ status: "success" });
-//     const totalAmount = amount.reduce(
-//       (sum, invoice) => sum + invoice.Amount,
-//       0
-//     );
-//     const planDocs = await UserModel.find(
-//       { PlanId: { $exists: true, $ne: null } },
-//       { PlanId: 1, _id: 0 }
-//     );
-//     const planIds = planDocs.map((p) => p.PlanId);
-//     let filter = { PlanId: { $in: planIds } };
-//     const getBills = await Invoice.find(filter).populate(
-//       "userId",
-//       "name _id"
-//     ).skip((page - 1) * limit).limit(limit).sort({ createdAt: -1 });
-//     if (search) {
-//       filter.$or = [
-//         { TransactionId: { $regex: search, $options: "i" } },
-//         { InvoiceNo: { $regex: search, $options: "i" } },
-//       ];
-//     }
-//     if (date) {
-//       const [day, month, year] = date.split("/").map(Number)
-//       const start = new Date(year, month - 1, day, 0, 0, 0)
-//       const end = new Date(year, month - 1, 23, 59, 59)
-//       filter.createdAt = { $gte: start, $lte: end };
-//     }
-//     const totalsales = await Invoice.countDocuments({ status: "success" });
-//     const totalItems = await Invoice.countDocuments(filter);
-//     const getresult = getBills.map((val) => ({
-//       ...val.toObject(),
-//       createdAt: timeFormat(val.createdAt),
-//       Amount: Number(val.Amount).toLocaleString(),
-//     }));
-
-//     return res
-//       .status(200)
-//       .json({
-//         message: "ReferenceUsers Created Successfully",
-//         getresult,
-//         currentPage: page,
-//         totalPages: Math.ceil(totalItems / limit),
-//         totalItems,
-//         totalsales,
-//         totalAmount,
-//       });
-//   } catch (error) {
-//     console.log("Erron in the PackageCreate", error);
-//     return res.status(500).json({ message: error.message });
-//   }
-// };
 
 export const getBills = async (req, res) => {
   const limit = parseInt(req.query?.limit) || 7;
@@ -85,7 +26,7 @@ export const getBills = async (req, res) => {
     });
 
     // Build filter
-    let filter = { PlanId: { $in: planIds } };
+    let filter = { PlanId: { $in: planIds },status:"success" };
 
     if (search) {
       filter.$or = [

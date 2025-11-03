@@ -53,7 +53,7 @@ export const getAllCustomer = async (req, res) => {
     let skip = (page - 1) * limit;
     let search = req.query?.name || "";
     let status = req.query?.status || "";
-    let filter={}
+    let filter = {};
 
     if (status) {
       filter.status = status;
@@ -161,5 +161,19 @@ export const toggleStatus = async (req, res) => {
   } catch (error) {
     console.log("toggleStatus.error", error.message);
     return res.status(500).json({ message: error.message });
+  }
+};
+
+export const DashboardUsers = async (req, res) => {
+  try {
+    const user = await UserModel.find();
+    let totalUsers = user.length || 0;
+    let activeUser = user.filter((val) => val.status === "Active").length || 0;
+    let inactiveUser =
+      user.filter((val) => val.status === "Inactive").length || 0;
+    return res.status(200).json({ totalUsers, activeUser, inactiveUser });
+  } catch (error) {
+    console.log("DashboardUsers.error", error);
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 };
