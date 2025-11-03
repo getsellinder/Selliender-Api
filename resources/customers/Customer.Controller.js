@@ -164,14 +164,56 @@ export const toggleStatus = async (req, res) => {
   }
 };
 
+// export const DashboardUsers = async (req, res) => {
+//   try {
+//     const user = await UserModel.find();
+//     let totalUsers = user.length || 0;
+//     let activeUser = user.filter((val) => val.status === "Active").length || 0;
+//     let inactiveUser =
+//       user.filter((val) => val.status === "Inactive").length || 0;
+//     return res.status(200).json({ totalUsers, activeUser, inactiveUser });
+//   } catch (error) {
+//     console.log("DashboardUsers.error", error);
+//     return res.status(500).json({ message: "Internal Server Error" });
+//   }
+// };
+
 export const DashboardUsers = async (req, res) => {
   try {
-    const user = await UserModel.find();
-    let totalUsers = user.length || 0;
-    let activeUser = user.filter((val) => val.status === "Active").length || 0;
+    const { month, year } = req.query;
+
+    const allUsers = await UserModel.find();
+    let totalUsers = allUsers.length || 0;
+    let activeUser =
+      allUsers.filter((val) => val.status === "Active").length || 0;
     let inactiveUser =
-      user.filter((val) => val.status === "Inactive").length || 0;
-    return res.status(200).json({ totalUsers, activeUser, inactiveUser });
+      allUsers.filter((val) => val.status === "Inactive").length || 0;
+
+    let monthUsers = [];
+    let monthActive = 0;
+    let monthInactive = 0;
+
+    if (month && year) {
+      const monthIndex =
+        new Date().toLocaleString("en-US", { month: "long" }) === month
+          ? new Date().getMonth()
+          : new Date(`${month} 1`).getMonth();
+      console.log("monthIndex", monthIndex);
+      monthUsers = allUsers.filter((user) => {
+        const createdmonth = new Date(user.createdAt).getMonth();
+        return createdmonth === monthIndex;
+      });
+      monthActive = monthUsers.filter((u) => u.status === "Active").length;
+      monthInactive = monthUsers.filter((u) => u.status === "Inactive").length;
+    }
+    return res.status(200).json({
+      totalUsers,
+      activeUser,
+      inactiveUser,
+      monthUsersCount: monthUsers.length || 0,
+      monthActive,
+      monthInactive,
+    });
   } catch (error) {
     console.log("DashboardUsers.error", error);
     return res.status(500).json({ message: "Internal Server Error" });
