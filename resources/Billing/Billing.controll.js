@@ -2,7 +2,6 @@ import mongoose from "mongoose";
 import {
   datewithMonth,
   shordataformate,
-  shortDateWithTime,
   timeFormat,
 } from "../../Utils/formatDateToIST .js";
 import Invoice from "../Plans/Invoice.js";
@@ -61,7 +60,7 @@ export const getBills = async (req, res) => {
     // Format result
     const getresult = getBills.map((val) => ({
       ...val.toObject(),
-      createdAt: shortDateWithTime(val.createdAt),
+      createdAt: timeFormat(val.createdAt),
       Amount: Number(val.Amount).toLocaleString(),
     }));
 
