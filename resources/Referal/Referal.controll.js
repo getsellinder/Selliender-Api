@@ -4,7 +4,7 @@ import UserModel from "../user/userModel.js";
 import Referal from "./Referal.model.js";
 
 export const ReferralPlan = async (req, res) => {
-  const {referralemail } = req.body;
+  const { referralemail } = req.body;
   const userId = req.user._id;
   try {
     const findUser = await UserModel.findById(userId);
@@ -58,12 +58,21 @@ export const countSearchlimit = async (req, res) => {
 
   try {
     const getUser = await UserModel.findById(id);
+  
 
     const getUserInvoice = await Invoice.findOne({ id: id }).sort({
       createdAt: -1,
     });
     if (!getUser) {
       return res.status(404).json({ message: "User not found" });
+    }
+    if (getUser.status === "Inactive") {
+      return res
+        .status(403)
+        .json({
+          message:
+            "Your account is suspended. Please contact the support team.",
+        });
     }
     if (!getUserInvoice) {
       return res.status(500).json({ message: "Invoice not found" });

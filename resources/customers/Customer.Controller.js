@@ -164,19 +164,119 @@ export const toggleStatus = async (req, res) => {
   }
 };
 
+
+
 // export const DashboardUsers = async (req, res) => {
 //   try {
-//     const user = await UserModel.find();
-//     let totalUsers = user.length || 0;
-//     let activeUser = user.filter((val) => val.status === "Active").length || 0;
+//     let { month, year } = req.query;
+
+//     const now = new Date();
+//     if (!month || !year) {
+//       month = now.toLocaleString("en-US", { month: "short" }); // "Jan"
+//       year = now.getFullYear();
+//     }
+
+//     const monthIndex = new Date(`${month} 1, ${year}`).getMonth();
+
+//     // ✅ Fetch users only once
+//     const allUsers = await UserModel.find();
+
+//     let totalUsers = allUsers.length || 0;
+//     let activeUser =
+//       allUsers.filter((val) => val.status === "Active").length || 0;
 //     let inactiveUser =
-//       user.filter((val) => val.status === "Inactive").length || 0;
-//     return res.status(200).json({ totalUsers, activeUser, inactiveUser });
+//       allUsers.filter((val) => val.status === "Inactive").length || 0;
+
+//     // ✅ Filter users for selected month
+//     const monthUsers = allUsers.filter((u) => {
+//       const d = new Date(u.createdAt);
+//       return d.getMonth() === monthIndex && d.getFullYear() == year;
+//     });
+
+//     const monthUsersCount = monthUsers.length;
+//     const monthActive = monthUsers.filter((u) => u.status === "Active").length;
+//     const monthInactive = monthUsers.filter(
+//       (u) => u.status === "Inactive"
+//     ).length;
+
+//     // ✅ Prepare DAILY graph arrays
+//     const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+
+//     const dailyRegistered = Array(daysInMonth).fill(0);
+//     const dailyInactive = Array(daysInMonth).fill(0);
+
+//     monthUsers.forEach((u) => {
+//       const day = new Date(u.createdAt).getDate() - 1;
+//       dailyRegistered[day]++;
+//       if (u.status === "Inactive") dailyInactive[day]++;
+//     });
+
+//     // ✅ Fetch monthly revenue from invoices
+//     const invoices = await UserModel.find({
+//       // status: "success",
+//       createdAt: {
+//         $gte: new Date(year, monthIndex, 1),
+//         $lte: new Date(year, monthIndex, daysInMonth, 23, 59, 59),
+//       },
+//     });
+
+//     const dailyRevenue = Array(daysInMonth).fill(0);
+//     invoices.forEach((inv) => {
+//       const day = new Date(inv.createdAt).getDate() - 1;
+//       dailyRevenue[day] += inv.Amount || 0;
+//     });
+//     const totalRevenue = invoices.reduce(
+//       (sum, inv) => sum + (inv.Amount || 0),
+//       0
+//     );
+//     const invoiceCountMap = {};
+//     invoices.forEach((inv) => {
+//       invoiceCountMap[inv.userId] = (invoiceCountMap[inv.userId] || 0) + 1;
+//     });
+
+//     // Users who purchased only once in this month = New users
+//     const newUsers = Object.entries(invoiceCountMap)
+//       .filter(([userId, count]) => count === 1)
+//       .map(([userId]) => userId);
+
+//     const newUsersCount = newUsers.length;
+
+//     // ✅ Daily new users for graph
+//     const dailyNewUsers = Array(daysInMonth).fill(0);
+//     invoices.forEach((inv) => {
+//       if (invoiceCountMap[inv.userId] === 1) {
+//         const day = new Date(inv.createdAt).getDate() - 1;
+//         dailyNewUsers[day]++;
+//       }
+//     });
+//     return res.status(200).json({
+//       selectedMonth: month,
+//       selectedYear: year,
+//       monthUsersCount,
+//       monthActive,
+//       monthInactive,
+//       totalRevenue,
+//       totalUsers,
+//       activeUser,
+//       inactiveUser,
+//       newUsersCount,
+//       chart: {
+//         labels: Array.from({ length: daysInMonth }, (_, i) => i + 1),
+//         datasets: [
+//           { label: "Registered Users", data: dailyRegistered, borderWidth: 2 },
+//           { label: "Suspended Users", data: dailyInactive, borderWidth: 2 },
+//           { label: "Revenue", data: dailyRevenue, borderWidth: 2 },
+//           { label: "New Users", data: dailyNewUsers, borderWidth: 2 },
+//         ],
+//       },
+//     });
 //   } catch (error) {
 //     console.log("DashboardUsers.error", error);
 //     return res.status(500).json({ message: "Internal Server Error" });
 //   }
 // };
+
+
 
 export const DashboardUsers = async (req, res) => {
   try {
@@ -184,22 +284,20 @@ export const DashboardUsers = async (req, res) => {
 
     const now = new Date();
     if (!month || !year) {
-      month = now.toLocaleString("en-US", { month: "short" }); // "Jan"
+      month = now.toLocaleString("en-US", { month: "short" });
       year = now.getFullYear();
     }
 
     const monthIndex = new Date(`${month} 1, ${year}`).getMonth();
 
-    // ✅ Fetch users only once
+    // ✅ Fetch all users
     const allUsers = await UserModel.find();
 
-    let totalUsers = allUsers.length || 0;
-    let activeUser =
-      allUsers.filter((val) => val.status === "Active").length || 0;
-    let inactiveUser =
-      allUsers.filter((val) => val.status === "Inactive").length || 0;
+    const totalUsers = allUsers.length;
+    const activeUser = allUsers.filter((u) => u.status === "Active").length;
+    const inactiveUser = allUsers.filter((u) => u.status === "Inactive").length;
 
-    // ✅ Filter users for selected month
+    // ✅ Users registered in selected month
     const monthUsers = allUsers.filter((u) => {
       const d = new Date(u.createdAt);
       return d.getMonth() === monthIndex && d.getFullYear() == year;
@@ -207,23 +305,26 @@ export const DashboardUsers = async (req, res) => {
 
     const monthUsersCount = monthUsers.length;
     const monthActive = monthUsers.filter((u) => u.status === "Active").length;
-    const monthInactive = monthUsers.filter(
-      (u) => u.status === "Inactive"
-    ).length;
+    const monthInactive = monthUsers.filter((u) => u.status === "Inactive").length;
 
-    // ✅ Prepare DAILY graph arrays
     const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
-
     const dailyRegistered = Array(daysInMonth).fill(0);
     const dailyInactive = Array(daysInMonth).fill(0);
+    const dailyNewUsers = Array(daysInMonth).fill(0); // ✅ New array
 
+    // ✅ Count daily registered & inactive users
     monthUsers.forEach((u) => {
       const day = new Date(u.createdAt).getDate() - 1;
       dailyRegistered[day]++;
+
       if (u.status === "Inactive") dailyInactive[day]++;
+      dailyNewUsers[day]++; 
     });
 
-    // ✅ Fetch monthly revenue from invoices
+    // ✅ New users count based on registration in that month
+    const newUsersCount = monthUsers.length;
+
+    // ✅ Monthly Revenue from invoices
     const invoices = await Invoice.find({
       status: "success",
       createdAt: {
@@ -237,30 +338,9 @@ export const DashboardUsers = async (req, res) => {
       const day = new Date(inv.createdAt).getDate() - 1;
       dailyRevenue[day] += inv.Amount || 0;
     });
-    const totalRevenue = invoices.reduce(
-      (sum, inv) => sum + (inv.Amount || 0),
-      0
-    );
-    const invoiceCountMap = {};
-    invoices.forEach((inv) => {
-      invoiceCountMap[inv.userId] = (invoiceCountMap[inv.userId] || 0) + 1;
-    });
 
-    // Users who purchased only once in this month = New users
-    const newUsers = Object.entries(invoiceCountMap)
-      .filter(([userId, count]) => count === 1)
-      .map(([userId]) => userId);
+    const totalRevenue = invoices.reduce((sum, inv) => sum + (inv.Amount || 0), 0);
 
-    const newUsersCount = newUsers.length;
-
-    // ✅ Daily new users for graph
-    const dailyNewUsers = Array(daysInMonth).fill(0);
-    invoices.forEach((inv) => {
-      if (invoiceCountMap[inv.userId] === 1) {
-        const day = new Date(inv.createdAt).getDate() - 1;
-        dailyNewUsers[day]++;
-      }
-    });
     return res.status(200).json({
       selectedMonth: month,
       selectedYear: year,
@@ -278,7 +358,7 @@ export const DashboardUsers = async (req, res) => {
           { label: "Registered Users", data: dailyRegistered, borderWidth: 2 },
           { label: "Suspended Users", data: dailyInactive, borderWidth: 2 },
           { label: "Revenue", data: dailyRevenue, borderWidth: 2 },
-          { label: "New Users", data: dailyNewUsers, borderWidth: 2 },
+          { label: "New Users", data: dailyNewUsers, borderWidth: 2 }, // ✅ Updated
         ],
       },
     });
