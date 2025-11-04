@@ -1,4 +1,4 @@
-import { timeFormat } from "../../Utils/formatDateToIST .js";
+import { shortDateWithTime, timeFormat } from "../../Utils/formatDateToIST .js";
 import UserModel from "../user/userModel.js";
 import LinkedinContent from "./LinkedinContent.model.js";
 import LinkedinPost from "./LinkedinPost.model.js";
@@ -517,8 +517,8 @@ export const getLinkedinAnalysisResult = async (req, res) => {
         const total = totalDocs.filter(u => u.LinkedinContentId).length;
         let data = result.map((val) => ({
             ...val.toObject(),
-            createdAt: timeFormat(val.createdAt),
-            updatedAt: timeFormat(val.updatedAt),
+            createdAt: shortDateWithTime(val.createdAt),
+            updatedAt: shortDateWithTime(val.updatedAt),
 
         }))
 
