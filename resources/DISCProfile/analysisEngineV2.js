@@ -507,19 +507,17 @@ function buildAnalysisResponse({ parsed, metrics, posts, profile, productPrice, 
 
   const confidenceScore = calculateConfidenceScore(metrics, posts.length);
 
+  // Personalization cues: normalize into an array of short bullets
   const personalizationSource = parsed.personalizationCues;
-  let personalizationCues;
-  if (Array.isArray(personalizationSource)) {
-    personalizationCues = personalizationSource.length > 0 ? personalizationSource : generateFallbackPersonalizationCues({ profile, productDescription: profile.productDescription || profile.product || productDescription, productPrice: productPrice || profile.productPrice || profile.productCost || null });
+  let personalizationCues = [];
+  if (Array.isArray(personalizationSource) && personalizationSource.length) {
+    personalizationCues = personalizationSource.slice(0, 12).map(s => String(s).trim()).filter(Boolean);
   } else if (typeof personalizationSource === "string" && personalizationSource.trim()) {
-    const segments = personalizationSource.split(/\n+/).map((item) => item.trim()).filter(Boolean);
-    personalizationCues = segments.length > 0 ? segments : generateFallbackPersonalizationCues({ profile, productDescription: profile.productDescription || profile.product || productDescription, productPrice: productPrice || profile.productPrice || profile.productCost || null });
-  } else {
-    personalizationCues = generateFallbackPersonalizationCues({ profile, productDescription: profile.productDescription || profile.product || productDescription, productPrice: productPrice || profile.productPrice || profile.productCost || null });
+    // split by lines or long sentence boundaries into bullets
+    personalizationCues = splitIntoBullets(personalizationSource).slice(0, 12);
   }
   if (personalizationCues.length < 4) {
-    const fallbackCues = generateFallbackPersonalizationCues({ profile, productDescription: profile.productDescription || profile.product || productDescription, productPrice: productPrice || profile.productPrice || profile.productCost || null });
-    personalizationCues = [...personalizationCues, ...fallbackCues].slice(0, 8);
+    personalizationCues = [...personalizationCues, ...generateFallbackPersonalizationCues({ profile, productDescription: profile.productDescription || profile.product || productDescription, productPrice: productPrice || profile.productPrice || profile.productCost || null })].slice(0, 8);
   }
 
   // Convert abbreviated DISC (D/I/S/C) to full-name display
@@ -543,12 +541,125 @@ function buildAnalysisResponse({ parsed, metrics, posts, profile, productPrice, 
 
   const finalTalkingPointsExpanded = ensureExpandedTalkingPoints(finalTalkingPoints, { profile, productDescription, productPrice });
 
+  // Remove repetitive long company/description mentions across large text fields
+  // Replace repeated occurrences after the first with a short reference
+  removeRepeatedCompanyDescription({ parsed, profile, finalTalkingPointsExpanded });
+
+  // Build quick summary for a one-page view
+  const quickSummary = buildQuickSummary({ profile, primaryAbbr, primaryPercentage, finalTalkingPointsExpanded, metrics, posts });
+
+  const actionableMetrics = buildActionableMetrics({ confidenceScore, postsCount: posts.length });
+
+  const recencyFlags = [];
+  const now = new Date();
+  const postDates = Array.isArray(posts)
+    ? posts
+        .map((post) => {
+          const value = post?.date || post?.createdAt || null;
+          if (!value) return null;
+          const parsed = new Date(value);
+          if (Number.isNaN(parsed.getTime())) return null;
+          return parsed;
+        })
+        .filter(Boolean)
+    : [];
+
+  if (postDates.length === 0) recencyFlags.push('Posts: No recent activity captured. Consider uploading fresh posts or verifying the prospect online.');
+  if (postDates.length > 0) {
+    const mostRecent = postDates.sort((a, b) => b.getTime() - a.getTime())[0];
+    const ageDays = Math.floor((now.getTime() - mostRecent.getTime()) / (1000 * 60 * 60 * 24));
+    if (ageDays > 45) recencyFlags.push(`Posts: Latest activity is ${ageDays} days old. Validate that priorities have not shifted.`);
+  }
+
+  const missingProfileFields = [];
+  if (!profile?.about) missingProfileFields.push('About section');
+  if (!profile?.experience || (Array.isArray(profile.experience) && profile.experience.length === 0)) missingProfileFields.push('Experience history');
+  if (!profile?.skills || (Array.isArray(profile.skills) && profile.skills.length === 0)) missingProfileFields.push('Skills list');
+  if (missingProfileFields.length) recencyFlags.push(`Profile: Missing ${missingProfileFields.join(', ')}. Ask the prospect or enrich the CRM before outreach.`);
+
+  if ((metrics.sampleQuality || 0) < 0.2) recencyFlags.push('Engagement: Post reactions/comments are low. Treat tone signals as directional only.');
+
+  // Build confidence warnings based on metrics
+  const confidenceWarnings = Array.isArray(parsed.confidence?.warnings) ? parsed.confidence.warnings.slice() : [];
+  if ((metrics.recency || 0) < 0.2) {
+    confidenceWarnings.push('Data recency is low: recent post activity is limited or older than 45 days. Verify up-to-date signals before assuming behavior.');
+  }
+  if ((metrics.sampleQuality || 0) < 0.2) {
+    confidenceWarnings.push('Sample quality is low: posts show minimal engagement which can reduce behavioral signal quality. Use early discovery to validate assumptions.');
+  }
+
+  const confidenceInterpretation = confidenceScore >= 70 ? 'High confidence' : confidenceScore >= 40 ? 'Moderate confidence' : 'Low confidence';
+
+  const openingScriptsNormalized = parsed.openingScripts || { linkedin_dm: [], email: [], phone: [], whatsapp: [] };
+
+  const reportAssessment = buildReportAssessment({
+    recencyFlags,
+    confidenceInterpretation,
+    confidenceScore,
+    personalizationCues,
+    talkingPoints: finalTalkingPointsExpanded,
+    openingScripts: openingScriptsNormalized,
+    actionableMetrics,
+    metrics
+  });
+
+  const preferenceSnapshot = buildPreferenceSnapshot({
+    primaryAbbr,
+    secondaryAbbr,
+    posts,
+    profile,
+    personalizationCues,
+    metrics,
+    parsed
+  });
+
+  // Build Probability to Purchase Analysis
+  const probabilityToPurchase = buildProbabilityToPurchase(
+    { dominantTrait: primaryStyle }, 
+    profile
+  );
+
+  // Build Common Ground & Shared Vision Analysis
+  const commonGroundAndSharedVision = buildCommonGroundAndSharedVision(profile);
+
+  // Build Confidence Explanation
+  const confidenceExplanation = buildConfidenceExplanation(metrics, posts, profile, confidenceScore, confidenceInterpretation);
+
+  // Build Executive Summary
+  const executiveSummary = buildExecutiveSummary(
+    profile, 
+    primaryAbbr, 
+    secondaryAbbr, 
+    confidenceScore, 
+    confidenceInterpretation, 
+    probabilityToPurchase, 
+    quickSummary
+  );
+
+  // Build Company Overview
+  const companyOverview = buildCompanyOverview(productDescription);
+
+  // Build Communication Strategy
+  const communicationStrategy = buildCommunicationStrategy(primaryAbbr, secondaryAbbr, profile);
+
+  // Build Next Steps (high-level actionable bullets)
+  const nextSteps = buildNextSteps(parsed, profile, posts, productDescription);
+
   return {
     executive: parsed.executiveSummary || `Approach ${profile.name || 'the prospect'} with focus on results and efficiency.`,
+    executiveSummary,
     starting: parsed.starting || {},
     linkedinPostsAnalyzed: posts.length,
     analysisGeneratedAt: new Date().toISOString(),
     analysisVersion: "v2",
+    quickSummary,
+    actionableMetrics,
+    dataRecency: {
+      recencyScore: safePercentage(metrics.recency),
+      sampleQualityScore: safePercentage(metrics.sampleQuality),
+      notes: confidenceWarnings.length ? confidenceWarnings : ['Data freshness and sample quality appear sufficient.'],
+      flags: recencyFlags
+    },
     personality: {
       disc: discDisplay,
       discBreakdown,
@@ -577,8 +688,12 @@ function buildAnalysisResponse({ parsed, metrics, posts, profile, productPrice, 
     },
   talkingPoints: finalTalkingPointsExpanded,
   personalizationCues,
-  openingScripts: parsed.openingScripts || { linkedin_dm: [], email: [], phone: [], whatsapp: [] },
-  objectionHandling: ensureObjectionResponsesLength(normalizeObjectionHandling({ existing: parsed.objectionHandling, profile, productDescription, productPrice: productPrice || profile.productPrice || profile.productCost || null }), { profile, productDescription, productPrice: productPrice || profile.productPrice || profile.productCost || null }),
+  openingScripts: openingScriptsNormalized,
+  objectionHandling: normalizeObjectionHandling({ existing: parsed.objectionHandling, profile, productDescription, productPrice: productPrice || profile.productPrice || profile.productCost || null }).map(item => ({
+    objection: item.objection,
+    recommendedResponse: item.response || '',
+    followUpTone: determineResponseTone(item.objection, item.response || '')
+  })),
     nextActions: Array.isArray(parsed.nextActions) ? parsed.nextActions : [],
     confidence: {
       score: confidenceScore,
@@ -589,8 +704,14 @@ function buildAnalysisResponse({ parsed, metrics, posts, profile, productPrice, 
         agreement: safePercentage(metrics.agreement),
         signalStrength: safePercentage(metrics.signalStrength)
       },
-      explanation: parsed.confidence?.explanation || `Confidence score of ${confidenceScore}% based on ${posts.length} posts analyzed.`,
-      warnings: parsed.confidence?.warnings || []
+      explanation: `Confidence score ${confidenceScore}% (${confidenceInterpretation}). ${posts.length === 0 ? 'No posts analyzed; rely on profile data.' : `${posts.length} posts analyzed with blended engagement.`}`,
+      warnings: confidenceWarnings,
+      interpretation: confidenceInterpretation,
+      legend: {
+        high: '70-100: High confidence — outreach guidance is well-supported by data.',
+        medium: '40-69: Moderate confidence — validate key assumptions with discovery.',
+        low: '0-39: Low confidence — treat recommendations as hypotheses and gather fresh inputs.'
+      }
     },
     dataSources: [
       `profile_${profile._id || 'manual'}`,
@@ -613,8 +734,125 @@ function buildAnalysisResponse({ parsed, metrics, posts, profile, productPrice, 
       dominantTopics: (Array.isArray(parsed.talkingPoints) ? parsed.talkingPoints : []).slice(0, 5).map(t => t.topic),
       writingTone: determineWritingTone(posts),
       rawRationale: parsed.rawRationale || "Analysis based on available profile and post data."
-    }
+    },
+    reportAssessment,
+    preferenceSnapshot,
+    probabilityToPurchase,
+    commonGroundAndSharedVision,
+    confidenceExplanation,
+    companyOverview,
+    communicationStrategy,
+    nextSteps
   };
+}
+
+// Split long text into short bullets using sentences and newlines
+function splitIntoBullets(text) {
+  if (!text) return [];
+  // Normalize whitespace
+  const t = String(text).replace(/\s+/g, ' ').trim();
+  // Try splitting by newlines first
+  const byLines = text.split(/\n+/).map(s => s.trim()).filter(Boolean);
+  if (byLines.length >= 3) return byLines.map(b => shortify(b));
+
+  // Otherwise split into sentences and make compact bullets
+  const sents = t.match(/[^\.\!\?]+[\.\!\?]?/g) || [t];
+  return sents.map(s => shortify(s)).filter(Boolean);
+
+  function shortify(s) {
+    const str = s.trim();
+    if (str.length > 240) return str.slice(0, 237).trim() + '...';
+    return str;
+  }
+}
+
+function buildQuickSummary({ profile, primaryAbbr, primaryPercentage, finalTalkingPointsExpanded, metrics, posts }) {
+  const top3 = (finalTalkingPointsExpanded || []).slice(0,3).map(tp => tp.topic || tp.title || (tp.whatToSay || '').split('\n')[0]).filter(Boolean);
+  const bestChannel = determineBestChannel(posts);
+  return {
+    who: `${profile.name || 'Unknown'}${profile.company ? ' — ' + profile.company : ''}${profile.title ? ' ('+profile.title+')' : ''}`,
+    primaryDISC: getDISCTypeName(primaryAbbr),
+    topTalkingPoints: top3,
+    bestOutreachChannel: bestChannel,
+    preferredTone: determineWritingTone(posts) || 'Balanced'
+  };
+}
+
+function determineBestChannel(posts) {
+  // Simple heuristic: if many short, social posts then LinkedIn, if long form then Email
+  if (!Array.isArray(posts) || posts.length === 0) return 'LinkedIn';
+  const avgLen = posts.reduce((a,p)=> a + ((p.content||p.text||'').length), 0) / posts.length;
+  const exclamations = posts.reduce((a,p)=> a + ((p.content||p.text||'').match(/!/g) || []).length, 0);
+  if (avgLen < 200 && exclamations > posts.length) return 'LinkedIn';
+  if (avgLen > 400) return 'Email';
+  return 'LinkedIn';
+}
+
+function buildActionableMetrics({ confidenceScore, postsCount }) {
+  const responseRateTarget = confidenceScore >= 70 ? '15-25%' : confidenceScore >= 50 ? '8-15%' : '3-8%';
+  const meetingRateTarget = confidenceScore >= 70 ? '4-8% (meetings per outreach)' : confidenceScore >= 50 ? '2-5%' : '1-2%';
+
+  // Return cadence as array of human-readable strings to match schema (followUpCadence: [String])
+  const followUpCadence = [
+    'Day 0: Connection/Intro (LinkedIn) — brief, personalized connection message',
+    'Day 1: Short value email — 1-2 sentence hook + CTA',
+    'Day 3: Social proof / content share — lightweight resource or case study',
+    'Day 7: Phone/meeting request — propose a specific 20-min working session',
+    'Day 14: Case study or ROI brief — send concise one-pager',
+    'Day 21: Reminder — short status-check and new data point',
+    'Day 30: Final offer or close — deadline or limited-time incentive'
+  ];
+
+  const engagementMilestones = [
+    'Connection accepted — measure: accepted_connections / outreach_attempts',
+    'Reply to first outreach — measure: replies / outreach_attempts',
+    'Scheduled working session — measure: meetings_scheduled / outreach_attempts',
+    'Shared ROI brief — measure: roi_briefs_sent',
+    'Internal champion created — measure: champion_confirmations'
+  ];
+
+  return {
+    responseRateTarget,
+    meetingRateTarget,
+    followUpCadence,
+    engagementMilestones
+  };
+}
+
+function removeRepeatedCompanyDescription({ parsed, profile, finalTalkingPointsExpanded }) {
+  try {
+    const companyDesc = (profile.about || '').trim();
+    if (!companyDesc || companyDesc.length < 60) return;
+    const shortRef = '(see company description above)';
+    const firstN = companyDesc.slice(0, 300);
+    let seen = 0;
+    // helper to replace after first occurrence
+    function replaceRepeated(text) {
+      if (!text || typeof text !== 'string') return text;
+      let out = text;
+      let idx = out.indexOf(firstN);
+      while (idx !== -1) {
+        if (seen === 0) {
+          // keep first occurrence
+          seen++;
+          idx = out.indexOf(firstN, idx + 1);
+          continue;
+        }
+        out = out.replace(firstN, shortRef);
+        idx = out.indexOf(firstN, idx + 1);
+      }
+      return out;
+    }
+
+    if (parsed.personalizationCues && typeof parsed.personalizationCues === 'string') parsed.personalizationCues = replaceRepeated(parsed.personalizationCues);
+    if (Array.isArray(parsed.openingScripts?.linkedin_dm)) parsed.openingScripts.linkedin_dm = parsed.openingScripts.linkedin_dm.map(s => replaceRepeated(s));
+    if (Array.isArray(parsed.openingScripts?.email)) parsed.openingScripts.email = parsed.openingScripts.email.map(e => (e && e.body) ? Object.assign({}, e, { body: replaceRepeated(e.body) }) : e);
+    if (Array.isArray(parsed.talkingPoints)) parsed.talkingPoints = parsed.talkingPoints.map(tp => (tp && tp.whatToSay) ? Object.assign({}, tp, { whatToSay: replaceRepeated(tp.whatToSay) }) : tp);
+    if (Array.isArray(finalTalkingPointsExpanded)) finalTalkingPointsExpanded.forEach(tp => { if (tp.whatToSay) tp.whatToSay = replaceRepeated(tp.whatToSay); });
+  } catch (e) {
+    // non-fatal
+    return;
+  }
 }
 
 function extractTopKeywords(posts, limit = 6) {
@@ -962,26 +1200,184 @@ function normalizeObjectionHandling({ existing, profile, productDescription, pro
   return Array.from(unique.values()).slice(0, 6);
 }
 
+function buildReportAssessment({ recencyFlags, confidenceInterpretation, confidenceScore, personalizationCues, talkingPoints, openingScripts, actionableMetrics, metrics }) {
+  const insightsStrong = Array.isArray(talkingPoints) && talkingPoints.length >= 4;
+
+  const linkedinCount = Array.isArray(openingScripts?.linkedin_dm) ? openingScripts.linkedin_dm.filter(Boolean).length : 0;
+  const phoneCount = Array.isArray(openingScripts?.phone) ? openingScripts.phone.filter(Boolean).length : 0;
+  const whatsappCount = Array.isArray(openingScripts?.whatsapp) ? openingScripts.whatsapp.filter(Boolean).length : 0;
+  const emailCount = Array.isArray(openingScripts?.email) ? openingScripts.email.filter((entry) => entry && (entry.subject || entry.body)).length : 0;
+  const totalScripts = linkedinCount + phoneCount + whatsappCount + emailCount;
+  const scriptQualityHigh = totalScripts >= 6;
+
+  const cueSet = new Set(Array.isArray(personalizationCues) ? personalizationCues.map((c) => String(c).toLowerCase()) : []);
+  const cueTotal = Array.isArray(personalizationCues) ? personalizationCues.length : 0;
+  const repetitionRatio = cueTotal === 0 ? 1 : cueSet.size / cueTotal;
+  const repetitionHigh = cueTotal > 0 && repetitionRatio < 0.75;
+
+  const dataFresh = (metrics.recency || 0) >= 0.45 && (metrics.sampleQuality || 0) >= 0.35 && (!recencyFlags || recencyFlags.length === 0);
+
+  const cadencePresent = Array.isArray(actionableMetrics?.followUpCadence) && actionableMetrics.followUpCadence.length >= 5;
+
+  const rows = [
+    {
+      aspect: 'Prospect insights',
+      assessment: insightsStrong ? 'Excellent' : 'Needs enrichment',
+      suggestedAction: insightsStrong ? 'Keep' : 'Add 1-2 role-specific insights from recent wins.'
+    },
+    {
+      aspect: 'Outreach scripts',
+      assessment: scriptQualityHigh ? 'Highly useful' : 'Incomplete',
+      suggestedAction: scriptQualityHigh ? 'Keep' : 'Add more channel variants with optional CTAs.'
+    },
+    {
+      aspect: 'Repetition',
+      assessment: repetitionHigh ? 'Too high' : 'Controlled',
+      suggestedAction: repetitionHigh ? 'Reduce repeated cues; inject fresh proof points.' : 'Continue rotating social proof elements.'
+    },
+    {
+      aspect: 'Data freshness',
+      assessment: dataFresh ? 'Current' : 'Unclear',
+      suggestedAction: dataFresh ? 'Monitor quarterly for shifts.' : 'Refresh stale sources or flag missing sections.'
+    },
+    {
+      aspect: 'Report design',
+      assessment: cadencePresent ? 'Structured' : 'Dense',
+      suggestedAction: cadencePresent ? 'Keep summary + cadence handy before calls.' : 'Add a 1-page quick summary and clear follow-up cadence.'
+    },
+    {
+      aspect: 'Confidence metrics',
+      assessment: `${confidenceInterpretation} (${confidenceScore}%)`,
+      suggestedAction: confidenceInterpretation === 'High confidence' ? 'Move to execution.' : 'Clarify scoring in discovery and capture fresh signals.'
+    }
+  ];
+
+  const finalVerdict = dataFresh && !repetitionHigh && scriptQualityHigh
+    ? 'The report is field-ready. Reps can use it directly before live outreach while monitoring data freshness quarterly.'
+    : 'With minor cleanup (refresh stale data, trim repetitive cues, and surface the one-page summary), it becomes an ideal sales-enablement brief for live calls.';
+
+  return {
+    overview: rows,
+    finalVerdict
+  };
+}
+
+function buildPreferenceSnapshot({ primaryAbbr, secondaryAbbr, posts, profile, personalizationCues, metrics, parsed }) {
+  const primaryLikes = {
+    D: ['Innovation that produces measurable wins', 'Decisive execution paths', 'Clear ROI benchmarks', 'Momentum-focused collaboration'],
+    I: ['Story-driven wins with public recognition', 'Collaborative working sessions', 'Social proof and community impact', 'Positive, forward-looking tone'],
+    S: ['Trust-building routines and reliable partners', 'Step-by-step adoption plans', 'Supportive team cultures', 'Long-term relationship focus'],
+    C: ['Data-backed case studies', 'Process clarity with risk controls', 'Structured onboarding', 'Clean documentation and proofs']
+  };
+  const primaryDislikes = {
+    D: ['Vague or unquantified proposals', 'Slow decision cycles', 'Over-engineered slide decks without next steps', 'Lack of accountability on owners'],
+    I: ['Overly technical or dry messaging', 'Minimal collaboration opportunities', 'Negative framing without solutions', 'Rigid scripts lacking human tone'],
+    S: ['Aggressive disruption without guardrails', 'Chaotic rollout plans', 'Rapid changes that ignore team impact', 'Transactional communication'],
+    C: ['Hand-wavy claims without data', 'Untested processes', 'Unclear metrics ownership', 'Last-minute scope changes']
+  };
+
+  const secondaryLikes = {
+    D: ['Bold product vision', 'Competitive positioning'],
+    I: ['Peer-led storytelling', 'Community amplification'],
+    S: ['Consistency across functions', 'Predictable communication cadence'],
+    C: ['Compliance proof points', 'Detailed feature walkthroughs']
+  };
+
+  const secondaryDislikes = {
+    D: ['Micro-management', 'Decision drift'],
+    I: ['Silence after outreach', 'Overly formal tone'],
+    S: ['Unresolved conflicts', 'Overwhelming change requests'],
+    C: ['Missing documentation', 'Loose change-control']
+  };
+
+  const likes = new Set(primaryLikes[primaryAbbr] || []);
+  (secondaryLikes[secondaryAbbr] || []).forEach((item) => likes.add(item));
+
+  const dislikes = new Set(primaryDislikes[primaryAbbr] || []);
+  (secondaryDislikes[secondaryAbbr] || []).forEach((item) => dislikes.add(item));
+
+  const keywords = extractTopKeywords(posts, 6);
+  const sustainabilityHit = keywords.some((word) => ['sustainability', 'climate', 'esg'].includes(word));
+  if (sustainabilityHit) likes.add('Sustainability-focused initiatives with measurable outcomes');
+
+  const educationHit = keywords.some((word) => ['edu', 'education', 'learning'].includes(word));
+  if (educationHit) likes.add('Programs that elevate learning impact for stakeholders');
+
+  const personalizationHit = Array.isArray(personalizationCues) && personalizationCues.some((cue) => String(cue).toLowerCase().includes('mentorship'));
+  if (personalizationHit) likes.add('Mentorship-led team development');
+
+  if ((metrics.sampleQuality || 0) < 0.3) dislikes.add('Low-engagement messaging that cannot prove traction');
+
+  const salesInsight = buildPreferenceSalesInsight({ primaryAbbr, secondaryAbbr, sustainabilityHit, educationHit, personalizationHit, metrics, parsed });
+
+  return {
+    likes: Array.from(likes).slice(0, 8),
+    dislikes: Array.from(dislikes).slice(0, 8),
+    salesInsight
+  };
+}
+
+function buildPreferenceSalesInsight({ primaryAbbr, secondaryAbbr, sustainabilityHit, educationHit, personalizationHit, metrics, parsed }) {
+  const traitLabel = `${getDISCTypeName(primaryAbbr)}${secondaryAbbr ? '/' + getDISCTypeName(secondaryAbbr) : ''}`;
+  const anchors = [];
+  if (sustainabilityHit) anchors.push('sustainability outcomes');
+  if (educationHit) anchors.push('education impact');
+  if (personalizationHit) anchors.push('mentorship culture');
+  const anchorText = anchors.length ? anchors.join(', ') : 'core growth metrics they already champion';
+  const certainty = (metrics.recency || 0) >= 0.45 ? 'Lean in with confidence on' : 'Lead with caution while validating';
+  const base = `${certainty} ${traitLabel.toLowerCase()} priorities: tie value stories to ${anchorText}.`;
+  const cue = ' Reinforce measurable outcomes and provide a crisp next milestone they can sponsor.';
+  return base + cue;
+}
+
+function determineResponseTone(objection, response) {
+  const objectionLower = (objection || '').toLowerCase();
+  const responseLower = (response || '').toLowerCase();
+  
+  if (objectionLower.includes('vendor') || objectionLower.includes('existing') || objectionLower.includes('already have')) {
+    return 'Confident, collaborative';
+  }
+  if (objectionLower.includes('budget') || objectionLower.includes('quarter') || objectionLower.includes('timing')) {
+    return 'Reassuring';
+  }
+  if (objectionLower.includes('roi') || objectionLower.includes('proof') || objectionLower.includes('evidence')) {
+    return 'Data-backed';
+  }
+  if (objectionLower.includes('stakeholder') || objectionLower.includes('buy-in') || objectionLower.includes('approval')) {
+    return 'Supportive';
+  }
+  if (responseLower.includes('understand') || responseLower.includes('totally fair')) {
+    return 'Empathetic';
+  }
+  if (responseLower.includes('data') || responseLower.includes('case study') || responseLower.includes('%')) {
+    return 'Data-backed';
+  }
+  if (responseLower.includes('pilot') || responseLower.includes('14-day') || responseLower.includes('trial')) {
+    return 'Reassuring';
+  }
+  
+  return 'Professional';
+}
+
 function generateFallbackObjectionHandling({ profile, productDescription, productPrice }) {
   const role = profile?.title || 'I';
   const company = profile?.company || 'our team';
-  const product = productDescription || profile?.productDescription || profile?.product || 'the solution';
   const price = productPrice ? formatProductPrice(productPrice) : null;
   return [
     {
       objection: 'We already have a tool for this',
       rationale: `${role} likely owns an existing vendor and fears duplicating spend or change fatigue at ${company}.`,
-      response: `Totally fair. Most teams we help started with overlapping tools. We map ${product} against your current stack, show the duplicate workflows we remove, and document the exit plan so your net cost${price ? ` stays near ${price}` : ''} is ROI-positive.`
+      response: `Totally fair. Most teams we help started with overlapping tools. We map our solution against your current stack, show the duplicate workflows we remove, and document the exit plan so your net cost${price ? ` stays near ${price}` : ''} is ROI-positive.`
     },
     {
       objection: 'Timing is tough right now',
       rationale: `${role} is juggling launches and wants to avoid adding lift mid-quarter.`,
-      response: `Understood. We scope a 14-day pilot, handle 80% of the lift, and pause if the milestones slip. That way you de-risk timing while still proving ${product} with minimal effort.`
+      response: `Understood. We scope a 14-day pilot, handle 80% of the lift, and pause if the milestones slip. That way you de-risk timing while still proving value with minimal effort.`
     },
     {
       objection: 'Budget is locked',
       rationale: `${role} needs a crisp business case tied to current budgeting cycles.`,
-      response: `Makes sense. We outline which existing spend ${product} consolidates, surface a cost-neutral option${price ? ` near ${price}` : ''}, and equip you with the quick ROI brief finance expects.`
+      response: `Makes sense. We outline which existing spend our solution consolidates, surface a cost-neutral option${price ? ` near ${price}` : ''}, and equip you with the quick ROI brief finance expects.`
     },
     {
       objection: 'Need stakeholder buy-in first',
@@ -991,7 +1387,7 @@ function generateFallbackObjectionHandling({ profile, productDescription, produc
     {
       objection: 'Not convinced on ROI yet',
       rationale: `${role} wants proof tied to their KPIs before advocating internally.`,
-      response: `We will bring metric-level benchmarks, share a customer intro, and build a forecast with your assumptions so you see exactly when ${product} hits break-even.`
+      response: `We will bring metric-level benchmarks, share a customer intro, and build a forecast with your assumptions so you see exactly when the solution hits break-even.`
     }
   ];
 }
@@ -1009,7 +1405,6 @@ function ensureObjectionResponsesLength(list, { profile, productDescription, pro
       return out;
     }
 
-    const product = productDescription || profile?.productDescription || profile?.product || 'the solution';
     const price = productPrice ? formatProductPrice(productPrice) : null;
     const extras = [
       `I understand budget and timing are important; we design our approach to deliver clear ROI with minimal disruption.`,
@@ -1028,4 +1423,882 @@ function ensureObjectionResponsesLength(list, { profile, productDescription, pro
     out.response = resp;
     return out;
   }).slice(0, 6);
+}
+
+function buildProbabilityToPurchase(discData, linkedinData) {
+  const factors = [];
+  let totalScore = 0;
+  let maxScore = 0;
+
+  // Decision Authority Analysis
+  const authorityScore = determineAuthorityScore(linkedinData);
+  factors.push({
+    factor: 'Decision Authority',
+    influence: authorityScore.level,
+    impact: authorityScore.description
+  });
+  totalScore += authorityScore.score;
+  maxScore += 5;
+
+  // Budget Control Analysis  
+  const budgetScore = determineBudgetControl(linkedinData, discData);
+  factors.push({
+    factor: 'Budget Control',
+    influence: budgetScore.level,
+    impact: budgetScore.description
+  });
+  totalScore += budgetScore.score;
+  maxScore += 5;
+
+  // Product Alignment Analysis
+  const alignmentScore = determineProductAlignment(linkedinData);
+  factors.push({
+    factor: 'Product Alignment',
+    influence: alignmentScore.level,
+    impact: alignmentScore.description
+  });
+  totalScore += alignmentScore.score;
+  maxScore += 5;
+
+  // Existing Vendor Ties Analysis
+  const vendorScore = determineVendorTies(linkedinData);
+  factors.push({
+    factor: 'Existing Vendor Ties',
+    influence: vendorScore.level,
+    impact: vendorScore.description
+  });
+  totalScore += vendorScore.score;
+  maxScore += 5;
+
+  // Openness to New Ideas Analysis
+  const opennessScore = determineOpenness(discData, linkedinData);
+  factors.push({
+    factor: 'Openness to New Ideas',
+    influence: opennessScore.level,
+    impact: opennessScore.description
+  });
+  totalScore += opennessScore.score;
+  maxScore += 5;
+
+  // Calculate probability percentage
+  const probabilityPercentage = Math.round((totalScore / maxScore) * 100);
+  
+  // Determine buyer likelihood category
+  let buyerCategory;
+  let outcomeDescription;
+  
+  if (probabilityPercentage >= 75) {
+    buyerCategory = 'Highly Likely Buyer';
+    outcomeDescription = 'High authority and strong alignment suggest excellent purchase probability';
+  } else if (probabilityPercentage >= 60) {
+    buyerCategory = 'Likely Buyer';
+    outcomeDescription = 'Good potential with some factors requiring attention';
+  } else if (probabilityPercentage >= 40) {
+    buyerCategory = 'Moderate Potential';
+    outcomeDescription = 'Mixed signals requiring strategic approach';
+  } else {
+    buyerCategory = 'Low Probability';
+    outcomeDescription = 'Significant barriers to purchase identified';
+  }
+
+  // Generate personality-based reasoning
+  const personalityReasoning = generatePersonalityReasoning(discData, linkedinData);
+
+  return {
+    factors,
+    predictedOutcome: {
+      percentage: probabilityPercentage,
+      category: buyerCategory,
+      description: outcomeDescription
+    },
+    reasoning: personalityReasoning
+  };
+}
+
+function determineAuthorityScore(linkedinData) {
+  const position = linkedinData.current_position?.title?.toLowerCase() || '';
+  const company = linkedinData.current_position?.company?.toLowerCase() || '';
+  
+  if (position.includes('ceo') || position.includes('founder') || position.includes('president')) {
+    return { score: 5, level: 'High', description: 'Executive decision-making authority' };
+  } else if (position.includes('director') || position.includes('vp') || position.includes('head of')) {
+    return { score: 4, level: 'High', description: 'Senior leadership with decision influence' };
+  } else if (position.includes('manager') || position.includes('lead')) {
+    return { score: 3, level: 'Medium', description: 'Management level with approval requirements' };
+  } else {
+    return { score: 2, level: 'Low', description: 'Limited decision-making authority' };
+  }
+}
+
+function determineBudgetControl(linkedinData, discData) {
+  const position = linkedinData.current_position?.title?.toLowerCase() || '';
+  const dominantTrait = discData.dominantTrait?.toLowerCase() || '';
+  
+  let score = 2;
+  let level = 'Low';
+  let description = 'Limited budget influence';
+  
+  if (position.includes('cfo') || position.includes('finance') || position.includes('budget')) {
+    score = 5;
+    level = 'High';
+    description = 'Direct control over financial decisions';
+  } else if (position.includes('director') || position.includes('vp')) {
+    score = 4;
+    level = 'High';
+    description = 'Manages departmental budgets and investments';
+  } else if (dominantTrait === 'dominance' && position.includes('manager')) {
+    score = 3;
+    level = 'Medium';
+    description = 'Influence over team and project budgets';
+  }
+  
+  return { score, level, description };
+}
+
+function determineProductAlignment(linkedinData) {
+  const position = linkedinData.current_position?.title?.toLowerCase() || '';
+  const company = linkedinData.current_position?.company?.toLowerCase() || '';
+  const experience = linkedinData.experience || [];
+  
+  let alignmentKeywords = ['technology', 'digital', 'innovation', 'ai', 'software', 'saas', 'tech'];
+  let hasAlignment = false;
+  let score = 2;
+  
+  // Check current role alignment
+  if (alignmentKeywords.some(keyword => position.includes(keyword))) {
+    hasAlignment = true;
+    score = 4;
+  }
+  
+  // Check company alignment
+  if (alignmentKeywords.some(keyword => company.includes(keyword))) {
+    hasAlignment = true;
+    score = Math.max(score, 3);
+  }
+  
+  // Check experience alignment
+  const techExperience = experience.filter(exp => 
+    alignmentKeywords.some(keyword => 
+      exp.title?.toLowerCase().includes(keyword) || 
+      exp.company?.toLowerCase().includes(keyword)
+    )
+  );
+  
+  if (techExperience.length >= 2) {
+    score = 5;
+    return { score, level: 'Strong', description: 'Extensive technology background aligns with solution needs' };
+  } else if (hasAlignment) {
+    return { score, level: 'Medium', description: 'Some alignment with technology and innovation focus' };
+  } else {
+    return { score: 2, level: 'Low', description: 'Limited alignment with technology solutions' };
+  }
+}
+
+function determineVendorTies(linkedinData) {
+  const experience = linkedinData.experience || [];
+  const currentCompany = linkedinData.current_position?.company?.toLowerCase() || '';
+  
+  // Look for indicators of vendor relationships
+  const hasLongTenure = experience.some(exp => {
+    const duration = exp.duration || '';
+    return duration.includes('year') && parseInt(duration) >= 5;
+  });
+  
+  const hasVendorExperience = experience.some(exp => 
+    exp.company?.toLowerCase().includes('microsoft') || 
+    exp.company?.toLowerCase().includes('oracle') ||
+    exp.company?.toLowerCase().includes('salesforce') ||
+    exp.company?.toLowerCase().includes('ibm')
+  );
+  
+  if (hasVendorExperience && hasLongTenure) {
+    return { score: 2, level: 'High', description: 'Strong existing vendor relationships may create switching barriers' };
+  } else if (hasLongTenure) {
+    return { score: 3, level: 'Medium', description: 'Long-standing partnerships may slow onboarding process' };
+  } else {
+    return { score: 4, level: 'Low', description: 'Flexible vendor relationships support new partnerships' };
+  }
+}
+
+function determineOpenness(discData, linkedinData) {
+  const dominantTrait = discData.dominantTrait?.toLowerCase() || '';
+  const position = linkedinData.current_position?.title?.toLowerCase() || '';
+  const experience = linkedinData.experience || [];
+  
+  let score = 3;
+  let level = 'Medium';
+  let description = 'Moderate openness to new solutions';
+  
+  // High openness indicators
+  if (dominantTrait === 'influence' || dominantTrait === 'dominance') {
+    score = 4;
+    level = 'High';
+    description = 'Personality type embraces innovation and new opportunities';
+  }
+  
+  // Position-based openness
+  if (position.includes('innovation') || position.includes('strategy') || position.includes('growth')) {
+    score = 5;
+    level = 'High';
+    description = 'Role focuses on innovation and emerging technologies';
+  }
+  
+  // Experience-based openness
+  const diverseExperience = experience.length >= 3 && 
+    new Set(experience.map(exp => exp.company)).size >= 3;
+  
+  if (diverseExperience) {
+    score = Math.max(score, 4);
+    level = 'High';
+    description = 'Diverse experience indicates openness to change and collaboration';
+  }
+  
+  return { score, level, description };
+}
+
+function generatePersonalityReasoning(discData, linkedinData) {
+  const dominantTrait = discData.dominantTrait?.toLowerCase() || '';
+  const position = linkedinData.current_position?.title?.toLowerCase() || '';
+  
+  let reasoning = '';
+  
+  switch(dominantTrait) {
+    case 'dominance':
+      reasoning = 'High-drive personality values results and efficiency, but requires clear ROI demonstration and quick implementation timelines.';
+      break;
+    case 'influence':
+      reasoning = 'People-focused approach values collaboration and innovation, but needs peer validation and social proof for decision confidence.';
+      break;
+    case 'steadiness':
+      reasoning = 'Stability-oriented personality prefers proven solutions and gradual implementation, requiring trust-building and risk mitigation.';
+      break;
+    case 'conscientiousness':
+      reasoning = 'Detail-oriented approach demands thorough evaluation and comprehensive documentation before committing to new solutions.';
+      break;
+    default:
+      reasoning = 'Personality profile suggests balanced approach to decision-making with focus on both results and relationships.';
+  }
+  
+  return reasoning;
+}
+
+function buildCommonGroundAndSharedVision(linkedinData) {
+  const areas = [];
+  
+  // Extract key information from profile
+  const position = linkedinData.current_position?.title?.toLowerCase() || '';
+  const company = linkedinData.current_position?.company?.toLowerCase() || '';
+  const about = linkedinData.about?.toLowerCase() || '';
+  const experience = linkedinData.experience || [];
+  
+  // Innovation Approach Analysis
+  const hasInnovationFocus = position.includes('innovation') || 
+                           position.includes('technology') || 
+                           position.includes('digital') ||
+                           about.includes('innovation') ||
+                           about.includes('technology');
+  
+  if (hasInnovationFocus) {
+    areas.push({
+      area: 'Innovation Approach',
+      commonality: `Both ${company || 'the organization'} and modern solutions prioritize scalable technology approaches for measurable impact.`
+    });
+  }
+  
+  // Sustainability Vision Analysis
+  const hasSustainabilityFocus = about.includes('sustainability') ||
+                               about.includes('environment') ||
+                               about.includes('green') ||
+                               about.includes('climate') ||
+                               position.includes('sustainability');
+  
+  if (hasSustainabilityFocus) {
+    areas.push({
+      area: 'Sustainability Vision',
+      commonality: 'Shared focus on responsible technology development and environmental consciousness.'
+    });
+  }
+  
+  // Education & Growth Analysis
+  const hasEducationFocus = about.includes('education') ||
+                          about.includes('learning') ||
+                          about.includes('development') ||
+                          about.includes('training') ||
+                          position.includes('education');
+  
+  if (hasEducationFocus) {
+    areas.push({
+      area: 'Education & Growth',
+      commonality: 'Both support continuous learning and professional development enablement.'
+    });
+  }
+  
+  // Leadership & Culture Analysis
+  const hasLeadershipRole = position.includes('ceo') ||
+                          position.includes('president') ||
+                          position.includes('director') ||
+                          position.includes('head') ||
+                          position.includes('manager');
+  
+  if (hasLeadershipRole) {
+    areas.push({
+      area: 'Leadership Culture',
+      commonality: 'Both value strategic execution with focus on long-term partnerships and results.'
+    });
+  }
+  
+  // Industry Expertise Analysis
+  const industryKeywords = ['financial', 'healthcare', 'technology', 'manufacturing', 'retail', 'consulting'];
+  const matchingIndustry = industryKeywords.find(keyword => 
+    company.includes(keyword) || position.includes(keyword) || about.includes(keyword)
+  );
+  
+  if (matchingIndustry) {
+    areas.push({
+      area: 'Industry Expertise',
+      commonality: `Deep ${matchingIndustry} sector experience creates natural alignment with solution requirements.`
+    });
+  }
+  
+  // Fallback areas if no specific matches found
+  if (areas.length === 0) {
+    areas.push(
+      {
+        area: 'Professional Excellence',
+        commonality: 'Both prioritize delivering exceptional results and maintaining high professional standards.'
+      },
+      {
+        area: 'Solution Focus',
+        commonality: 'Shared commitment to finding practical solutions that drive measurable business outcomes.'
+      }
+    );
+  }
+  
+  // Generate sales insight based on the commonalities found
+  const salesInsight = generateCommonGroundSalesInsight(areas, company || 'their organization');
+  
+  return {
+    areas,
+    salesInsight
+  };
+}
+
+function generateCommonGroundSalesInsight(areas, companyName) {
+  if (areas.length === 0) return 'Focus on shared professional values and solution-oriented mindset to build rapport.';
+  
+  const primaryArea = areas[0];
+  
+  let insight = 'Use this overlap to create emotional resonance. Example:\n';
+  
+  switch(primaryArea.area) {
+    case 'Innovation Approach':
+      insight += `"Like ${companyName}'s focus on innovation, we share the principle that technology should drive measurable impact and scalable results."`;
+      break;
+    case 'Sustainability Vision':
+      insight += `"Similar to ${companyName}'s sustainability initiatives, we're committed to responsible practices that support long-term environmental goals."`;
+      break;
+    case 'Education & Growth':
+      insight += `"Just as ${companyName} invests in learning and development, we believe in empowering teams through knowledge-driven insights and continuous improvement."`;
+      break;
+    case 'Leadership Culture':
+      insight += `"Like ${companyName}'s leadership approach, we focus on strategic execution and building partnerships that deliver lasting value."`;
+      break;
+    case 'Industry Expertise':
+      insight += `"Given ${companyName}'s deep industry expertise, we understand the unique challenges and opportunities in your sector."`;
+      break;
+    default:
+      insight += `"Like ${companyName}, we're built on the foundation of delivering exceptional results through practical, solution-focused approaches."`;
+  }
+  
+  return insight;
+}
+
+function buildConfidenceExplanation(metrics, posts, profile, existingConfidenceScore, existingConfidenceInterpretation) {
+  const parameters = [];
+  
+  // Completeness Parameter
+  const completenessScore = safePercentage(metrics.completeness);
+  const completenessReasoning = getCompletenessReasoning(profile, completenessScore);
+  parameters.push({
+    parameter: 'Completeness',
+    score: `${completenessScore}%`,
+    reasoning: completenessReasoning
+  });
+  
+  // Agreement Parameter  
+  const agreementScore = safePercentage(metrics.agreement);
+  const agreementReasoning = getAgreementReasoning(agreementScore);
+  parameters.push({
+    parameter: 'Agreement',
+    score: `${agreementScore}%`,
+    reasoning: agreementReasoning
+  });
+  
+  // Recency Parameter
+  const recencyScore = safePercentage(metrics.recency);
+  const recencyReasoning = getRecencyReasoning(posts, recencyScore);
+  parameters.push({
+    parameter: 'Recency',
+    score: `${recencyScore}%`,
+    reasoning: recencyReasoning
+  });
+  
+  // Signal Strength Parameter
+  const signalStrengthScore = safePercentage(metrics.signalStrength);
+  const signalStrengthReasoning = getSignalStrengthReasoning(posts, signalStrengthScore);
+  parameters.push({
+    parameter: 'Signal Strength',
+    score: `${signalStrengthScore}%`,
+    reasoning: signalStrengthReasoning
+  });
+  
+  // Sample Quality Parameter
+  const sampleQualityScore = safePercentage(metrics.sampleQuality);
+  const sampleQualityReasoning = getSampleQualityReasoning(posts, sampleQualityScore);
+  parameters.push({
+    parameter: 'Sample Quality',
+    score: `${sampleQualityScore}%`,
+    reasoning: sampleQualityReasoning
+  });
+  
+  // Use existing confidence score instead of recalculating
+  const overallScore = existingConfidenceScore;
+  const overallCategory = getConfidenceCategory(overallScore);
+  const overallReasoning = getOverallConfidenceReasoning(overallScore, overallCategory);
+  
+  // Generate interpretation using existing confidence score
+  const interpretation = generateConfidenceInterpretation(overallScore, overallCategory, parameters);
+  
+  return {
+    parameters,
+    overallConfidence: {
+      score: overallScore,
+      category: overallCategory,
+      reasoning: overallReasoning
+    },
+    interpretation
+  };
+}
+
+function getCompletenessReasoning(profile, score) {
+  if (score >= 90) return 'Full professional and activity data identified';
+  if (score >= 70) return 'Most professional data available with minor gaps';
+  if (score >= 50) return 'Moderate data completeness with some missing elements';
+  return 'Limited profile data available for analysis';
+}
+
+function getAgreementReasoning(score) {
+  if (score >= 80) return 'Behavioral patterns strongly align with DISC mapping';
+  if (score >= 60) return 'Behavioral patterns align with DISC mapping';
+  if (score >= 40) return 'Moderate alignment between behavior and DISC traits';
+  return 'Limited behavioral alignment with DISC assessment';
+}
+
+function getRecencyReasoning(posts, score) {
+  if (score >= 80) return 'Recent activity within 30 days indicates current behavioral patterns';
+  if (score >= 60) return 'Activity within 2 months shows recent engagement patterns';
+  if (score >= 40) return 'Profile updated within 6 months';
+  if (score >= 20) return 'Activity data is 6-12 months old, may need verification';
+  return 'Limited recent activity data available';
+}
+
+function getSignalStrengthReasoning(posts, score) {
+  if (score >= 80) return 'Strong, consistent communication tone across multiple channels';
+  if (score >= 60) return 'Consistent communication tone across channels';
+  if (score >= 40) return 'Moderate signal consistency with some variation';
+  return 'Limited or inconsistent communication signals';
+}
+
+function getSampleQualityReasoning(posts, score) {
+  const engagementLevel = calculateAvgEngagement(posts);
+  
+  if (score >= 80) return 'High-quality content with strong engagement and depth';
+  if (score >= 60) return 'Good quality posts with moderate engagement levels';
+  if (score >= 40) return 'Basic content quality with limited engagement data';
+  if (posts.length > 0) return 'Limited qualitative content or low engagement signals';
+  return 'Limited qualitative interviews or media signals';
+}
+
+function getConfidenceCategory(score) {
+  if (score >= 80) return 'High';
+  if (score >= 60) return 'Moderate';
+  if (score >= 40) return 'Fair';
+  return 'Low';
+}
+
+function getOverallConfidenceReasoning(score, category) {
+  switch(category) {
+    case 'High':
+      return 'Reliable for outreach personalization and tone matching';
+    case 'Moderate':
+      return 'Good foundation for outreach with some verification recommended';
+    case 'Fair':
+      return 'Basic insights available, additional discovery needed';
+    default:
+      return 'Limited confidence, extensive validation required';
+  }
+}
+
+function generateConfidenceInterpretation(score, category, parameters) {
+  let interpretation = `A confidence score of ${score} indicates ${category.toLowerCase()} reliability in personality and engagement insights.`;
+  
+  // Identify areas of concern
+  const lowScoreParams = parameters.filter(p => parseInt(p.score) < 50);
+  
+  if (lowScoreParams.length > 0) {
+    const concerns = lowScoreParams.map(p => p.parameter.toLowerCase()).join(' and ');
+    interpretation += ` Minor uncertainty arises from ${concerns}, so verifying the latest initiatives before outreach is recommended.`;
+  } else if (score >= 80) {
+    interpretation += ' High confidence enables direct personalization without additional verification.';
+  } else {
+    interpretation += ' Moderate confidence supports targeted outreach with standard validation practices.';
+  }
+  
+  return interpretation;
+}
+
+function buildExecutiveSummary(profile, primaryAbbr, secondaryAbbr, confidenceScore, confidenceInterpretation, probabilityToPurchase, quickSummary) {
+  // Determine company type based on profile information
+  const companyType = determineCompanyType(profile);
+  
+  // Get confidence category
+  const confidenceCategory = confidenceScore >= 70 ? 'High Confidence' : confidenceScore >= 40 ? 'Moderate Confidence' : 'Low Confidence';
+  
+  // Get purchase probability details
+  const purchasePercentage = probabilityToPurchase?.predictedOutcome?.percentage || 0;
+  const purchaseCategory = probabilityToPurchase?.predictedOutcome?.category || 'Unknown';
+  
+  // Determine communication tone based on DISC type
+  const communicationTone = determineCommunicationTone(primaryAbbr, secondaryAbbr);
+  
+  // Get best outreach channels from quick summary or determine from DISC
+  const bestChannels = quickSummary?.bestOutreachChannel ? 
+    getBestOutreachChannels(quickSummary.bestOutreachChannel) : 
+    getBestOutreachChannelsFromDISC(primaryAbbr);
+  
+  // Generate next step recommendation
+  const nextStep = generateNextStepRecommendation(primaryAbbr, bestChannels);
+  
+  return {
+    profileName: profile.name || 'Unknown',
+    title: profile.current_position?.title || profile.title || 'Unknown',
+    companyType: companyType,
+    primaryDISCType: `${getDISCTypeName(primaryAbbr)} (${primaryAbbr})`,
+    secondaryDISCType: `${getDISCTypeName(secondaryAbbr)} (${secondaryAbbr})`,
+    confidenceScore: `${confidenceScore} / 100 (${confidenceCategory})`,
+    purchaseProbability: `${purchasePercentage}% (${purchaseCategory})`,
+    communicationTone: communicationTone,
+    bestOutreachChannels: bestChannels,
+    nextStep: nextStep
+  };
+}
+
+function determineCompanyType(profile) {
+  const company = profile.current_position?.company?.toLowerCase() || profile.company?.toLowerCase() || '';
+  const title = profile.current_position?.title?.toLowerCase() || profile.title?.toLowerCase() || '';
+  const about = profile.about?.toLowerCase() || '';
+  
+  if (company.includes('microsoft') || company.includes('google') || company.includes('apple') || company.includes('amazon')) {
+    return 'Global Technology & Innovation';
+  } else if (company.includes('bank') || company.includes('financial') || title.includes('finance')) {
+    return 'Financial Services';
+  } else if (company.includes('health') || company.includes('medical') || title.includes('health')) {
+    return 'Healthcare & Life Sciences';
+  } else if (company.includes('consult') || title.includes('consult')) {
+    return 'Professional Services';
+  } else if (title.includes('technology') || title.includes('engineer') || about.includes('technology')) {
+    return 'Technology & Software';
+  } else if (title.includes('sales') || title.includes('marketing')) {
+    return 'Sales & Marketing';
+  } else if (title.includes('ceo') || title.includes('president') || title.includes('founder')) {
+    return 'Executive Leadership';
+  } else {
+    return 'Professional Services';
+  }
+}
+
+function determineCommunicationTone(primaryAbbr, secondaryAbbr) {
+  switch(primaryAbbr) {
+    case 'D':
+      return 'Concise, confident, ROI-driven';
+    case 'I':
+      return 'Engaging, enthusiastic, relationship-focused';
+    case 'S':
+      return 'Patient, supportive, relationship-building';
+    case 'C':
+      return 'Detailed, analytical, data-driven';
+    default:
+      return 'Professional, balanced approach';
+  }
+}
+
+function getBestOutreachChannels(preferredChannel) {
+  switch(preferredChannel?.toLowerCase()) {
+    case 'linkedin':
+      return 'LinkedIn → Email → Call';
+    case 'email':
+      return 'Email → LinkedIn → Call';
+    case 'phone':
+      return 'Call → LinkedIn → Email';
+    default:
+      return 'LinkedIn → Email → Call';
+  }
+}
+
+function getBestOutreachChannelsFromDISC(primaryAbbr) {
+  switch(primaryAbbr) {
+    case 'D':
+      return 'Call → LinkedIn → Email';
+    case 'I':
+      return 'LinkedIn → Email → Call';
+    case 'S':
+      return 'Email → LinkedIn → Call';
+    case 'C':
+      return 'Email → LinkedIn → Call';
+    default:
+      return 'LinkedIn → Email → Call';
+  }
+}
+
+function generateNextStepRecommendation(primaryAbbr, channels) {
+  const primaryChannel = channels.split(' → ')[0];
+  
+  switch(primaryAbbr) {
+    case 'D':
+      return `Send direct ${primaryChannel.toLowerCase()} message with clear ROI; schedule call within 24 hours`;
+    case 'I':
+      return `Send personalized ${primaryChannel.toLowerCase()} message; follow-up email in 48 hours`;
+    case 'S':
+      return `Send warm ${primaryChannel.toLowerCase()} introduction; gentle follow-up in 3-5 days`;
+    case 'C':
+      return `Send detailed ${primaryChannel.toLowerCase()} with data/case study; follow-up in 1 week`;
+    default:
+      return `Send personalized ${primaryChannel.toLowerCase()} message; follow-up email in 48 hours`;
+  }
+}
+
+function buildCompanyOverview(productDescription) {
+  if (!productDescription) {
+    return null;
+  }
+
+  // Extract company information from product description
+  const overview = {
+    companyName: extractCompanyName(productDescription),
+    specializations: extractSpecializations(productDescription),
+    keyFeatures: extractKeyFeatures(productDescription),
+    pricingModel: extractPricingModel(productDescription)
+  };
+
+  return overview;
+}
+
+function extractCompanyName(text) {
+  // Look for company names in various formats
+  const patterns = [
+    /([A-Z][a-zA-Z0-9\s]+(?:Inc\.|LLC|Ltd\.|Pvt\. Ltd\.|Corp\.|Corporation|Enterprises|Solutions|Technologies|Systems))/gi,
+    /([A-Z][a-zA-Z0-9]+(?:flake|tech|soft|ware|labs|works|hub|nest|flow|sync|cloud|net|web|app|pro|max|plus))/gi,
+    /^([A-Z][a-zA-Z0-9\s]{2,20}(?=\s(?:specializes|offers|provides|develops|builds|creates)))/gim
+  ];
+  
+  for (const pattern of patterns) {
+    const matches = text.match(pattern);
+    if (matches && matches.length > 0) {
+      return matches[0].trim();
+    }
+  }
+  
+  return null;
+}
+
+function extractSpecializations(text) {
+  const specializations = [];
+  const patterns = [
+    /specializes?\s+in\s+([^.]+)/gi,
+    /(?:expert|expertise)\s+in\s+([^.]+)/gi,
+    /(?:focus|focuses)\s+on\s+([^.]+)/gi,
+    /(?:develop|development|building)\s+([^.]+)/gi
+  ];
+  
+  patterns.forEach(pattern => {
+    const matches = text.matchAll(pattern);
+    for (const match of matches) {
+      if (match[1]) {
+        specializations.push(match[1].trim().replace(/,$/, ''));
+      }
+    }
+  });
+  
+  return specializations.length > 0 ? specializations : null;
+}
+
+function extractKeyFeatures(text) {
+  const features = [];
+  const sentences = text.split(/[.!?]+/);
+  
+  sentences.forEach(sentence => {
+    sentence = sentence.trim();
+    if (sentence.length > 20 && sentence.length < 150) {
+      // Look for feature-indicating words
+      const featureKeywords = ['support', 'maintenance', 'scalable', 'powered', 'built', 'design', 'solutions', 'security', 'transparent', 'deployment'];
+      const hasFeatureKeyword = featureKeywords.some(keyword => 
+        sentence.toLowerCase().includes(keyword)
+      );
+      
+      if (hasFeatureKeyword) {
+        features.push(sentence.trim());
+      }
+    }
+  });
+  
+  return features.length > 0 ? features.slice(0, 4) : null; // Limit to 4 key features
+}
+
+function extractPricingModel(text) {
+  const pricingPatterns = [
+    /\$[\d,]+/g,
+    /(?:priced?\s+at|starting\s+at|costs?\s+around|budget\s+of)\s*\$?[\d,]+/gi,
+    /(?:transparent|standard|fixed|competitive)\s+pricing/gi,
+    /engagement\s+model[^.]*\$[\d,]+/gi
+  ];
+  
+  for (const pattern of pricingPatterns) {
+    const matches = text.match(pattern);
+    if (matches && matches.length > 0) {
+      return matches.join('; ');
+    }
+  }
+  
+  return null;
+}
+
+function buildNextSteps(parsed, profile, posts, productDescription) {
+  // Prefer explicit nextSteps from LLM if present
+  if (Array.isArray(parsed.nextSteps) && parsed.nextSteps.length) {
+    return parsed.nextSteps.map(s => String(s).trim()).filter(Boolean).slice(0, 8);
+  }
+  if (typeof parsed.nextSteps === 'string' && parsed.nextSteps.trim()) {
+    return splitIntoBullets(parsed.nextSteps).slice(0, 8);
+  }
+
+  // Fallback: try deriving concise next steps from parsed.nextActions if available
+  if (Array.isArray(parsed.nextActions) && parsed.nextActions.length) {
+    const mapping = parsed.nextActions.slice(0, 6).map(na => {
+      const day = na.day !== undefined ? `Day ${na.day}: ` : '';
+      const action = na.action || na.objective || na.copy || na.channel || '';
+      return `${day}${String(action).trim()}`.trim();
+    }).filter(Boolean);
+    if (mapping.length) return mapping;
+  }
+
+  // Default recommended next steps (short, actionable bullets)
+  return [
+    'Validate recent posts or initiatives before outreach.',
+    'Personalize the LinkedIn message using Likes/Common Ground.',
+    'Use DISC insights to adapt tone dynamically.',
+    'Log activity and outcomes within Sellinder dashboard.'
+  ];
+}
+
+function buildCommunicationStrategy(primaryAbbr, secondaryAbbr, profile) {
+  const recommendedSequence = generateRecommendedSequence(primaryAbbr, profile);
+  const toneGuidance = generateToneGuidance(primaryAbbr, secondaryAbbr);
+  
+  return {
+    recommendedSequence,
+    toneGuidance
+  };
+}
+
+function generateRecommendedSequence(primaryAbbr, profile) {
+  const sequence = [];
+  
+  switch(primaryAbbr) {
+    case 'D': // Dominance - Direct, results-focused
+      sequence.push(
+        { day: 1, channel: 'LinkedIn', objective: 'Direct connection request with ROI-focused value proposition' },
+        { day: 2, channel: 'Email', objective: 'Present solution with clear metrics and immediate benefits' },
+        { day: 4, channel: 'Phone', objective: 'Schedule demo with specific outcomes and timeline' },
+        { day: 7, channel: 'Follow-up', objective: 'Decision timeline and next steps confirmation' }
+      );
+      break;
+      
+    case 'I': // Influence - Social, relationship-focused
+      sequence.push(
+        { day: 1, channel: 'LinkedIn', objective: 'Establish connection with value-based note' },
+        { day: 2, channel: 'Email', objective: 'Present solution in alignment with team goals and collaboration' },
+        { day: 5, channel: 'Phone', objective: 'Discuss team benefits and social proof from similar clients' },
+        { day: 8, channel: 'Follow-up', objective: 'Share success stories and peer recommendations' }
+      );
+      break;
+      
+    case 'S': // Steadiness - Patient, relationship-building
+      sequence.push(
+        { day: 1, channel: 'LinkedIn', objective: 'Warm introduction with mutual connection reference' },
+        { day: 3, channel: 'Email', objective: 'Present solution emphasizing stability and support' },
+        { day: 7, channel: 'Phone', objective: 'Discuss implementation timeline and ongoing support' },
+        { day: 10, channel: 'Follow-up', objective: 'Address concerns and provide detailed transition plan' }
+      );
+      break;
+      
+    case 'C': // Conscientiousness - Analytical, detail-oriented  
+      sequence.push(
+        { day: 1, channel: 'LinkedIn', objective: 'Connect with detailed case study or white paper' },
+        { day: 3, channel: 'Email', objective: 'Present comprehensive solution analysis with data points' },
+        { day: 7, channel: 'Phone', objective: 'Technical discussion with detailed ROI calculations' },
+        { day: 10, channel: 'Follow-up', objective: 'Provide additional documentation and implementation details' }
+      );
+      break;
+      
+    default:
+      sequence.push(
+        { day: 1, channel: 'LinkedIn', objective: 'Establish connection with value-based note' },
+        { day: 2, channel: 'Email', objective: 'Present solution in alignment with business goals' },
+        { day: 5, channel: 'Phone', objective: 'Reinforce ROI and measurable results' },
+        { day: 8, channel: 'Follow-up', objective: 'Short message referencing previous discussion' }
+      );
+  }
+  
+  return sequence;
+}
+
+function generateToneGuidance(primaryAbbr, secondaryAbbr) {
+  let guidance = '';
+  
+  switch(primaryAbbr) {
+    case 'D':
+      guidance = 'Assertive, respectful, confident — focus on impact and efficiency, not features.';
+      break;
+    case 'I':
+      guidance = 'Enthusiastic, engaging, collaborative — emphasize team benefits and social validation.';
+      break;
+    case 'S':
+      guidance = 'Patient, supportive, trustworthy — build relationship gradually with consistent follow-through.';
+      break;
+    case 'C':
+      guidance = 'Professional, detailed, factual — provide comprehensive information and logical reasoning.';
+      break;
+    default:
+      guidance = 'Professional, balanced approach — adapt tone based on their response and engagement level.';
+  }
+  
+  // Add secondary trait influence if different from primary
+  if (secondaryAbbr && secondaryAbbr !== primaryAbbr) {
+    switch(secondaryAbbr) {
+      case 'D':
+        guidance += ' Include decisive language and clear action steps.';
+        break;
+      case 'I':
+        guidance += ' Add personal touches and relationship-building elements.';
+        break;
+      case 'S':
+        guidance += ' Emphasize stability and long-term partnership value.';
+        break;
+      case 'C':
+        guidance += ' Support claims with data and detailed explanations.';
+        break;
+    }
+  }
+  
+  return guidance;
 }

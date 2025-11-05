@@ -350,10 +350,28 @@ export const resetPassword = catchAsyncErrors(async (req, res, next) => {
 
 //6.Get User Detail
 export const getUserDetails = catchAsyncErrors(async (req, res, next) => {
-  const user = await User.findById(req.user.id).sort({ createdAt: -1 });
+  let user = await User.findById(req.user.id).populate(
+    "PlanId",
+    "Package SearchLimitMonthly SearchLimitYearly name"
+  );
   if (!user) {
     return res.status(400).json({ message: "data not found" });
   }
+
+  // If user has a plan but SearchLimit is 0, initialize it from the plan monthly limit
+  try {
+    const planLimit = user?.PlanId?.SearchLimitMonthly ?? 0;
+    if ((user.SearchLimit === 0 || user.SearchLimit == null) && planLimit > 0) {
+      user = await User.findByIdAndUpdate(
+        req.user.id,
+        { $set: { SearchLimit: planLimit } },
+        { new: true }
+      ).populate("PlanId", "Package SearchLimitMonthly SearchLimitYearly name");
+    }
+  } catch (err) {
+    console.log("getUserDetails: failed to initialize SearchLimit", err?.message || err);
+  }
+
   res.status(200).json({
     success: true,
     user,
@@ -828,10 +846,8 @@ export const googlelogin = async (req, res) => {
       user.name = name;
       await user.save();
     }
-    const token = jwt.sign({ _id: user._id, email }, process.env.JWT_SECRET, {
-      expiresIn: "12h",
-    });
-    return res.status(200).json({ message: "Success", token, user });
+    // prefer using sendToken to ensure SearchLimit and PlanId are populated/initialized
+    sendToken(user, 200, res);
   } catch (error) {
     // console.error(error);
     return res.status(500).json({ message: error.message || "Server error" });
