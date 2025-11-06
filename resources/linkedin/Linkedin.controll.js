@@ -1,4 +1,4 @@
-import { shortDateWithTime, timeFormat } from "../../Utils/formatDateToIST .js";
+import { shordataformate, shortDateWithTime, timeFormat } from "../../Utils/formatDateToIST .js";
 import UserModel from "../user/userModel.js";
 import LinkedinContent from "./LinkedinContent.model.js";
 import LinkedinPost from "./LinkedinPost.model.js";
@@ -358,69 +358,6 @@ export const analyzeDISCProfile = async (req, res) => {
     }
 };
 
-// export const LinkedinUploadFile = async (req, res) => {
-//     const { id } = req.params
-//     const { LinkedinURL, LinkedinDec, content, posts } = req.body;
-
-//     try {
-//         let saveProfile = null;
-//         let savePosts = [];
-//         console.log("Incoming body:", { LinkedinURL, LinkedinDec, content, posts });
-
-//         if (content && Object.keys(content).length > 0) {
-//             saveProfile = await LinkedinContent.create({
-//                 LinkedinURL,
-//                 LinkedinDec,
-//                 ...content
-//             })
-//             console.log("✅ Saved content:", saveProfile._id);
-//         } else {
-//             return res.status(400).json({ message: "No content provided." })
-//         }
-
-
-//         // ---------- Save Posts ----------
-//         if (posts && Array.isArray(posts) && posts.length > 0) {
-//             savePosts = await LinkedinPost.insertMany(posts.map((p) => ({
-//                 ...p,
-//                 profileId: saveProfile ? saveProfile._id : null
-//             })))
-//             console.log("✅ Saved posts:", savePosts.length)
-//         } else if (posts && typeof posts === "object" && Object.keys(posts).length > 0) {
-//             const post = await LinkedinPost.create({
-//                 ...posts,
-//                 profileId: saveProfile ? saveProfile._id : null,
-//             })
-//             savePosts.push(post)
-//             console.log("✅ Saved single post:", post._id);
-//         } else {
-//             return res.status(400).json({ message: "No posts provided." })
-//         }
-
-
-//         if (id) {
-//             await UserModel.findByIdAndUpdate(id, {
-//                 LinkedinContentId: saveProfile ? saveProfile._id : null,
-//                 LinkedinPostId: savePosts.length > 0 ? savePosts[0]._id : null,
-//             });
-//             console.log("✅ Linked data to user:", id);
-
-
-//         }
-//         res.status(200).json({
-//             message: "Files uploaded successfully",
-//             profile: saveProfile,
-//             posts: savePosts,
-
-//         });
-//     } catch (error) {
-//         console.error("❌ Error uploading LinkedIn data:", error);
-//         res.status(500).json({ message: error.message });
-//     }
-// };
-
-
-
 
 
 export const getLinkedinUploadFile = async (req, res) => {
@@ -517,8 +454,8 @@ export const getLinkedinAnalysisResult = async (req, res) => {
         const total = totalDocs.filter(u => u.LinkedinContentId).length;
         let data = result.map((val) => ({
             ...val.toObject(),
-            createdAt: shortDateWithTime(val.createdAt),
-            updatedAt: shortDateWithTime(val.updatedAt),
+            createdAt: shordataformate(val.createdAt),
+            updatedAt: shordataformate(val.updatedAt),
 
         }))
 
