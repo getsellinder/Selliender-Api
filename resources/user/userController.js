@@ -446,50 +446,36 @@ export const updatePassword = catchAsyncErrors(async (req, res, next) => {
 
 // 9. Update User Profile
 export const updateProfile = catchAsyncErrors(async (req, res, next) => {
+  // Only allow updating name and email per requirements
   const newUserData = {
     name: req.body.name,
     email: req.body.email,
-    phone: req.body.phone,
   };
 
-  // Check if the email already exists but belongs to a different user
+  // Validate presence of at least one updatable field
+  if (!newUserData.name && !newUserData.email) {
+    return res.status(400).json({
+      success: false,
+      message: "Please provide name or email to update",
+    });
+  }
+
+  // Check if the email already exists and belongs to a different user
   if (req?.body?.email) {
     const emailExists = await User.findOne({ email: req.body.email });
-
     if (emailExists && emailExists._id.toString() !== req.user.id) {
       return res.status(400).json({
         success: false,
-        message: "Same Email is already in use by another user.",
+        message: "Email is already in use by another user.",
       });
     }
-  }
-
-  if (req?.files) {
-    const userImage = req.files?.avatar;
-    const user = await User.findById(req.user.id);
-    if (user?.avatar?.public_id) {
-      const imageId = user?.avatar?.public_id;
-      await cloudinary.uploader.destroy(imageId);
-    }
-
-    const myCloud = await cloudinary.v2.uploader.upload(
-      userImage.tempFilePath,
-      {
-        folder: "Frameji/user_image",
-      }
-    );
-
-    newUserData.avatar = {
-      public_id: myCloud.public_id,
-      url: myCloud.secure_url,
-    };
   }
 
   const user = await User.findByIdAndUpdate(req.user.id, newUserData, {
     new: true,
     runValidators: true,
     useFindAndModify: false,
-  });
+  }).select('-password');
 
   return res.status(200).json({
     success: true,
