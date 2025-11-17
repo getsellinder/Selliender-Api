@@ -6,11 +6,11 @@ import { roles, rolesAdmin } from "../../Utils/authorizeRoles.js";
 const router = express.Router();
 
 router
-  .route("/")
+  .route("/plans")
   .get(isAuthenticatedUser, authorizeRoles(...rolesAdmin), getusercurrentplan);
   
   router
-  .route("/get/:id")
+  .route("/billing/get/:id")
   .get(isAuthenticatedUser, authorizeRoles(...roles), getUserBills);
 
 

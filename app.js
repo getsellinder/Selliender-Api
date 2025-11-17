@@ -334,6 +334,6 @@ app.use("/api", MessageRouter);
 app.use("/api/reports", ReportsRoute);
 app.use("/api/referral", ReferalRoute)
 app.use("/api/billing", BillingRoute)
-app.use("/user/billing", UserBillingRoute)
+app.use("/user", UserBillingRoute)
 
 export default app;
