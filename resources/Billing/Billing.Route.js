@@ -2,7 +2,7 @@ import express from "express";
 import { authorizeRoles, isAuthenticatedUser } from "../../middlewares/auth.js";
 import { roles, rolesAdmin } from "../../Utils/authorizeRoles.js";
 
-import { getbillinvoice, getBills, viewbilling } from "./Billing.controll.js";
+import { getbillinvoice, getBills, viewbilling ,getUserBills} from "./Billing.controll.js";
 
 const Router = express.Router();
 
@@ -11,6 +11,13 @@ Router.get(
   isAuthenticatedUser,
   authorizeRoles(...roles),
   getBills
+);
+
+Router.get(
+  "/get",
+  isAuthenticatedUser,
+  authorizeRoles(...roles),
+  getUserBills
 );
 
 Router.get(

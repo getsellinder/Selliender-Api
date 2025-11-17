@@ -17,6 +17,7 @@ import BillingRoute from "./resources/Billing/Billing.Route.js"
 import MessageRouter from "./resources/message/Message.Route.js";
 import PackageRoute from "./resources/Plans/Package.Route.js";
 import LinkedinRoute from "./resources/linkedin/Linkedin.Route.js";
+import UserBillingRoute from "./resources/Sellinder-user-plan/Sellinder-user-Route.js"
 
 // Design Route
 import designRoute from "./resources/Design/designRouter.js";
@@ -333,5 +334,6 @@ app.use("/api", MessageRouter);
 app.use("/api/reports", ReportsRoute);
 app.use("/api/referral", ReferalRoute)
 app.use("/api/billing", BillingRoute)
+app.use("/user/billing", UserBillingRoute)
 
 export default app;

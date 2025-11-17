@@ -30,7 +30,7 @@ export function shordataformate(data) {
   }).replace(/,/g, "");
 }
 export function shortDateWithTime(data) {
-  const date = new Date()
+  const date = new Date(data)
   return date.toLocaleDateString("en-US", {
     month: "short",
     day: "2-digit",
