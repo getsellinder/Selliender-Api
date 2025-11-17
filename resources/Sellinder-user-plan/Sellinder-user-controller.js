@@ -95,7 +95,7 @@ export const getUserBills = async (req, res) => {
 
     // Get paginated invoices
     const getBills = await Invoice.find(filter)
-      .populate("userId", "name _id SearchLimit")
+      .populate("userId", "name _id SearchLimit").populate("PlanId")
       .skip((page - 1) * limit)
       .limit(limit)
       .sort({ createdAt: -1 });
@@ -113,8 +113,7 @@ export const getUserBills = async (req, res) => {
       (sum, invoice) => sum + Number(invoice.Amount),
       0
     );
-    let totalsales = await Invoice.countDocuments({ status: "success" });
-    totalsales = Number(totalsales).toLocaleString();
+
     totalAmount = Number(totalAmount).toLocaleString();
 
     return res.status(200).json({
@@ -123,7 +122,7 @@ export const getUserBills = async (req, res) => {
       currentPage: page,
       totalPages: Math.ceil(totalItems / limit),
       totalItems,
-      totalsales,
+ 
       totalAmount,
     });
   } catch (error) {
