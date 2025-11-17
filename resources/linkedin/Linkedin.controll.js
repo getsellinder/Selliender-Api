@@ -4,6 +4,7 @@ import LinkedinContent from "./LinkedinContent.model.js";
 import LinkedinPost from "./LinkedinPost.model.js";
 import DISCProfile from "../DISCProfile/DISCProfileModel.js";
 import { analyzeLinkedInProfile } from "../DISCProfile/analysisEngineV2.js";
+import jwt from 'jsonwebtoken';
 
 
 function normalizeLinkedInPosts(rawPosts, maxCount = 30) {
@@ -213,12 +214,31 @@ export const analyzeDISCProfile = async (req, res) => {
     const { userId } = req.params;
 
     try {
-        const user = await UserModel.findById(userId)
+        let user = await UserModel.findById(userId)
             .populate('LinkedinContentId')
             .populate('LinkedinPostId');
 
+        // Ensure PlanId is populated so we can initialize SearchLimit from the purchased plan
+        try {
+            await user?.populate?.('PlanId', 'Package SearchLimitMonthly SearchLimitYearly name');
+        } catch (e) {
+            // non-fatal: proceed without populated plan
+        }
+
         if (!user) {
             return res.status(404).json({ message: "User not found" });
+        }
+
+        // If user has no SearchLimit set but has a plan with a monthly allowance, initialize it now
+        try {
+            const planLimit = user?.PlanId?.SearchLimitMonthly ?? 0;
+            if ((user.SearchLimit === 0 || user.SearchLimit == null) && planLimit > 0) {
+                await UserModel.findByIdAndUpdate(userId, { $set: { SearchLimit: planLimit } });
+                user.SearchLimit = planLimit;
+                console.log(`Initialized SearchLimit from plan for user ${userId}: ${planLimit}`);
+            }
+        } catch (err) {
+            console.warn('Failed to initialize SearchLimit from plan:', err?.message || err);
         }
 
         const parsedSearchLimit = parseSearchLimit(user.SearchLimit);
@@ -309,7 +329,17 @@ export const analyzeDISCProfile = async (req, res) => {
             objectionHandling: analysisResult.objectionHandling,
             personalizationCues: analysisResult.personalizationCues,
             nextActions: analysisResult.nextActions,
+            nextSteps: analysisResult.nextSteps || null,
             confidence: confidenceResult,
+            quickSummary: analysisResult.quickSummary || null,
+            actionableMetrics: analysisResult.actionableMetrics || null,
+            preferenceSnapshot: analysisResult.preferenceSnapshot || null,
+            probabilityToPurchase: analysisResult.probabilityToPurchase || null,
+            commonGroundAndSharedVision: analysisResult.commonGroundAndSharedVision || null,
+            confidenceExplanation: analysisResult.confidenceExplanation || null,
+            executiveSummary: analysisResult.executiveSummary || null,
+            companyOverview: analysisResult.companyOverview || null,
+            communicationStrategy: analysisResult.communicationStrategy || null,
             dataSources,
             analysisMetadata: analysisResult.analysisMetadata
         });
@@ -538,6 +568,12 @@ export const getLatestDISCAnalysis = async (req, res) => {
             });
         }
 
+        try {
+            const origin = req.headers.origin || '*';
+            res.setHeader('Access-Control-Allow-Origin', origin);
+            res.setHeader('Access-Control-Allow-Credentials', 'false');
+        } catch (e) {}
+
         return res.status(200).json({
             success: true,
             analysis: latestAnalysis
@@ -551,9 +587,54 @@ export const getLatestDISCAnalysis = async (req, res) => {
 
 export const getDISCAnalysisById = async (req, res) => {
     try {
-        const { analysisId } = req.params;
+        const { analysisId: rawAnalysisId } = req.params;
+        const analysisId = String(rawAnalysisId || '').trim();
 
-        const analysis = await DISCProfile.findById(analysisId)
+        // If no id was provided (client called /disc/analysis/), try to return the authenticated user's history
+        if (!analysisId) {
+            // attempt to decode JWT from cookie or Authorization header
+            let token = req.cookies?.token || null;
+            if (!token && req.headers?.authorization && req.headers.authorization.startsWith('Bearer ')) {
+                token = req.headers.authorization.split(' ')[1];
+            }
+
+            if (!token) return res.status(401).json({ success: false, message: 'Authentication required to fetch user history' });
+
+            let payload;
+            try {
+                payload = jwt.verify(token, process.env.JWT_SECRET);
+            } catch (err) {
+                return res.status(401).json({ success: false, message: 'Invalid or expired token' });
+            }
+
+            const userId = payload._id || payload.id || payload.userId || null;
+            if (!userId) return res.status(401).json({ success: false, message: 'Invalid token payload' });
+
+            // reuse getAllDISCAnalysesByUser logic: fetch and return analyses for this user
+            const analyses = await DISCProfile.find({ userId })
+                .sort({ createdAt: -1 })
+                .limit(50)
+                .populate('linkedinContentId')
+                .populate('linkedinPostId');
+
+            try { const origin = req.headers.origin || '*'; res.setHeader('Access-Control-Allow-Origin', origin); res.setHeader('Access-Control-Allow-Credentials', 'false'); } catch (e) {}
+            return res.status(200).json({ success: true, analyses });
+        }
+
+        // Try to normalize/accept common client id formats: trim, and extract a 24-hex ObjectId if embedded
+        const mongoose = await import('mongoose');
+        let resolvedId = analysisId;
+        if (!mongoose.Types.ObjectId.isValid(resolvedId)) {
+            const m = analysisId.match(/([a-fA-F0-9]{24})/);
+            if (m) resolvedId = m[1];
+        }
+
+        if (!mongoose.Types.ObjectId.isValid(resolvedId)) {
+            // treat as not found instead of a hard 400 so clients (extensions) can handle gracefully
+            return res.status(404).json({ success: false, message: 'Analysis not found' });
+        }
+
+        const analysis = await DISCProfile.findById(resolvedId)
             .populate('userId')
             .populate('linkedinContentId')
             .populate('linkedinPostId');
@@ -562,10 +643,9 @@ export const getDISCAnalysisById = async (req, res) => {
             return res.status(404).json({ success: false, message: "No analysis history found for this user." });
         }
 
-        return res.status(200).json({
-            success: true,
-            analysis: analysis
-        });
+        try { const origin = req.headers.origin || '*'; res.setHeader('Access-Control-Allow-Origin', origin); res.setHeader('Access-Control-Allow-Credentials', 'false'); } catch (e) {}
+        return res.status(200).json({ success: true, analysis: analysis });
+
 
     } catch (error) {
         console.error("Error fetching DISC analysis:", error);
@@ -612,6 +692,9 @@ export const getAllDISCAnalysesByUser = async (req, res) => {
                 },
                 productDescription: doc.productDescription,
                 executive: doc.executive,
+                quickSummary: doc.quickSummary || null,
+                actionableMetrics: doc.actionableMetrics || null,
+                preferenceSnapshot: doc.preferenceSnapshot || null,
                 personality: {
                     disc: doc.personality?.disc,
                     bullets: doc.personality?.bullets,
@@ -623,6 +706,8 @@ export const getAllDISCAnalysesByUser = async (req, res) => {
                 objectionHandling: (doc.objectionHandling || []).slice(0, 5),
                 personalizationCues: (doc.personalizationCues || []).slice(0, 5),
                 nextActions: doc.nextActions,
+                nextSteps: doc.nextSteps || null,
+                companyOverview: doc.companyOverview || null,
                 confidence: doc.confidence,
                 analysisMetadata: doc.analysisMetadata,
                 createdAt: doc.createdAt
@@ -634,13 +719,23 @@ export const getAllDISCAnalysesByUser = async (req, res) => {
             };
         });
 
+        try {
+            const origin = req.headers.origin || '*';
+            res.setHeader('Access-Control-Allow-Origin', origin);
+            res.setHeader('Access-Control-Allow-Credentials', 'false');
+        } catch (e) {
+            // ignore header set errors
+        }
+
         return res.status(200).json({
             success: true,
             count: responseAnalyses.length,
             total: total,
             currentPage: page,
             totalPages: Math.ceil(total / limit),
-            analyses: responseAnalyses
+            analyses: responseAnalyses,
+            // Backwards-compatible alias for clients expecting a `history` field
+            history: responseAnalyses.map(item => item.analysis)
         });
 
     } catch (error) {
@@ -651,9 +746,20 @@ export const getAllDISCAnalysesByUser = async (req, res) => {
 
 export const getDISCAnalysisSummary = async (req, res) => {
     try {
-        const { analysisId } = req.params;
+        const { analysisId: rawAnalysisId } = req.params;
+        const analysisId = String(rawAnalysisId || '').trim();
+        const mongoose = await import('mongoose');
+        let resolvedId = analysisId;
+        if (!mongoose.Types.ObjectId.isValid(resolvedId)) {
+            const m = analysisId.match(/([a-fA-F0-9]{24})/);
+            if (m) resolvedId = m[1];
+        }
 
-        const analysis = await DISCProfile.findById(analysisId)
+        if (!mongoose.Types.ObjectId.isValid(resolvedId)) {
+            return res.status(404).json({ success: false, message: 'Analysis not found' });
+        }
+
+        const analysis = await DISCProfile.findById(resolvedId)
             .populate('linkedinContentId', 'name title company location profilePicture LinkedinURL');
 
         if (!analysis) {
@@ -672,6 +778,9 @@ export const getDISCAnalysisSummary = async (req, res) => {
             },
             productDescription: analysis.productDescription,
             executive: analysis.executive,
+            quickSummary: analysis.quickSummary || null,
+            actionableMetrics: analysis.actionableMetrics || null,
+            preferenceSnapshot: analysis.preferenceSnapshot || null,
             personality: {
                 disc: analysis.personality.disc,
                 bullets: analysis.personality.bullets,
@@ -683,15 +792,15 @@ export const getDISCAnalysisSummary = async (req, res) => {
             objectionHandling: analysis.objectionHandling.slice(0, 5),
             personalizationCues: analysis.personalizationCues.slice(0, 5),
             nextActions: analysis.nextActions,
+            nextSteps: analysis.nextSteps || null,
+            companyOverview: analysis.companyOverview || null,
             confidence: analysis.confidence,
             analysisMetadata: analysis.analysisMetadata,
             createdAt: analysis.createdAt
         };
 
-        return res.status(200).json({
-            success: true,
-            summary: summary
-        });
+        try { const origin = req.headers.origin || '*'; res.setHeader('Access-Control-Allow-Origin', origin); res.setHeader('Access-Control-Allow-Credentials', 'false'); } catch (e) {}
+        return res.status(200).json({ success: true, summary: summary });
 
     } catch (error) {
         console.error("Error fetching DISC analysis summary:", error);
@@ -703,12 +812,31 @@ export const analyzeDISCProfileCompact = async (req, res) => {
     const { userId } = req.params;
 
     try {
-        const user = await UserModel.findById(userId)
+        let user = await UserModel.findById(userId)
             .populate('LinkedinContentId')
             .populate('LinkedinPostId');
 
         if (!user) {
             return res.status(404).json({ message: "User not found" });
+        }
+
+        // Ensure PlanId is populated so we can initialize SearchLimit from the purchased plan
+        try {
+            await user?.populate?.('PlanId', 'Package SearchLimitMonthly SearchLimitYearly name');
+        } catch (e) {
+            // non-fatal: proceed without populated plan
+        }
+
+        // If user has no SearchLimit set but has a plan with a monthly allowance, initialize it now
+        try {
+            const planLimit = user?.PlanId?.SearchLimitMonthly ?? 0;
+            if ((user.SearchLimit === 0 || user.SearchLimit == null) && planLimit > 0) {
+                await UserModel.findByIdAndUpdate(userId, { $set: { SearchLimit: planLimit } });
+                user.SearchLimit = planLimit;
+                console.log(`Initialized SearchLimit from plan for user ${userId}: ${planLimit}`);
+            }
+        } catch (err) {
+            console.warn('Failed to initialize SearchLimit from plan:', err?.message || err);
         }
 
         const parsedSearchLimit = parseSearchLimit(user.SearchLimit);
@@ -795,7 +923,17 @@ export const analyzeDISCProfileCompact = async (req, res) => {
             objectionHandling: analysisResult.objectionHandling,
             personalizationCues: analysisResult.personalizationCues,
             nextActions: analysisResult.nextActions,
+            nextSteps: analysisResult.nextSteps || null,
             confidence: confidenceResult,
+            quickSummary: analysisResult.quickSummary || null,
+            actionableMetrics: analysisResult.actionableMetrics || null,
+            preferenceSnapshot: analysisResult.preferenceSnapshot || null,
+            probabilityToPurchase: analysisResult.probabilityToPurchase || null,
+            commonGroundAndSharedVision: analysisResult.commonGroundAndSharedVision || null,
+            confidenceExplanation: analysisResult.confidenceExplanation || null,
+            executiveSummary: analysisResult.executiveSummary || null,
+            companyOverview: analysisResult.companyOverview || null,
+            communicationStrategy: analysisResult.communicationStrategy || null,
             dataSources,
             analysisMetadata: analysisResult.analysisMetadata
         });
@@ -843,6 +981,8 @@ export const analyzeDISCProfileCompact = async (req, res) => {
             personality: discProfileDoc.personality,
             talkingPoints: discProfileDoc.talkingPoints,
             approachGuidance: discProfileDoc.personality?.approachGuidance || discProfileDoc.personality?.approach || null,
+            companyOverview: discProfileDoc.companyOverview || null,
+            nextSteps: discProfileDoc.nextSteps || null,
             analysisId: discProfileDoc._id
         };
 

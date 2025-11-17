@@ -27,6 +27,8 @@ const OpeningScriptSchema = new mongoose.Schema({
 
 const ObjectionHandlingSchema = new mongoose.Schema({
     objection: String,
+    recommendedResponse: String,
+    followUpTone: String,
     rationale: String,
     response: String,
     category: String
@@ -74,6 +76,13 @@ const StartingSectionSchema = new mongoose.Schema({
     aboutProduct: String,
     productCost: String,
     profileSummary: String
+}, { _id: false });
+
+const CompanyOverviewSchema = new mongoose.Schema({
+    companyName: String,
+    specializations: [String],
+    keyFeatures: [String],
+    pricingModel: String
 }, { _id: false });
 
 const DISCProfileSchema = new mongoose.Schema(
@@ -125,7 +134,20 @@ const DISCProfileSchema = new mongoose.Schema(
         objectionHandling: [ObjectionHandlingSchema],
         personalizationCues: [String],
         nextActions: [FollowUpActionSchema],
+    nextSteps: [String],
         confidence: ConfidenceSchema,
+        quickSummary: {
+            who: String,
+            primaryDISC: String,
+            topTalkingPoints: [String],
+            bestOutreachChannel: String,
+            preferredTone: String
+        },
+        actionableMetrics: {
+            responseRateTarget: String,
+            followUpCadence: [String],
+            engagementMilestones: [String]
+        },
         dataSources: [String],
         analysisMetadata: {
             profileFieldsUsed: Number,
@@ -134,6 +156,77 @@ const DISCProfileSchema = new mongoose.Schema(
             dominantTopics: [String],
             writingTone: String,
             rawRationale: String
+        },
+        quickSummary: {
+            who: String,
+            primaryDISC: String,
+            topTalkingPoints: [String],
+            bestOutreachChannel: String,
+            preferredTone: String
+        },
+        actionableMetrics: {
+            responseRateTarget: String,
+            followUpCadence: [String],
+            engagementMilestones: [String]
+        },
+        preferenceSnapshot: {
+            likes: [String],
+            dislikes: [String],
+            salesInsight: String
+        },
+        probabilityToPurchase: {
+            factors: [{
+                factor: String,
+                influence: String,
+                impact: String
+            }],
+            predictedOutcome: {
+                percentage: Number,
+                category: String,
+                description: String
+            },
+            reasoning: String
+        },
+        commonGroundAndSharedVision: {
+            areas: [{
+                area: String,
+                commonality: String
+            }],
+            salesInsight: String
+        },
+        confidenceExplanation: {
+            parameters: [{
+                parameter: String,
+                score: String,
+                reasoning: String
+            }],
+            overallConfidence: {
+                score: Number,
+                category: String,
+                reasoning: String
+            },
+            interpretation: String
+        },
+        executiveSummary: {
+            profileName: String,
+            title: String,
+            companyType: String,
+            primaryDISCType: String,
+            secondaryDISCType: String,
+            confidenceScore: String,
+            purchaseProbability: String,
+            communicationTone: String,
+            bestOutreachChannels: String,
+            nextStep: String
+        },
+        companyOverview: CompanyOverviewSchema,
+        communicationStrategy: {
+            recommendedSequence: [{
+                day: Number,
+                channel: String,
+                objective: String
+            }],
+            toneGuidance: String
         }
     },
     { timestamps: true }

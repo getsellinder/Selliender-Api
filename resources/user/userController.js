@@ -350,10 +350,28 @@ export const resetPassword = catchAsyncErrors(async (req, res, next) => {
 
 //6.Get User Detail
 export const getUserDetails = catchAsyncErrors(async (req, res, next) => {
-  const user = await User.findById(req.user.id).sort({ createdAt: -1 });
+  let user = await User.findById(req.user.id).populate(
+    "PlanId",
+    "Package SearchLimitMonthly SearchLimitYearly name"
+  );
   if (!user) {
     return res.status(400).json({ message: "data not found" });
   }
+
+  // If user has a plan but SearchLimit is 0, initialize it from the plan monthly limit
+  try {
+    const planLimit = user?.PlanId?.SearchLimitMonthly ?? 0;
+    if ((user.SearchLimit === 0 || user.SearchLimit == null) && planLimit > 0) {
+      user = await User.findByIdAndUpdate(
+        req.user.id,
+        { $set: { SearchLimit: planLimit } },
+        { new: true }
+      ).populate("PlanId", "Package SearchLimitMonthly SearchLimitYearly name");
+    }
+  } catch (err) {
+    console.log("getUserDetails: failed to initialize SearchLimit", err?.message || err);
+  }
+
   res.status(200).json({
     success: true,
     user,
@@ -428,50 +446,36 @@ export const updatePassword = catchAsyncErrors(async (req, res, next) => {
 
 // 9. Update User Profile
 export const updateProfile = catchAsyncErrors(async (req, res, next) => {
+  // Only allow updating name and email per requirements
   const newUserData = {
     name: req.body.name,
     email: req.body.email,
-    phone: req.body.phone,
   };
 
-  // Check if the email already exists but belongs to a different user
+  // Validate presence of at least one updatable field
+  if (!newUserData.name && !newUserData.email) {
+    return res.status(400).json({
+      success: false,
+      message: "Please provide name or email to update",
+    });
+  }
+
+  // Check if the email already exists and belongs to a different user
   if (req?.body?.email) {
     const emailExists = await User.findOne({ email: req.body.email });
-
     if (emailExists && emailExists._id.toString() !== req.user.id) {
       return res.status(400).json({
         success: false,
-        message: "Same Email is already in use by another user.",
+        message: "Email is already in use by another user.",
       });
     }
-  }
-
-  if (req?.files) {
-    const userImage = req.files?.avatar;
-    const user = await User.findById(req.user.id);
-    if (user?.avatar?.public_id) {
-      const imageId = user?.avatar?.public_id;
-      await cloudinary.uploader.destroy(imageId);
-    }
-
-    const myCloud = await cloudinary.v2.uploader.upload(
-      userImage.tempFilePath,
-      {
-        folder: "Frameji/user_image",
-      }
-    );
-
-    newUserData.avatar = {
-      public_id: myCloud.public_id,
-      url: myCloud.secure_url,
-    };
   }
 
   const user = await User.findByIdAndUpdate(req.user.id, newUserData, {
     new: true,
     runValidators: true,
     useFindAndModify: false,
-  });
+  }).select('-password');
 
   return res.status(200).json({
     success: true,
@@ -828,10 +832,8 @@ export const googlelogin = async (req, res) => {
       user.name = name;
       await user.save();
     }
-    const token = jwt.sign({ _id: user._id, email }, process.env.JWT_SECRET, {
-      expiresIn: "12h",
-    });
-    return res.status(200).json({ message: "Success", token, user });
+    // prefer using sendToken to ensure SearchLimit and PlanId are populated/initialized
+    sendToken(user, 200, res);
   } catch (error) {
     // console.error(error);
     return res.status(500).json({ message: error.message || "Server error" });
