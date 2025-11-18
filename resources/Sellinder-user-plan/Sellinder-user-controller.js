@@ -55,18 +55,18 @@ export const getUserBills = async (req, res) => {
   const page = parseInt(req.query?.page) || 1;
   const search = req.query?.name || "";
   const date = req.query?.date || "";
-  // const userId = req.user._id
-  const { id } = req.params;
-  console.log("userId", id);
+  const userId = req.user._id
+  // const { id } = req.params;
+  console.log("userId", userId);
 
   try {
     const planIds = await UserModel.distinct("PlanId", {
-      _id: id,
+      _id: userId,
       PlanId: { $ne: null },
     });
 
     let filter = {
-      userId: id,
+      userId: userId,
       PlanId: { $in: planIds },
       status: "success",
     };
