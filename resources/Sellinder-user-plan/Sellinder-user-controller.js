@@ -16,7 +16,13 @@ export const getusercurrentplan = async (req, res) => {
       status: "success",
     })
       .populate("userId", "name _id SearchLimit")
-      .populate("PlanId");
+      .populate({
+        path: "PlanId",
+        populate: {
+          path: "GST",
+          select: "Gst",
+        },
+      });
 
     if (!findInvoice) {
       return res.status(404).json({ message: "User Invoice not found" });
@@ -55,7 +61,7 @@ export const getUserBills = async (req, res) => {
   const page = parseInt(req.query?.page) || 1;
   const search = req.query?.name || "";
   const date = req.query?.date || "";
-  const userId = req.user._id
+  const userId = req.user._id;
   // const { id } = req.params;
   console.log("userId", userId);
 
@@ -95,7 +101,14 @@ export const getUserBills = async (req, res) => {
 
     // Get paginated invoices
     const getBills = await Invoice.find(filter)
-      .populate("userId", "name _id SearchLimit").populate("PlanId")
+      .populate("userId", "name _id SearchLimit")
+      .populate({
+        path: "PlanId",
+        populate: {
+          path: "GST",
+          select: "Gst",
+        },
+      })
       .skip((page - 1) * limit)
       .limit(limit)
       .sort({ createdAt: -1 });
@@ -122,7 +135,7 @@ export const getUserBills = async (req, res) => {
       currentPage: page,
       totalPages: Math.ceil(totalItems / limit),
       totalItems,
- 
+
       totalAmount,
     });
   } catch (error) {
