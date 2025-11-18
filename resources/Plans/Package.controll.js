@@ -131,7 +131,6 @@ export const PackageDelete = async (req, res) => {
   }
 };
 
-
 export const PackageUpdate = async (req, res) => {
   try {
     const { id } = req.params;
@@ -322,6 +321,7 @@ export const ConfirmPayment = async (req, res) => {
       razorpaySignature,
       razorpayOrderId,
     } = req.body;
+    console.log("req.body",req.body)
     const findPlan = await packageModel.findById(id);
     const findUser = await UserModel.findById(userId);
     const findTax = await Tax.findById(findPlan.GST);
@@ -331,7 +331,7 @@ export const ConfirmPayment = async (req, res) => {
       return res.status(404).json({ message: "Plan not found" });
     }
     if (!findUser) {
-      return res.status(404).json({ message: "User  not found" });
+      return res.status(404).json({ message: "User  not found with this Id" });
     }
     const appName = sellinderAddress[0]?.appName || "Sellinder";
     const address =
@@ -347,20 +347,24 @@ export const ConfirmPayment = async (req, res) => {
     let gstnumber = findTax.Gst;
     let searchLimit = 0;
     let userLimit;
+ 
 
     if (durationType === "monthly") {
       expiryDate.setMonth(expiryDate.getMonth() + 1);
       planOriginalAmount = findPlan.Monthly_Price;
       searchLimit = findPlan.SearchLimitMonthly;
       userLimit = findPlan.monthlyUserLimit;
+
     } else if (durationType === "yearly") {
       expiryDate.setFullYear(expiryDate.getFullYear() + 1);
       planOriginalAmount = findPlan.Yearly_Price;
       searchLimit = findPlan.SearchLimitYearly;
       userLimit = findPlan.yearlyUserLimit;
+   
     }
-
+    console.log("durationType",durationType)
     gstcalculate = ((planOriginalAmount * gstnumber) / 100).toFixed(2);
+
     const add = {
       InvoiceNo: `INV${Date.now()}`,
       userId,
@@ -373,6 +377,7 @@ export const ConfirmPayment = async (req, res) => {
       duration: durationType,
       TransactionId: razorpayPaymentId,
       status: paymentStatus,
+    
       razorypayTime: new Date(),
     };
 
@@ -391,118 +396,118 @@ export const ConfirmPayment = async (req, res) => {
       { new: true }
     );
 
-    await sendBrevoEmail({
-      to: findUser.email,
-      fromEmail: address,
-      fromName: appName,
-      subject: `${appName} Invoice Plan Details`,
-      html: `
-  <div style="font-family: Arial, sans-serif; max-width: 700px; margin: auto; border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">
+  //   await sendBrevoEmail({
+  //     to: findUser.email,
+  //     fromEmail: address,
+  //     fromName: appName,
+  //     subject: `${appName} Invoice Plan Details`,
+  //     html: `
+  // <div style="font-family: Arial, sans-serif; max-width: 700px; margin: auto; border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">
     
-    <!-- Header -->
-    <div style="background: linear-gradient(135deg, #0a2c60, #143d80); color: white; padding: 25px;">
-      <div style="text-align:center; margin-bottom:20px;">
-        <img src="${logo}" alt="Sellinder Logo" width="120" />
+  //   <!-- Header -->
+  //   <div style="background: linear-gradient(135deg, #0a2c60, #143d80); color: white; padding: 25px;">
+  //     <div style="text-align:center; margin-bottom:20px;">
+  //       <img src="${logo}" alt="Sellinder Logo" width="120" />
    
-      </div>
-    </div>
+  //     </div>
+  //   </div>
 
-    <!-- Invoice Info -->
-    <div style="padding: 25px;">
-      <h3 style="margin: 0 0 10px;">INVOICE</h3>
-      <p style="margin: 0;">Invoice Number: <strong>${
-        invoice.InvoiceNo
-      }</strong></p>
+  //   <!-- Invoice Info -->
+  //   <div style="padding: 25px;">
+  //     <h3 style="margin: 0 0 10px;">INVOICE</h3>
+  //     <p style="margin: 0;">Invoice Number: <strong>${
+  //       invoice.InvoiceNo
+  //     }</strong></p>
      
-      <p style="margin: 0;">Date: <strong>${shordataformate(
-        invoice.createdAt
-      )}</strong></p>
-    </div>
+  //     <p style="margin: 0;">Date: <strong>${shordataformate(
+  //       invoice.createdAt
+  //     )}</strong></p>
+  //   </div>
 
-    <!-- Table -->
-    <table style="width: 100%; border-collapse: collapse;">
-      <thead>
-        <tr style="background-color: #143d80; color: white;">
-          <th style="padding: 10px; text-align: left;">#</th>
-          <th style="padding: 10px; text-align: left;">Plan</th>
-          <th style="padding: 10px; text-align: right;">Amount</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr style="border-bottom: 1px solid #eee;">
-          <td style="padding: 10px;">1</td>
-          <td style="padding: 10px;">${findPlan.Package}</td>
-          <td style="padding: 10px; text-align: right;">₹${Number(
-            planOriginalAmount.toFixed(2)
-          ).toLocaleString()}</td>
-        </tr>
-        <tr style="border-bottom: 1px solid #eee;">
-          <td style="padding: 10px;"></td>
-          <td style="padding: 10px;">${shordataformate(
-            invoice.plan_start_date
-          )}-${shordataformate(invoice.plan_expiry_date)}</td>
-          <td style="padding: 10px; text-align: right;"></td>
-        </tr>
-          <tr style="border-bottom: 1px solid #eee;">
-          <td style="padding: 10px;"></td>
-          <td style="padding: 10px;">${searchLimit} Profile Monthly </td>
-          <td style="padding: 10px; text-align: right;"></td>
-        </tr>
-         </tr>
-          <tr style="border-bottom: 1px solid #eee;">
-          <td style="padding: 10px;"></td>
-          <td style="padding: 10px;">    Up to ${userLimit} user</td>
-          <td style="padding: 10px; text-align: right;"></td>
-        </tr>
-      </tbody>
-    </table>
+  //   <!-- Table -->
+  //   <table style="width: 100%; border-collapse: collapse;">
+  //     <thead>
+  //       <tr style="background-color: #143d80; color: white;">
+  //         <th style="padding: 10px; text-align: left;">#</th>
+  //         <th style="padding: 10px; text-align: left;">Plan</th>
+  //         <th style="padding: 10px; text-align: right;">Amount</th>
+  //       </tr>
+  //     </thead>
+  //     <tbody>
+  //       <tr style="border-bottom: 1px solid #eee;">
+  //         <td style="padding: 10px;">1</td>
+  //         <td style="padding: 10px;">${findPlan.Package}</td>
+  //         <td style="padding: 10px; text-align: right;">₹${Number(
+  //           planOriginalAmount.toFixed(2)
+  //         ).toLocaleString()}</td>
+  //       </tr>
+  //       <tr style="border-bottom: 1px solid #eee;">
+  //         <td style="padding: 10px;"></td>
+  //         <td style="padding: 10px;">${shordataformate(
+  //           invoice.plan_start_date
+  //         )}-${shordataformate(invoice.plan_expiry_date)}</td>
+  //         <td style="padding: 10px; text-align: right;"></td>
+  //       </tr>
+  //         <tr style="border-bottom: 1px solid #eee;">
+  //         <td style="padding: 10px;"></td>
+  //         <td style="padding: 10px;">${searchLimit} Profile Monthly </td>
+  //         <td style="padding: 10px; text-align: right;"></td>
+  //       </tr>
+  //        </tr>
+  //         <tr style="border-bottom: 1px solid #eee;">
+  //         <td style="padding: 10px;"></td>
+  //         <td style="padding: 10px;">    Up to ${userLimit} user</td>
+  //         <td style="padding: 10px; text-align: right;"></td>
+  //       </tr>
+  //     </tbody>
+  //   </table>
 
-    <!-- Plan & Totals Section -->
-    <div
-      style="
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        border-top: 1px solid #ccc;
-        border-bottom: 1px solid #ccc;
-        margin: 20px 0;
-        padding: 20px 25px;
-      "
-    >
-      <!-- Left side: Plan Details -->
+  //   <!-- Plan & Totals Section -->
+  //   <div
+  //     style="
+  //       display: flex;
+  //       justify-content: space-between;
+  //       align-items: flex-start;
+  //       border-top: 1px solid #ccc;
+  //       border-bottom: 1px solid #ccc;
+  //       margin: 20px 0;
+  //       padding: 20px 25px;
+  //     "
+  //   >
+  //     <!-- Left side: Plan Details -->
  
 
-      <!-- Divider -->
+  //     <!-- Divider -->
   
 
-      <!-- Right side: Totals -->
-      <div style="width: 100%; text-align: right;">
+  //     <!-- Right side: Totals -->
+  //     <div style="width: 100%; text-align: right;">
  
-        <p style="margin: 0; font-size: 14px;">
-          Sub Total: <strong>₹${Number(
-            planOriginalAmount.toFixed(2)
-          ).toLocaleString()}</strong>
-        </p>
-        <p style="margin: 0; font-size: 14px;">
-          GST ${gstnumber}%: <strong>₹${Number(
-        gstcalculate
-      ).toLocaleString()}</strong>
-        </p>
-        <h3 style="margin: 10px 0 0; color: #000;">
-          Total: ₹${Number(invoice.Amount.toFixed(2)).toLocaleString()}
+  //       <p style="margin: 0; font-size: 14px;">
+  //         Sub Total: <strong>₹${Number(
+  //           planOriginalAmount.toFixed(2)
+  //         ).toLocaleString()}</strong>
+  //       </p>
+  //       <p style="margin: 0; font-size: 14px;">
+  //         GST ${gstnumber}%: <strong>₹${Number(
+  //       gstcalculate
+  //     ).toLocaleString()}</strong>
+  //       </p>
+  //       <h3 style="margin: 10px 0 0; color: #000;">
+  //         Total: ₹${Number(invoice.Amount.toFixed(2)).toLocaleString()}
 
-        </h3>
-      </div>
-    </div>
+  //       </h3>
+  //     </div>
+  //   </div>
 
-    <!-- Footer -->
-    <div style="background: linear-gradient(135deg, #143d80, #0a2c60); color: white; text-align: center; padding: 15px; font-size: 14px;">
-      <strong>${copyright}</strong>
-    </div>
+  //   <!-- Footer -->
+  //   <div style="background: linear-gradient(135deg, #143d80, #0a2c60); color: white; text-align: center; padding: 15px; font-size: 14px;">
+  //     <strong>${copyright}</strong>
+  //   </div>
 
-  </div>
-  `,
-    });
+  // </div>
+  // `,
+  //   });
 
     res.status(200).json({
       success: true,
@@ -510,7 +515,7 @@ export const ConfirmPayment = async (req, res) => {
       sellinderAddress,
     });
   } catch (error) {
-    console.log("ConfirmPayment.error", error);
+    console.log("ConfirmPayment.error", error.message );
     return res.status(500).json({ message: error.message });
   }
 };
