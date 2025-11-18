@@ -6,7 +6,7 @@ import { roles, rolesAdmin } from "../../Utils/authorizeRoles.js";
 const router = express.Router();
 
 router
-  .route("/plans")
+  .route("/plans/:id")
   .get(isAuthenticatedUser, authorizeRoles(...rolesAdmin), getusercurrentplan);
   
   router
