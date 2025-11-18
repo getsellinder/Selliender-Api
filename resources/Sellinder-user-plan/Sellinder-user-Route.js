@@ -10,7 +10,7 @@ router
   .get(isAuthenticatedUser, authorizeRoles(...rolesAdmin), getusercurrentplan);
   
   router
-  .route("/billing/get")
+  .route("/billing/get/:id")
   .get(isAuthenticatedUser, authorizeRoles(...roles), getUserBills);
 
 
