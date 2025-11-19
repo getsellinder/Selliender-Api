@@ -23,7 +23,7 @@ export const getusercurrentplan = async (req, res) => {
           select: "Gst",
         },
       }).sort({createdAt:-1});
-    console.log("findInvoice", findInvoice);
+
 
     if (!findInvoice) {
       return res.status(404).json({ message: "User Invoice not found" });
@@ -50,7 +50,7 @@ export const getusercurrentplan = async (req, res) => {
     ).toLocaleString();
 
     let invoice = findInvoice.toObject();
-    console.log("invoice",invoice)
+
     invoice.plan_start_date = shortDateWithTime(invoice.plan_start_date);
     invoice.plan_expiry_date = shortDateWithTime(invoice.plan_expiry_date);
     invoice.createdAt = shortDateWithTime(invoice.createdAt);
