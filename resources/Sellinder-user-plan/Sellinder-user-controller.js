@@ -22,7 +22,8 @@ export const getusercurrentplan = async (req, res) => {
           path: "GST",
           select: "Gst",
         },
-      });
+      }).sort({createdAt:-1});
+    console.log("findInvoice", findInvoice);
 
     if (!findInvoice) {
       return res.status(404).json({ message: "User Invoice not found" });
@@ -31,32 +32,42 @@ export const getusercurrentplan = async (req, res) => {
     let presetPlanAmont = findInvoice.Amount;
     let presentPlanDuration = findInvoice.duration;
     let presentPlan = findInvoice.PlanId.Package;
+    const getplan = presentPlan === "Pro" ? "Growth" : null;
+
+    const futurePlanDetilas = await packageModel.find({ Package: getplan });
 
     // const getplan = presentPlan === "Pro" ? "Growth" : "Pro";
-    const getplan = presentPlan === "Growth" ? "Growth" : null;
+
     const findAllPlans = await packageModel.findOne({ Package: getplan });
     let selectMonthPrice = findAllPlans.Total_Monthly_Price;
     let selectYearPrice = findAllPlans.Total_Yearly_Price;
     let futurePlanAmount =
-      presentPlanDuration === "monthly" ? selectMonthPrice : selectYearPrice;
+      presentPlan === "Growth" && presentPlanDuration === "monthly"
+        ? selectMonthPrice
+        : selectYearPrice;
     let AddtogetPlanAmount = Math.floor(
       futurePlanAmount - presetPlanAmont
     ).toLocaleString();
 
     let invoice = findInvoice.toObject();
+    console.log("invoice",invoice)
     invoice.plan_start_date = shortDateWithTime(invoice.plan_start_date);
     invoice.plan_expiry_date = shortDateWithTime(invoice.plan_expiry_date);
     invoice.createdAt = shortDateWithTime(invoice.createdAt);
     invoice.Amount = invoice.Amount.toLocaleString();
-    invoice.PlanId.Monthly_Price = invoice.PlanId.Monthly_Price.toLocaleString();
+    invoice.PlanId.Monthly_Price =
+      invoice.PlanId.Monthly_Price.toLocaleString();
     invoice.PlanId.Yearly_Price = invoice.PlanId.Yearly_Price.toLocaleString();
-    invoice.PlanId.Total_Yearly_Price = invoice.PlanId.Total_Yearly_Price.toLocaleString();
-    invoice.PlanId.Total_Monthly_Price = invoice.PlanId.Total_Monthly_Price.toLocaleString();
+    invoice.PlanId.Total_Yearly_Price =
+      invoice.PlanId.Total_Yearly_Price.toLocaleString() ;
+    invoice.PlanId.Total_Monthly_Price =
+      invoice.PlanId.Total_Monthly_Price.toLocaleString() ;
 
     return res.status(200).json({
       invoice,
       AddtogetPlanAmount,
       getplan,
+      futurePlanDetilas,
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });
