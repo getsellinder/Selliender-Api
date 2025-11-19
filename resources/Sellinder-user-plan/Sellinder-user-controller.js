@@ -34,20 +34,20 @@ export const getusercurrentplan = async (req, res) => {
     let presentPlan = findInvoice.PlanId.Package;
     const getplan = presentPlan === "Pro" ? "Growth" : null;
 
-    const futurePlanDetilas = await packageModel.find({ Package: getplan });
+    const futurePlanDetilas = await packageModel.find({ Package: getplan }).populate("GST","Gst");
 
     // const getplan = presentPlan === "Pro" ? "Growth" : "Pro";
 
-    const findAllPlans = await packageModel.findOne({ Package: getplan });
-    let selectMonthPrice = findAllPlans.Total_Monthly_Price;
-    let selectYearPrice = findAllPlans.Total_Yearly_Price;
+    // const findAllPlans = await packageModel.findOne({ Package: getplan });
+    let selectMonthPrice = futurePlanDetilas.Total_Monthly_Price;
+    let selectYearPrice = futurePlanDetilas.Total_Yearly_Price;
     let futurePlanAmount =
       presentPlan === "Growth" && presentPlanDuration === "monthly"
         ? selectMonthPrice
         : selectYearPrice;
-    let AddtogetPlanAmount = Math.floor(
-      futurePlanAmount - presetPlanAmont
-    ).toLocaleString();
+    // let AddtogetPlanAmount = Math.floor(
+    //   futurePlanAmount - presetPlanAmont
+    // ).toLocaleString();
 
     let invoice = findInvoice.toObject();
 
@@ -65,7 +65,7 @@ export const getusercurrentplan = async (req, res) => {
 
     return res.status(200).json({
       invoice,
-      AddtogetPlanAmount,
+      // AddtogetPlanAmount,
       getplan,
       futurePlanDetilas,
     });
