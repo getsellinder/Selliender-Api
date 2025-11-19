@@ -7,7 +7,7 @@ const router = express.Router();
 
 router
   .route("/upgrade/plans/:id")
-  .get(isAuthenticatedUser, authorizeRoles(...rolesAdmin), getusercurrentplan);
+  .get(isAuthenticatedUser, authorizeRoles(...roles), getusercurrentplan);
   
   router
   .route("/billing/get/:id")
