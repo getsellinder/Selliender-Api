@@ -9,7 +9,7 @@ import packageModel from "../Plans/Package.model.js";
 
 export const getusercurrentplan = async (req, res) => {
   try {
-    const id = req.user._id;
+    const { id } = req.params; //userId
     const findInvoice = await Invoice.findOne({
       userId: id,
       invoice_status: "Active",
@@ -32,22 +32,29 @@ export const getusercurrentplan = async (req, res) => {
     let presentPlanDuration = findInvoice.duration;
     let presentPlan = findInvoice.PlanId.Package;
 
-    const getplan = presentPlan === "Pro" ? "Growth" : "Pro";
+    // const getplan = presentPlan === "Pro" ? "Growth" : "Pro";
+    const getplan = presentPlan === "Growth" ? "Growth" : null;
     const findAllPlans = await packageModel.findOne({ Package: getplan });
     let selectMonthPrice = findAllPlans.Total_Monthly_Price;
     let selectYearPrice = findAllPlans.Total_Yearly_Price;
     let futurePlanAmount =
       presentPlanDuration === "monthly" ? selectMonthPrice : selectYearPrice;
-    let AddtogetPlanAmount = Math.floor(futurePlanAmount - presetPlanAmont);
+    let AddtogetPlanAmount = Math.floor(
+      futurePlanAmount - presetPlanAmont
+    ).toLocaleString();
 
     let invoice = findInvoice.toObject();
     invoice.plan_start_date = shortDateWithTime(invoice.plan_start_date);
     invoice.plan_expiry_date = shortDateWithTime(invoice.plan_expiry_date);
     invoice.createdAt = shortDateWithTime(invoice.createdAt);
-    invoice.Amount = invoice.Amount.toString();
+    invoice.Amount = invoice.Amount.toLocaleString();
+    invoice.PlanId.Monthly_Price = invoice.PlanId.Monthly_Price.toLocaleString();
+    invoice.PlanId.Yearly_Price = invoice.PlanId.Yearly_Price.toLocaleString();
+    invoice.PlanId.Total_Yearly_Price = invoice.PlanId.Total_Yearly_Price.toLocaleString();
+    invoice.PlanId.Total_Monthly_Price = invoice.PlanId.Total_Monthly_Price.toLocaleString();
 
     return res.status(200).json({
-      findInvoice,
+      invoice,
       AddtogetPlanAmount,
       getplan,
     });
