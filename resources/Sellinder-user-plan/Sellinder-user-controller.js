@@ -79,21 +79,22 @@ export const getUserBills = async (req, res) => {
   const page = parseInt(req.query?.page) || 1;
   const search = req.query?.name || "";
   const date = req.query?.date || "";
-  const userId = req.user._id;
-  // const { id } = req.params;
-  console.log("userId", userId);
+  // const userId = req.user._id;
+  const { id } = req.params;
+  
 
   try {
-    const planIds = await UserModel.distinct("PlanId", {
-      _id: userId,
-      PlanId: { $ne: null },
-    });
+//  const planIds = await UserModel.distinct("PlanId", {
+//   _id: userId,
+//   PlanId: { $ne: null },
+// });
 
-    let filter = {
-      userId: userId,
-      PlanId: { $in: planIds },
-      status: "success",
-    };
+let filter = {
+  userId: id,
+  // PlanId: { $in: planIds },
+  status: "success",
+  invoice_status:"Active"
+};
 
     if (search) {
       filter.$or = [
@@ -130,6 +131,7 @@ export const getUserBills = async (req, res) => {
       .skip((page - 1) * limit)
       .limit(limit)
       .sort({ createdAt: -1 });
+   
 
     // Format result
     const getresult = getBills.map((val) => ({
