@@ -512,11 +512,17 @@ export const getDISCProfilesByUserTable = async (req, res) => {
     const discProfiles = await DISCProfile.find({ userId }).skip(skip).limit(limit)
       .sort({ createdAt: -1 })
     const total=await DISCProfile.countDocuments({userId})
+    let result=discProfiles.map((val)=>({
+        ...val.toObject(),
+        createdAt:shordataformate(val.createdAt)
+
+    }))
+    
 
 
     return res.status(200).json({
       count: discProfiles.length,
-      profiles: discProfiles,
+      profiles: result,
       totalPages:Math.ceil(total/limit),
       totalItems:total,
       currentPage:page
