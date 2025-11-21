@@ -442,7 +442,7 @@ export const getLinkedinAnalysisResult = async (req, res) => {
     const skip = (page - 1) * limit;
 
     try {
-        const { name } = req.query;  // ✅ get name from query params
+        const { name } = req.query;  
 
         // build match for populate
         let match = {};
@@ -502,6 +502,59 @@ export const getLinkedinAnalysisResult = async (req, res) => {
 };
 
 
+export const getDISCProfilesByUserTable = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const limit=parseInt(req.query?.limit)|| 5
+    let page=parseInt(req.query?.page) || 1
+    let skip=(page-1)*limit
+
+    const discProfiles = await DISCProfile.find({ userId }).skip(skip).limit(limit)
+      .sort({ createdAt: -1 })
+    const total=await DISCProfile.countDocuments({userId})
+
+
+    return res.status(200).json({
+      count: discProfiles.length,
+      profiles: discProfiles,
+      totalPages:Math.ceil(total/limit),
+      totalItems:total,
+      currentPage:page
+    });
+  } catch (error) {
+    console.error("Error in getDISCProfilesByUser:", error);
+    return res.status(500).json({
+      message: "Failed to retrieve DISC profiles",
+      error: error.message,
+    });
+  }
+};
+
+
+export const getDISCProfilesByUserId = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const discProfiles = await DISCProfile.findById(id)
+    if(!discProfiles){
+        return res.status(404).json({message:"Data not found with this Id"})
+    }
+   
+    //   .populate("linkedinContentId")
+    //   .populate("linkedinPostId");
+
+    return res.status(200).json({
+      count: discProfiles.length,
+      profiles: discProfiles,
+    });
+  } catch (error) {
+    console.error("Error in getDISCProfilesByUser:", error);
+    return res.status(500).json({
+      message: "Failed to retrieve DISC profiles",
+      error: error.message,
+    });
+  }
+};
 
 export const getLinkedinUserProfile = async (req, res) => {
     const { id } = req.params

@@ -7,6 +7,7 @@ import {
   deleteDISCProfile,
   updateDISCProfile,
   reanalyzeDISCProfile,
+
 } from "./DISCProfileController.js";
 
 const Router = express.Router();
@@ -24,5 +25,9 @@ Router.delete("/delete/:id", deleteDISCProfile);
 Router.put("/update/:id", updateDISCProfile);
 
 Router.post("/reanalyze/:id", reanalyzeDISCProfile);
+
+
+// for admin 
+
 
 export default Router;

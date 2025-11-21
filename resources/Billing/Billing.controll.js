@@ -28,7 +28,7 @@ export const getBills = async (req, res) => {
     });
 
     // Build filter
-    let filter = { PlanId: { $in: planIds },status:"success" };
+    let filter = { PlanId: { $in: planIds },status:"success",invoice_status:"Active" };
 
     if (search) {
       filter.$or = [
@@ -106,7 +106,7 @@ export const getUserBills = async (req, res) => {
     });
 
     // Build filter
-    let filter = { PlanId: { $in: planIds },status:"success" };
+    let filter = { PlanId: { $in: planIds },status:"success",invoice_status:"Active" };
 
     if (search) {
       filter.$or = [
@@ -150,7 +150,7 @@ export const getUserBills = async (req, res) => {
       (sum, invoice) => sum + Number(invoice.Amount),
       0
     );
-    let totalsales = await Invoice.countDocuments({ status: "success" });
+    let totalsales = await Invoice.countDocuments({ status: "success",invoice_status:"Active" });
     totalsales = Number(totalsales).toLocaleString();
     totalAmount = Number(totalAmount).toLocaleString();
 

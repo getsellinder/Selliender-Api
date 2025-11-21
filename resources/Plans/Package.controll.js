@@ -357,12 +357,11 @@ export const ConfirmPayment = async (req, res) => {
       userLimit = findPlan.monthlyUserLimit;
     } else if (durationType === "yearly") {
       expiryDate.setFullYear(expiryDate.getFullYear() + 1);
-      expiryDate.setDate(expiryDate.getDate()-1)
+      expiryDate.setDate(expiryDate.getDate() - 1);
       planOriginalAmount = findPlan.Yearly_Price;
       searchLimit = findPlan.SearchLimitYearly;
       userLimit = findPlan.yearlyUserLimit;
     }
-   
 
     gstcalculate = ((planOriginalAmount * gstnumber) / 100).toFixed(2);
 
@@ -378,6 +377,7 @@ export const ConfirmPayment = async (req, res) => {
       duration: durationType,
       TransactionId: razorpayPaymentId,
       status: paymentStatus,
+      invoice_status: paymentStatus === "failed" ? "Deactive" : "Active",
 
       razorypayTime: new Date(),
     };

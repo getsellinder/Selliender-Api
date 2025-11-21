@@ -11,7 +11,9 @@ import {
     getLatestDISCAnalysis,
     getDISCAnalysisById,
     getAllDISCAnalysesByUser,
-    getDISCAnalysisSummary
+    getDISCAnalysisSummary,
+    getDISCProfilesByUserTable,
+    getDISCProfilesByUserId
 } from "./Linkedin.controll.js"
 import multer from "multer"
 
@@ -25,6 +27,10 @@ Router.post("/analyze-disc-compact/:userId", analyzeDISCProfileCompact)
 
 Router.get("/get/:id", getLinkedinUploadFile)
 Router.get("/analysis", getLinkedinAnalysisResult)
+Router.get("/analysis/:userId", getDISCProfilesByUserTable)
+Router.get("/analysis/admin/:id", getDISCProfilesByUserId)
+
+
 
 Router.get("/analysis/:id", getLinkedinUserProfile)
 Router.delete("/delete/:id", LinkedinuserDelete)
