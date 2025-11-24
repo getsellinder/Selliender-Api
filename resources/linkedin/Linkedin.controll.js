@@ -508,19 +508,32 @@ export const getDISCProfilesByUserTable = async (req, res) => {
     const limit=parseInt(req.query?.limit)|| 5
     let page=parseInt(req.query?.page) || 1
     let skip=(page-1)*limit
+    let {name}=req.query
+    let match={userId}
+    if (name) {
+      match.$or = [
+        { "executiveSummary.profileName": { $regex: name, $options: "i" } },
+        { "executiveSummary.companyType": { $regex: name, $options: "i" } }
+      ];
+    }
 
-    const discProfiles = await DISCProfile.find({ userId }).skip(skip).limit(limit)
-      .sort({ createdAt: -1 })
-    const total=await DISCProfile.countDocuments({userId})
+
+     const discProfiles = await DISCProfile.find(match)
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 });
+
+    const total=await DISCProfile.countDocuments(match)
     let result=discProfiles.map((val)=>({
         ...val.toObject(),
         createdAt:shordataformate(val.createdAt)
 
     }))
-    
+    let profile=result.map((item)=>item.executiveSummary)
 
 
     return res.status(200).json({
+        // profile,
       count: discProfiles.length,
       profiles: result,
       totalPages:Math.ceil(total/limit),
