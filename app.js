@@ -204,6 +204,7 @@ import ReviewRoute from "./resources/ReviewStatus/reviewStatusRoutes.js";
 import ReportsRoute from "./resources/report/reportsRouter.js";
 import AuthRouter from "./resources/authentication/AuthenticationRoute.js";
 import DISCProfileRoute from "./resources/DISCProfile/DISCProfileRoute.js";
+import PuppeteerRoute from "./resources/puppeteer/puppeteer.route.js"
 
 // app.use(express.json({ limit: "50mb" }));
 
@@ -335,5 +336,7 @@ app.use("/api/reports", ReportsRoute);
 app.use("/api/referral", ReferalRoute)
 app.use("/api/billing", BillingRoute)
 app.use("/user", UserBillingRoute)
+
+app.use("/pupeeteer",PuppeteerRoute)
 
 export default app;
