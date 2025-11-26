@@ -1,8 +1,8 @@
 import express from "express"
-import { createpupeteer } from "./puppeteer.controll"
+import { createplaywright } from "./puppeteer.controll.js"
 
 let Router=express.Router()
 
-Router.post("/",createpupeteer)
+Router.post("/",createplaywright)
 
 export default Router
