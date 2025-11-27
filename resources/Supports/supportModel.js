@@ -22,11 +22,11 @@ export const MessageSchema = new mongoose.Schema(
 );
 const supportSchema = new mongoose.Schema(
   {
-    ticketId: {
-      type: String,
-      default: () => `TKT-${Math.floor(Math.random() * 10) + 1}`,
-      unique: true,
-    },
+  ticketId: {
+  type: String,
+  default: () => `TKT-${Math.floor(10000 + Math.random() * 90000)}`,
+  unique: true,
+},
     subject: {
       type: String,
       required: true,
@@ -34,6 +34,15 @@ const supportSchema = new mongoose.Schema(
     description: {
       type: String,
       required: true,
+    },
+    category:{
+      type:String,
+      required:true,
+    },
+     priority:{
+      type:String,
+      enum:["Low","Medium","High","Critical"],
+      required:true,
     },
     resolvedBy: {
       type: mongoose.Schema.Types.ObjectId,
@@ -43,7 +52,7 @@ const supportSchema = new mongoose.Schema(
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      unique: true,
+      // unique: true,
     },
     messages: [MessageSchema],
     status: {

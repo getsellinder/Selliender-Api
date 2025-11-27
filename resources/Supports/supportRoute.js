@@ -2,7 +2,8 @@ import bodyParser from "body-parser";
 import {
   closedticktbyuser,
   createSupport,
-  createSupportUser,
+  sendMessage,
+
   deleteImageFromCloudinary,
   deleteSupport,
   getAllSupportTicket,
@@ -26,13 +27,16 @@ app.use(bodyParser.raw({ type: "application/json" }));
 const router = express.Router();
 //checkout Routes-------------------------//
 router
-  .route("/support/create/")
+  .route("/support/create/:id")
   .post(isAuthenticatedUserOrPatient, createSupport);
+
 // user
 
 router
-  .route("/support/user/create/")
-  .post(isAuthenticatedUserOrPatient, createSupportUser);
+  .route("/support/message/:ticketId")
+  .post(isAuthenticatedUserOrPatient, sendMessage);
+
+
 
 router
   .route("/support/admin/get/")

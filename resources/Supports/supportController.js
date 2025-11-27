@@ -14,7 +14,7 @@ export const createSupport = async (req, res) => {
     const AdminId = req.user._id;
     const { id } = req.params;
 
-    const { subject, description } = req.body;
+    const { subject, description, category, priority } = req.body;
 
     const findUser = await UserModel.findById(id);
     if (!findUser) {
@@ -27,43 +27,8 @@ export const createSupport = async (req, res) => {
     }
 
     const data = {
-      subject,
-      description,
+      subject, description, category, priority,
       userId: id,
-      createdBy: AdminId,
-    };
-    await Support.create(data);
-    return res.status(200).json({ message: "Ticket created successfully." });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      success: false,
-      msg: error.message,
-    });
-  }
-};
-
-// user point of view
-export const createSupportUser = async (req, res) => {
-  try {
-    const UserId = req.user._id;
-
-    const { subject, description } = req.body;
-
-    const findUser = await UserModel.findById(UserId);
-    if (!findUser) {
-      return res.status(404).json({ message: "User not found with this id" });
-    }
-    if (!subject || !description) {
-      return res.status(500).json({
-        message: "Some fields are missing. Kindly complete the form.",
-      });
-    }
-
-    const data = {
-      subject,
-      description,
-      userId: UserId,
       // createdBy: AdminId,
     };
     await Support.create(data);
@@ -76,6 +41,8 @@ export const createSupportUser = async (req, res) => {
     });
   }
 };
+
+
 
 export const getAllSupportTicketUser = async (req, res) => {
   try {
@@ -103,6 +70,35 @@ export const getAllSupportTicketUser = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
+
+export const sendMessage = async (req, res) => {
+  try {
+    const { message, receiverId } = req.body
+    let senderId = req.user._id
+    let { ticketId } = req.params //tikcet id
+    if (!message || message.trim() === "") {
+      return res.status(400).json({ message: "Message is required" });
+    }
+    let ticket = await Support.findById(ticketId)
+    if (!ticket) {
+      return res.status(404).json({ message: "Ticket not found" });
+    }
+    let data = {
+      message,
+      senderId,
+      receiverId
+    }
+console.log("data",data)
+    ticket.messages.push(data)
+    await ticket.save()
+
+    return res.status(200).json({ message: "Message sent successfully" });
+
+  } catch (error) {
+    console.log("error", error)
+    return res.status(200).json({ message: "Internal Server Error" })
+  }
+}
 export const closedticktbyuser = async (req, res) => {
   try {
     const userId = req.user._id;
