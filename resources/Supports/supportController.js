@@ -187,7 +187,7 @@ export const getOneSupportTicket = async (req, res) => {
     const support = await Support.findById(req.params?.id).populate(
       "userId",
       "name email"
-    );
+    ).populate("messages.senderId","name email").populate("messages.receiverId","name email");
     if (!support) {
       return res.status(404).json({ message: "Ticket not found" });
     }
