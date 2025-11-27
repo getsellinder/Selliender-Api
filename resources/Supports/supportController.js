@@ -138,10 +138,13 @@ export const getAllSupportTicket = async (req, res) => {
     const limit = parseInt(req.query.limit) || 4;
     const skip = (page - 1) * limit;
     let filter = {};
-    filter.status = status ? status.toUpperCase() : "OPEN";
+    // filter.status = status ? status.toUpperCase() : "OPEN";
+    if (status && status.trim() !== "") {
+      filter.status = status.toUpperCase()
+    }
     let searchQuery = {};
     if (searchInput && searchInput.trim() !== "") {
-      const regex = new RegExp(searchInput.trim() ,"i");
+      const regex = new RegExp(searchInput.trim(), "i");
       searchQuery = {
         $or: [{ ticketId: regex }, { subject: regex }],
       };
@@ -187,7 +190,7 @@ export const getOneSupportTicket = async (req, res) => {
     const support = await Support.findById(req.params?.id).populate(
       "userId",
       "name email"
-    ).populate("messages.senderId","name email").populate("messages.receiverId","name email");
+    ).populate("messages.senderId", "name email").populate("messages.receiverId", "name email");
     if (!support) {
       return res.status(404).json({ message: "Ticket not found" });
     }
