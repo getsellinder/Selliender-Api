@@ -141,7 +141,7 @@ export const getAllSupportTicket = async (req, res) => {
     filter.status = status ? status.toUpperCase() : "OPEN";
     let searchQuery = {};
     if (searchInput && searchInput.trim() !== "") {
-      const regex = new RegExp(searchInput.trim() !== "");
+      const regex = new RegExp(searchInput.trim() ,"i");
       searchQuery = {
         $or: [{ ticketId: regex }, { subject: regex }],
       };
