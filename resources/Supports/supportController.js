@@ -1,59 +1,11 @@
 import { Support } from "./supportModel.js";
 import cloudinary from "../../Utils/cloudinary.js";
 
-import { formatDateToIST } from "../../Utils/formatDateToIST .js";
+import {
+  formatDateToIST,
+  shordataformate,
+} from "../../Utils/formatDateToIST .js";
 import UserModel from "../user/userModel.js";
-
-// export const createSupport = async (req, res) => {
-//   try {
-//     if (req?.files && req?.files?.image) {
-//       let images = [];
-//       let Allfiles = req.files.image;
-//       if (typeof Allfiles.tempFilePath === "string") {
-//         let filepath = Allfiles.tempFilePath;
-//         images.push(filepath);
-//       } else {
-//         Allfiles.map((item) => {
-//           images.push(item.tempFilePath);
-//         });
-//       }
-
-//       const imagesLinks = [];
-//       for (let i = 0; i < images.length; i++) {
-//         const result = await cloudinary.v2.uploader.upload(images[i], {
-//           folder: "tavisa/CustomerSupport",
-//         });
-
-//         imagesLinks.push({
-//           public_id: result.public_id,
-//           url: result.secure_url,
-//         });
-//       }
-//       req.body.image = imagesLinks;
-//     }
-
-//     req.body.addedBy = (await req?.user?._id)
-//       ? req?.user?._id
-//       : req?.patient?._id;
-//     req.body.from = (await req?.user?._id) ? "Website" : "Mobile";
-//     req.body.addedByModel = (await req?.user?._id) ? "User" : "Patient";
-
-//     const support = await Support.create({ ...req.body });
-
-//     res.status(201).json({
-//       success: true,
-//       data: support,
-//       msg: "Support ticket created successfully.",
-//     });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({
-//       success: false,
-//       msg: error.message,
-//     });
-//   }
-// };
-// ****************************
 
 // user pointof view
 
@@ -181,53 +133,43 @@ export const closedticktbyuser = async (req, res) => {
 };
 
 // user end heaer
+
 export const getAllSupportTicket = async (req, res) => {
   try {
-    // Use the find method to retrieve all support tickets
     const { status, searchInput } = req.query;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 4;
-
-    let skip = (page - 1) * limit;
-    const filter = {};
-
-    if (status === undefined) {
-      filter.status = "OPEN";
-    } else {
-      filter.status = status.toUpperCase();
-    }
-
+    const skip = (page - 1) * limit;
+    let filter = {};
+    filter.status = status ? status.toUpperCase() : "OPEN";
     let searchQuery = {};
     if (searchInput && searchInput.trim() !== "") {
-      const regex = new RegExp(searchInput, "i"); // case-insensitive
+      const regex = new RegExp(searchInput.trim() !== "");
       searchQuery = {
-        $or: [
-          { ticketId: regex },
-          { subject: regex },
-          { "userId.name": regex },
-          { "userId.email": regex },
-        ],
+        $or: [{ ticketId: regex }, { subject: regex }],
       };
     }
-
-    const total = await Support.countDocuments({ ...filter, ...searchQuery });
-
-    const support = await Support.find({ ...filter, ...searchQuery })
+    const total = await Support.countDocuments({
+      ...filter,
+      ...searchQuery,
+    });
+    const support = await Support.find({
+      ...filter,
+      ...searchQuery,
+    })
+      .populate("userId", "name email")
       .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(limit)
-      .populate("userId", "name email");
+      .limit(limit);
     if (support.length === 0) {
       return res.status(404).json({
-        message: `${status === filter.status}`
-          ? `No ${filter.status} Requests Active Now`
-          : `No ${filter.status} Close Request Active Now `,
+        message: `No ${filter.status} Tickets Found`,
       });
     }
     const data = support.map((t) => ({
-      t,
-      createdAt: formatDateToIST(t.createdAt),
-      updatedAt: formatDateToIST(t.updatedAt),
+      ...t._doc,
+      createdAt: shordataformate(t.createdAt),
+      updatedAt: shordataformate(t.updatedAt),
     }));
     return res.status(200).json({
       data,

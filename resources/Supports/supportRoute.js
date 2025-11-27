@@ -16,6 +16,7 @@ import { isAuthenticatedUser, authorizeRoles } from "../../middlewares/auth.js";
 import express from "express";
 import { isAuthenticatedPatient } from "../../middlewares/PatientAuth.js";
 import { isAuthenticatedUserOrPatient } from "../../middlewares/AuthUserOrPatient.js";
+import { rolesAdmin } from "../../Utils/authorizeRoles.js";
 
 const app = express();
 
@@ -34,7 +35,7 @@ router
   .post(isAuthenticatedUserOrPatient, createSupportUser);
 
 router
-  .route("/support/user/get/")
+  .route("/support/admin/get/")
   .get(isAuthenticatedUserOrPatient, getAllSupportTicketUser);
 router
   .route("/support/user/update/status/:ticketId")
@@ -49,7 +50,7 @@ router
   .route("/support/getAll/")
   .get(
     isAuthenticatedUser,
-    authorizeRoles("admin", "Customer"),
+    authorizeRoles(...rolesAdmin),
     getAllSupportTicket
   );
 // router
