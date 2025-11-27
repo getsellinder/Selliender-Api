@@ -4,6 +4,7 @@ import cloudinary from "../../Utils/cloudinary.js";
 import {
   formatDateToIST,
   shordataformate,
+  shortDateWithTime,
 } from "../../Utils/formatDateToIST .js";
 import UserModel from "../user/userModel.js";
 
@@ -27,7 +28,10 @@ export const createSupport = async (req, res) => {
     }
 
     const data = {
-      subject, description, category, priority,
+      subject,
+      description,
+      category,
+      priority,
       userId: id,
       // createdBy: AdminId,
     };
@@ -41,8 +45,6 @@ export const createSupport = async (req, res) => {
     });
   }
 };
-
-
 
 export const getAllSupportTicketUser = async (req, res) => {
   try {
@@ -73,32 +75,31 @@ export const getAllSupportTicketUser = async (req, res) => {
 
 export const sendMessage = async (req, res) => {
   try {
-    const { message, receiverId } = req.body
-    let senderId = req.user._id
-    let { ticketId } = req.params //tikcet id
+    const { message, receiverId } = req.body;
+    let senderId = req.user._id;
+    let { ticketId } = req.params; //tikcet id
     if (!message || message.trim() === "") {
       return res.status(400).json({ message: "Message is required" });
     }
-    let ticket = await Support.findById(ticketId)
+    let ticket = await Support.findById(ticketId);
     if (!ticket) {
       return res.status(404).json({ message: "Ticket not found" });
     }
     let data = {
       message,
       senderId,
-      receiverId
-    }
-console.log("data",data)
-    ticket.messages.push(data)
-    await ticket.save()
+      receiverId,
+    };
+    console.log("data", data);
+    ticket.messages.push(data);
+    await ticket.save();
 
     return res.status(200).json({ message: "Message sent successfully" });
-
   } catch (error) {
-    console.log("error", error)
-    return res.status(200).json({ message: "Internal Server Error" })
+    console.log("error", error);
+    return res.status(200).json({ message: "Internal Server Error" });
   }
-}
+};
 export const closedticktbyuser = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -183,20 +184,25 @@ export const getAllSupportTicket = async (req, res) => {
 export const getOneSupportTicket = async (req, res) => {
   try {
     // console.log(req.params.id);/api/support/getOne/
-    const support = await Support.findById(req.params?.id).populate({
-      path: "addedBy", // Field to populate
-    });
-    if (support) {
-      return res.status(200).json({
-        success: true,
-        support,
-      });
-    } else {
-      return res.status(404).json({
-        success: false,
-        msg: "Support ticket not found",
-      });
+    const support = await Support.findById(req.params?.id).populate(
+      "userId",
+      "name email"
+    );
+    if (!support) {
+      return res.status(404).json({ message: "Ticket not found" });
     }
+    let data = support.toObject();
+    data.createdAt = shordataformate(support.createdAt);
+    data.updatedAt = shordataformate(support.updatedAt);
+    data.messages = data.messages.map((msg) => {
+      let m = msg;
+      return {
+        ...m,
+        createdAt: shortDateWithTime(m.createdAt),
+        updatedAt: shortDateWithTime(m.updatedAt),
+      };
+    });
+    return res.status(200).json(data)
   } catch (error) {
     res.status(500).json({
       success: false,
