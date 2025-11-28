@@ -12,6 +12,7 @@ import {
   getAllSupportUserForOnlineStatus,
   getOneSupportTicket,
   updateSupport,
+  updateStatus,
 } from "./supportController.js";
 import { isAuthenticatedUser, authorizeRoles } from "../../middlewares/auth.js";
 import express from "express";
@@ -65,7 +66,17 @@ router.route("/support/delete/:ticketId").delete(deleteSupport);
 router
   .route("/support/getOne/:id")
   .get(isAuthenticatedUserOrPatient, getOneSupportTicket);
-router
+
+
+
+  router
+  .route("/support/update/status/:id")
+  .put(
+    isAuthenticatedUser,
+    authorizeRoles(...rolesAdmin),
+    updateStatus
+  );
+  router
   .route("/support/update/:id")
   .patch(isAuthenticatedUserOrPatient, updateSupport);
 router

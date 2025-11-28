@@ -140,7 +140,7 @@ export const getAllSupportTicket = async (req, res) => {
     let filter = {};
     // filter.status = status ? status.toUpperCase() : "OPEN";
     if (status && status.trim() !== "") {
-      filter.status = status.toUpperCase()
+      filter.status = status.toUpperCase();
     }
     let searchQuery = {};
     if (searchInput && searchInput.trim() !== "") {
@@ -187,10 +187,10 @@ export const getAllSupportTicket = async (req, res) => {
 export const getOneSupportTicket = async (req, res) => {
   try {
     // console.log(req.params.id);/api/support/getOne/
-    const support = await Support.findById(req.params?.id).populate(
-      "userId",
-      "name email"
-    ).populate("messages.senderId", "name email").populate("messages.receiverId", "name email");
+    const support = await Support.findById(req.params?.id)
+      .populate("userId", "name email")
+      .populate("messages.senderId", "name email")
+      .populate("messages.receiverId", "name email");
     if (!support) {
       return res.status(404).json({ message: "Ticket not found" });
     }
@@ -205,7 +205,7 @@ export const getOneSupportTicket = async (req, res) => {
         updatedAt: shortDateWithTime(m.updatedAt),
       };
     });
-    return res.status(200).json(data)
+    return res.status(200).json(data);
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -379,6 +379,39 @@ export const deleteImageFromCloudinary = async (req, res) => {
       });
     }
   } catch (error) {
+    res.status(500).json({
+      success: false,
+      msg: error.message ? error.message : "Something went wrong!",
+    });
+  }
+};
+
+export const updateStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+    let {id}=req.params
+
+    const supportTicket = await Support.findById(id);
+
+    if (!supportTicket) {
+      return res.status(404).json({
+        success: false,
+        msg: "Support ticket not found",
+      });
+    }
+    await Support.findByIdAndUpdate(
+      id,
+      { status: status },
+      { new: true }
+    );
+
+    return res.status(200).json({
+      success: true,
+  
+      message: `Staus ${status} Updated Successfully`,
+    });
+  } catch (error) {
+    
     res.status(500).json({
       success: false,
       msg: error.message ? error.message : "Something went wrong!",
