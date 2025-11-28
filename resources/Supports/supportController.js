@@ -227,31 +227,57 @@ export const getAllSupportUserForOnlineStatus = async (req, res) => {
 };
 // ************************8
 
+
+
 export const getAllSupportTicketofuser = async (req, res) => {
   try {
-    // Retrieve the user ID from the request
-    const userId = (await req?.user?._id) ? req?.user?._id : req?.patient?._id;
+    const { status, searchInput } = req.query;
+    let {id}=req.params
+    console.log("userId.getAllSupportTicketofuser",id)
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 4;
+    const skip = (page - 1) * limit;
+    let filter = {userId:id};
 
-    // Use the find method to retrieve all support tickets created by the user
-    const support = await Support.find({ addedBy: userId }).sort({
-      createdAt: -1,
+    if (status && status.trim() !== "") {
+      filter.status = status.toUpperCase();
+    }
+    let searchQuery = {userId:id};
+    if (searchInput && searchInput.trim() !== "") {
+      const regex = new RegExp(searchInput.trim(), "i");
+      searchQuery = {
+        $or: [{ ticketId: regex }, { subject: regex }],
+      };
+    }
+    const total = await Support.countDocuments({
+      ...filter,
+      ...searchQuery,
     });
-
-    // Check if support tickets were found
-    if (support) {
-      return res.status(200).json({
-        success: true,
-        support,
-      });
-    } else {
+    const support = await Support.find({
+      ...filter,
+      ...searchQuery,
+    })
+      .populate("userId", "name email")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+    if (support.length === 0) {
       return res.status(404).json({
-        success: false,
-        msg: "No support tickets found for the user.",
+        message: `No ${filter.status || "Tokens"} Tickets Found`,
       });
     }
+    const data = support.map((t) => ({
+      ...t._doc,
+      createdAt: shordataformate(t.createdAt),
+      updatedAt: shordataformate(t.updatedAt),
+    }));
+    return res.status(200).json({
+      data,
+      currentPage: page,
+      totalPage: Math.ceil(total / limit),
+      totalItems: total,
+    });
   } catch (error) {
-    // Handle errors
-    // console.error(error);
     res.status(500).json({
       success: false,
       msg: error.message ? error.message : "Something went wrong!",
@@ -263,14 +289,14 @@ export const getAllSupportTicketofuser = async (req, res) => {
 
 export const deleteSupport = async (req, res) => {
   try {
-    const { ticketId } = req.params;
-    const findticket = await Support.findById(ticketId);
+    const { id } = req.params; //ticket Id
+    const findticket = await Support.findById(id);
     if (!findticket) {
       return res
         .status(404)
         .json({ message: "Ticket details not found with this ID" });
     }
-    const result = await Support.findByIdAndDelete(ticketId);
+    const result = await Support.findByIdAndDelete(id);
     return res
       .status(200)
       .json({ message: "Ticket Details deleted Successfully", result });

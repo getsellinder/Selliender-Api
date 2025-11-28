@@ -58,11 +58,11 @@ router
     authorizeRoles(...rolesAdmin),
     getAllSupportTicket
   );
-// router
-//   .route("/support/userticket/")
-//   .get(isAuthenticatedUserOrPatient, getAllSupportTicketofuser);
+router
+  .route("/support/userticket/:id")
+  .get(isAuthenticatedUserOrPatient, getAllSupportTicketofuser);
 
-router.route("/support/delete/:ticketId").delete(deleteSupport);
+router.route("/support/delete/:id").delete(deleteSupport);
 router
   .route("/support/getOne/:id")
   .get(isAuthenticatedUserOrPatient, getOneSupportTicket);
