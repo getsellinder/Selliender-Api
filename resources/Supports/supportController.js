@@ -75,12 +75,13 @@ export const getAllSupportTicketUser = async (req, res) => {
 
 export const sendMessage = async (req, res) => {
   try {
-    const { message, receiverId } = req.body;
+    const { message } = req.body;
     let senderId = req.user._id;
     let { ticketId } = req.params; //tikcet id
     if (!message || message.trim() === "") {
       return res.status(400).json({ message: "Message is required" });
     }
+
     let ticket = await Support.findById(ticketId);
     if (!ticket) {
       return res.status(404).json({ message: "Ticket not found" });
@@ -88,9 +89,40 @@ export const sendMessage = async (req, res) => {
     let data = {
       message,
       senderId,
-      receiverId,
+      // receiverId,
     };
     console.log("data", data);
+    ticket.messages.push(data);
+    await ticket.save();
+
+    return res.status(200).json({ message: "Message sent successfully" });
+  } catch (error) {
+    console.log("error", error);
+    return res.status(200).json({ message: "Internal Server Error" });
+  }
+};
+
+export const sendMessageuser = async (req, res) => {
+  try {
+    const { message } = req.body;
+    let senderId = req.user._id;
+    let { ticketId } = req.params; //tikcet id
+    if (!message || message.trim() === "") {
+      return res.status(400).json({ message: "Message is required" });
+    }
+    const findAdmin=await UserModel.findOne({role:"admin"})
+    console.log("findAdmin",findAdmin)
+    const adminId=findAdmin._id
+    let ticket = await Support.findById(ticketId);
+    if (!ticket) {
+      return res.status(404).json({ message: "Ticket not found" });
+    }
+    let data = {
+      message,
+      senderId,
+      receiverId:adminId,
+    };
+
     ticket.messages.push(data);
     await ticket.save();
 

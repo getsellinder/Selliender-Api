@@ -3,7 +3,7 @@ import {
   closedticktbyuser,
   createSupport,
   sendMessage,
-
+  sendMessageuser,
   deleteImageFromCloudinary,
   deleteSupport,
   getAllSupportTicket,
@@ -33,11 +33,12 @@ router
 
 // user
 
-router
+router 
   .route("/support/message/:ticketId")
   .post(isAuthenticatedUserOrPatient, sendMessage);
-
-
+  router 
+  .route("/support/message/user/:ticketId")
+  .post(isAuthenticatedUserOrPatient, sendMessageuser);
 
 router
   .route("/support/admin/get/")
@@ -53,11 +54,7 @@ router
 
 router
   .route("/support/getAll/")
-  .get(
-    isAuthenticatedUser,
-    authorizeRoles(...rolesAdmin),
-    getAllSupportTicket
-  );
+  .get(isAuthenticatedUser, authorizeRoles(...rolesAdmin), getAllSupportTicket);
 router
   .route("/support/userticket/:id")
   .get(isAuthenticatedUserOrPatient, getAllSupportTicketofuser);
@@ -67,16 +64,10 @@ router
   .route("/support/getOne/:id")
   .get(isAuthenticatedUserOrPatient, getOneSupportTicket);
 
-
-
-  router
+router
   .route("/support/update/status/:id")
-  .put(
-    isAuthenticatedUser,
-    authorizeRoles(...rolesAdmin),
-    updateStatus
-  );
-  router
+  .put(isAuthenticatedUser, authorizeRoles(...rolesAdmin), updateStatus);
+router
   .route("/support/update/:id")
   .patch(isAuthenticatedUserOrPatient, updateSupport);
 router
