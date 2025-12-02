@@ -13,6 +13,7 @@ import UserModel from "../user/userModel.js";
 export const createSupport = async (req, res) => {
   try {
     const id = req.user._id;
+    // const {id}=req.params //user id
   
 
     const { subject, description, category, priority } = req.body;

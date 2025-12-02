@@ -28,7 +28,7 @@ app.use(bodyParser.raw({ type: "application/json" }));
 const router = express.Router();
 //checkout Routes-------------------------//
 router
-  .route("/support/create")
+  .route("/support/create/")
   .post(isAuthenticatedUserOrPatient, createSupport);
 
 // user
