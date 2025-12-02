@@ -12,8 +12,8 @@ import UserModel from "../user/userModel.js";
 
 export const createSupport = async (req, res) => {
   try {
-    const AdminId = req.user._id;
-    const { id } = req.params;
+    const id = req.user._id;
+  
 
     const { subject, description, category, priority } = req.body;
 
@@ -35,8 +35,8 @@ export const createSupport = async (req, res) => {
       userId: id,
       // createdBy: AdminId,
     };
-    await Support.create(data);
-    return res.status(200).json({ message: "Ticket created successfully." });
+   let ticket= await Support.create(data);
+    return res.status(200).json({ message: "Ticket created successfully.",ticket });
   } catch (error) {
     console.error(error);
     res.status(500).json({
