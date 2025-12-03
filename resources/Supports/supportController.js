@@ -13,9 +13,6 @@ import UserModel from "../user/userModel.js";
 export const createSupport = async (req, res) => {
   try {
     const id = req.user._id;
-    // const {id}=req.params //user id
-  
-
     const { subject, description, category, priority } = req.body;
 
     const findUser = await UserModel.findById(id);
@@ -34,10 +31,11 @@ export const createSupport = async (req, res) => {
       category,
       priority,
       userId: id,
-      // createdBy: AdminId,
     };
-   let ticket= await Support.create(data);
-    return res.status(200).json({ message: "Ticket created successfully.",ticket });
+    let ticket = await Support.create(data);
+    return res
+      .status(200)
+      .json({ message: "Ticket created successfully.", ticket });
   } catch (error) {
     console.error(error);
     res.status(500).json({
@@ -111,9 +109,9 @@ export const sendMessageuser = async (req, res) => {
     if (!message || message.trim() === "") {
       return res.status(400).json({ message: "Message is required" });
     }
-    const findAdmin=await UserModel.findOne({role:"admin"})
-    console.log("findAdmin",findAdmin)
-    const adminId=findAdmin._id
+    const findAdmin = await UserModel.findOne({ role: "admin" });
+    console.log("findAdmin", findAdmin);
+    const adminId = findAdmin._id;
     let ticket = await Support.findById(ticketId);
     if (!ticket) {
       return res.status(404).json({ message: "Ticket not found" });
@@ -121,7 +119,7 @@ export const sendMessageuser = async (req, res) => {
     let data = {
       message,
       senderId,
-      receiverId:adminId,
+      receiverId: adminId,
     };
 
     ticket.messages.push(data);
@@ -222,8 +220,8 @@ export const getOneSupportTicket = async (req, res) => {
     // console.log(req.params.id);/api/support/getOne/
     const support = await Support.findById(req.params?.id)
       .populate("userId", "name email")
-      .populate("messages.senderId", "name email")
-      // .populate("messages.receiverId", "name email");
+      .populate("messages.senderId", "name email");
+    // .populate("messages.receiverId", "name email");
     if (!support) {
       return res.status(404).json({ message: "Ticket not found" });
     }
@@ -260,22 +258,20 @@ export const getAllSupportUserForOnlineStatus = async (req, res) => {
 };
 // ************************8
 
-
-
 export const getAllSupportTicketofuser = async (req, res) => {
   try {
     const { status, searchInput } = req.query;
-    let {id}=req.params
-    console.log("userId.getAllSupportTicketofuser",id)
+    let { id } = req.params;
+    console.log("userId.getAllSupportTicketofuser", id);
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 4;
     const skip = (page - 1) * limit;
-    let filter = {userId:id};
+    let filter = { userId: id };
 
     if (status && status.trim() !== "") {
       filter.status = status.toUpperCase();
     }
-    let searchQuery = {userId:id};
+    let searchQuery = { userId: id };
     if (searchInput && searchInput.trim() !== "") {
       const regex = new RegExp(searchInput.trim(), "i");
       searchQuery = {
@@ -448,7 +444,7 @@ export const deleteImageFromCloudinary = async (req, res) => {
 export const updateStatus = async (req, res) => {
   try {
     const { status } = req.body;
-    let {id}=req.params
+    let { id } = req.params;
 
     const supportTicket = await Support.findById(id);
 
@@ -458,19 +454,14 @@ export const updateStatus = async (req, res) => {
         msg: "Support ticket not found",
       });
     }
-    await Support.findByIdAndUpdate(
-      id,
-      { status: status },
-      { new: true }
-    );
+    await Support.findByIdAndUpdate(id, { status: status }, { new: true });
 
     return res.status(200).json({
       success: true,
-  
+
       message: `Staus ${status} Updated Successfully`,
     });
   } catch (error) {
-    
     res.status(500).json({
       success: false,
       msg: error.message ? error.message : "Something went wrong!",

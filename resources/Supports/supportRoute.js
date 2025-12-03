@@ -27,15 +27,18 @@ app.use(bodyParser.raw({ type: "application/json" }));
 
 const router = express.Router();
 //checkout Routes-------------------------//
-router
-  .route("/support/create/")
-  .post(isAuthenticatedUserOrPatient, createSupport);
+// router
+//   .route("/support/create/")
+//   .post(isAuthenticatedUserOrPatient, createSupport);
+
+  router.route("/support/create/").post(isAuthenticatedUser, createSupport);
 
 // user
 
 router 
   .route("/support/message/:ticketId")
   .post(isAuthenticatedUserOrPatient, sendMessage);
+
   router 
   .route("/support/message/user/:ticketId")
   .post(isAuthenticatedUserOrPatient, sendMessageuser);
